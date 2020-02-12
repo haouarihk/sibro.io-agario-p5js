@@ -23,11 +23,9 @@ function login() {
 }
 var pos=1;
 function mouseWheel(event) {
-    print(event.delta);
-    //move the square according to the vertical scroll amount
+    print(pos);
+    //to zoom in and out
     pos += event.delta;
-    //uncomment to block page scrolling
-    //return false;
   }
 function setup() {
     socket = io.connect('http://localhost:3000/');
@@ -53,9 +51,9 @@ function draw() {
     createCanvas(windowWidth, windowHeight);
     //background(255);
     translate(width / 2, height / 2);
-    var newzoom = 200 / player.r;
+    var newzoom = 120/pos;
     zoom = lerp(zoom, newzoom, 0.1);
-        scale(zoom); 
+        scale(newzoom); 
     translate(-player.pos.x, -player.pos.y);
     
 

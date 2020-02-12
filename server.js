@@ -3,7 +3,7 @@ var app = express();
 var server = app.listen(3000);
 var players = [];
 var foods = [];
-var foodscount = 1000;
+var foodscount = 100000;
 app.use(express.static('public'));
 console.log("server is running");
 
@@ -19,8 +19,8 @@ function generateid() {
   }
 }
 function generatex(ppls, foodi) {
-  var x = Math.floor(Math.random() * 5000) - 5000;
-  var y = Math.floor(Math.random() * 5000) - 5000;
+  var x = Math.floor(Math.random() * 10000) - 5000;
+  var y = Math.floor(Math.random() * 10000) - 5000;
   var prob = 0;
 
   for (var i = 0; i < foodi.length; i++) {
@@ -75,7 +75,7 @@ function food() {
     this.x = saved.xx;
     this.y = saved.yy;
     this.id = generateid();
-    this.r = Math.floor(Math.random() * 40) + 30;
+    this.r = Math.floor(Math.random() * 60) + 50;
   }
 }
 function smallpipi(id, x, y, r, c) {
@@ -98,7 +98,7 @@ var sockets = require('socket.io');
 var io = sockets(server);
 io.sockets.on('connection', Connection);
 io.sockets.on('disconnect', disconnection);
-setInterval(foodgen, 500);
+setInterval(foodgen, 100);
 function foodgen() {
   var newfood = new food();
   newfood.generate();
@@ -124,7 +124,7 @@ function updatepipis() {
       if(killer!=null){
         var aten = foods[j].id;
         
-        players[i].r+=foods[j].r/(players[i].r*0.2);
+        players[i].r+=foods[j].r*0.8;///(players[i].r*0.2);
         foods.splice(j,1);
       }
     }
@@ -140,7 +140,7 @@ function Connection(socket) {
   //new connection plays one time
   socket.on('ready', playerjoined);
   function playerjoined(newplayer) {
-    players.push(new smallpipi(newplayer.id, newplayer.x, newplayer.y, 100, newplayer.c));
+    players.push(new smallpipi(newplayer.id, newplayer.x, newplayer.y, 200, newplayer.c));
     //console.log("new player got pushed");
   }
   socket.on('updateplayer', updateplayer);
