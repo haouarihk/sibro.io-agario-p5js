@@ -1,0 +1,21 @@
+{
+  "name": "projectsibro",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "document": "^0.4.7",
+    "express": "^4.17.1",
+    "git": "^0.1.5",
+    "p5": "^0.10.2",
+    "socket.io": "^2.3.0",
+    "victor": "^1.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
