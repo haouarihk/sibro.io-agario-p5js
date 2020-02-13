@@ -25,7 +25,9 @@ var pos=1;
 function mouseWheel(event) {
     //print(pos);
     //to zoom in and out
-    pos += event.delta;
+    pos +=event.delta;
+    pos=constrain(pos,1,2001);
+    //pos=constrain(pos,1,2001);
   }
 function setup() {
     socket = io.connect('http://localhost:3000/');
@@ -52,7 +54,7 @@ function searchindexwithid(id){
 }
 function draw() {
     
-    createCanvas(windowWidth, windowHeight);
+    createCanvas(windowWidth, windowHeight-22);
     //background(255);
     fill(240);
     square(width, height, 100);
@@ -63,9 +65,10 @@ function draw() {
             player.r=players[i].r;
         }
     }
-    var newzoom = 600/pos;
-    zoom = lerp(zoom, newzoom, 0.5);
-        scale(zoom+120/[player.r]); 
+    var newzoom =pos;
+    zoom = lerp(zoom, newzoom, 0.2);
+    //console.log(newzoom);
+        scale(120/([player.r]*(zoom*0.01))); 
     translate(-player.pos.x, -player.pos.y);
     
 
