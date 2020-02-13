@@ -131,17 +131,21 @@ function updatepipis() {
       if(players[j].velx==0){if(players[j].vely==0)players.splice(j,1);}
       var killer= calculatedis(players[i],players[j]);
       if(killer!=null){
+
         if(killer==players[j].id){
-          console.log("plan 1 activated");
+          var aten = players[i].id;
+          var ater = players[j].id;
         players[j].r+=players[i].r*0.8;
         players.splice(i,1);
         }else
         if(killer==players[i].id){
-          console.log("plan 2 activated");
-        //var aten = players[j].id;
+          var aten = players[j].id;
+          var ater = players[i].id;
         players[i].r+=players[j].r*0.8;
         players.splice(j,1);
         }
+        var warfeilddata={aterid:ater,atenid:aten};
+        io.sockets.emit('warfeilddata', warfeilddata);
       }
     }
   }}

@@ -36,6 +36,7 @@ function setup() {
     login()
     socket.on('updatepipis', updatepeeps);
     socket.on('updateyamies', updateyamies);
+    socket.on('warfeilddata', warfeilddata);
     
 }
 
@@ -108,6 +109,17 @@ function updateyamies(yam){
     {
         foods[i]=new Food(0,yam[i].x,yam[i].y,yam[i].r,yam[i].id);
     }
+}
+function warfeilddata(data){
+    if(data.aterid==player.id){
+        console.log("You KILLED HIM");
+    }else if (data.atenid==player.id){
+        console.log("You are dead");
+        imspectating()
+    }
+}
+function imspectating(){
+
 }
 
 
