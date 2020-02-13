@@ -133,13 +133,13 @@ function updatepipis() {
       if(killer!=null){
         if(killer==players[j].id){
           console.log("plan 1 activated");
-        players[j].r+=players[i].r;
+        players[j].r+=players[i].r*0.8;
         players.splice(i,1);
         }else
         if(killer==players[i].id){
           console.log("plan 2 activated");
         //var aten = players[j].id;
-        players[i].r+=players[j].r;
+        players[i].r+=players[j].r*0.8;
         players.splice(j,1);
         }
       }
