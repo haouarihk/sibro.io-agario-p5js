@@ -124,7 +124,7 @@ function updatepipis() {
       if(killer!=null){
         var aten = foods[j].id;
         
-        players[i].r+=foods[j].r*0.8;///(players[i].r*0.2);
+        players[i].r+=foods[j].r/(players[i].r*0.2);
         foods.splice(j,1);
       }
     }

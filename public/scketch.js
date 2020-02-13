@@ -23,7 +23,7 @@ function login() {
 }
 var pos=1;
 function mouseWheel(event) {
-    print(pos);
+    //print(pos);
     //to zoom in and out
     pos += event.delta;
   }
@@ -51,7 +51,13 @@ function draw() {
     createCanvas(windowWidth, windowHeight);
     //background(255);
     translate(width / 2, height / 2);
-    var newzoom = 120/pos;
+for (let i = 0; i < players.length; i++) {
+    if (player.id == players[i].id) {
+        indexofplayer=i;
+        player.r=players[i].r;
+    }
+}
+    var newzoom = 120/pos+120/[player.r];
     zoom = lerp(zoom, newzoom, 0.1);
         scale(newzoom); 
     translate(-player.pos.x, -player.pos.y);
