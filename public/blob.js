@@ -11,4 +11,5 @@ function Blob() {
         textAlign(CENTER);
         text([parseInt(r)], x-2, y+[parseInt(r)]/2);
     }
+    
 }
