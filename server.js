@@ -109,6 +109,7 @@ function foodgen() {
 }
 setInterval(updatepipis, 24);
 function updatepipis() {
+  comparisionwithweight();
   var data = [];
   for (var i = 0; i < players.length; i++) {
     data.push({ id: players[i].id, x: players[i].x, y: players[i].y, r: players[i].r, nickname: players[i].nickname });
@@ -192,5 +193,17 @@ function waittilnotnull(data) {
   } else {
     return data;
   }
+}
+function comparisionwithweight(){
+  players.sort( compare );
+}
+function compare( a, b ) {
+  if ( a.r< b.r ){
+    return 1;
+  }
+  if ( a.r > b.r ){
+    return -1;
+  }
+  return 0;
 }
 

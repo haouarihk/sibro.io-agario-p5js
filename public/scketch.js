@@ -51,6 +51,8 @@ function draw() {
     
     createCanvas(windowWidth, windowHeight);
     //background(255);
+    fill(240);
+    square(width, height, 100);
     translate(width / 2, height / 2);
     for (let i = 0; i < players.length; i++) {
         if (player.id == players[i].id) {
@@ -64,8 +66,9 @@ function draw() {
     translate(-player.pos.x, -player.pos.y);
     
 
-    fill(100);
-    square(-5000, -5000, 10000);
+    //fill(100);
+    //square(-5000, -5000, 10000);
+
     for (let index = 0; index < foods.length; index++) {
         foods[index].show();
     }
