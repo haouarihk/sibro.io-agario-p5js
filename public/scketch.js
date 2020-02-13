@@ -5,9 +5,9 @@ var foods = [];
 var zoom = 1;
 var id = '';
 var indexofplayer = 0;
-
+var nickname='';
 function login() {
-
+    nickname=document.getElementById("nickname").value;
     player = new Player(random(-width, width), random(-height, height), socket.id, 'Guest');
 
     socket.on('connect', function () {
@@ -15,8 +15,8 @@ function login() {
         x: player.pos.x,
         y: player.pos.y,
         c: color(random(100, 255), random(0, 120), random(0, 120)),
-        id: player.id
-
+        id: player.id,
+        nickname:nickname
     }; socket.emit('ready', data);
     });
 
@@ -33,7 +33,7 @@ function setup() {
         socket = io.connect('http://localhost:3000/');
     }
 
-    login()
+    login();
     socket.on('updatepipis', updatepeeps);
     socket.on('updateyamies', updateyamies);
     socket.on('warfeilddata', warfeilddata);

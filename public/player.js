@@ -7,7 +7,9 @@ function Player(x,y,id,nickname){
 
     this.setrad=function(r){
         this.r=r;
+        
     }
+    
     this.update=function(){
         //calculating mouse possition
         
@@ -33,6 +35,10 @@ function Player(x,y,id,nickname){
    this.show=function(){
        var blob=new Blob();
        blob.show(this.pos.x,this.pos.y,this.r);
+       fill(255);
+        textSize(0.3*this.r);
+        textAlign(CENTER);
+        text(this.nickname, x-2, y);
    }
    this.constrain=function (){
     //stop it from going outside of the world

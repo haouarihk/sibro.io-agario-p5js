@@ -9,6 +9,6 @@ function Blob() {
         fill(255);
         textSize(0.3*r);
         textAlign(CENTER);
-        text([parseInt(r)], x-2, y+30);
+        text([parseInt(r)], x-2, y+[parseInt(r)]/2);
     }
 }

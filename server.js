@@ -78,13 +78,13 @@ function food() {
     this.r = Math.floor(Math.random() * 60) + 50;
   }
 }
-function smallpipi(id, x, y, r, c) {
+function smallpipi(id, x, y, r, c,nickname) {
   this.id = id;
   this.x = x;
   this.y = y;
   this.r = r;
   this.c = c;
-  this.nickname = id;
+  this.nickname =nickname;
   this.updatevel = function (velx, vely) {
     this.x = Math.min(Math.max(this.x, -5000), 5000);
     this.y = Math.min(Math.max(this.y, -5000), 5000);
@@ -161,7 +161,7 @@ function Connection(socket) {
   //new connection plays one time
   socket.on('ready', playerjoined);
   function playerjoined(newplayer) {
-    players.push(new smallpipi(newplayer.id, newplayer.x, newplayer.y, 200, newplayer.c));
+    players.push(new smallpipi(newplayer.id, newplayer.x, newplayer.y, 200, newplayer.c,newplayer.nickname));
     //console.log("new player got pushed");
   }
   socket.on('updateplayer', updateplayer);
