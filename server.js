@@ -3,7 +3,7 @@ var app = express();
 var server = app.listen(3000);
 var players = [];
 var foods = [];
-var foodscount = 100000;
+var foodscount = 10000;
 app.use(express.static('public'));
 console.log("server is running");
 
@@ -98,7 +98,7 @@ var sockets = require('socket.io');
 var io = sockets(server);
 io.sockets.on('connection', Connection);
 io.sockets.on('disconnect', disconnection);
-setInterval(foodgen, 100);
+setInterval(foodgen, 300);
 function foodgen() {
   var newfood = new food();
   newfood.generate();
@@ -107,7 +107,7 @@ function foodgen() {
     console.log(foods.length + '/' + foodscount + ' new food with id:' + newfood.id + ' in' + newfood.x + ',' + newfood.y);
   }
 }
-setInterval(updatepipis, 30);
+setInterval(updatepipis, 24);
 function updatepipis() {
   var data = [];
   for (var i = 0; i < players.length; i++) {
@@ -123,9 +123,25 @@ function updatepipis() {
       var killer= calculatedis(players[i],foods[j]);
       if(killer!=null){
         var aten = foods[j].id;
-        
         players[i].r+=foods[j].r/(players[i].r*0.2);
         foods.splice(j,1);
+      }
+    }
+    for(var j=0;j<players.length;j++){
+      if(players[j].velx==0){if(players[j].vely==0)players.splice(j,1);}
+      var killer= calculatedis(players[i],players[j]);
+      if(killer!=null){
+        if(killer==players[j].id){
+          console.log("plan 1 activated");
+        players[j].r+=players[i].r;
+        players.splice(i,1);
+        }else
+        if(killer==players[i].id){
+          console.log("plan 2 activated");
+        //var aten = players[j].id;
+        players[i].r+=players[j].r;
+        players.splice(j,1);
+        }
       }
     }
   }}
@@ -155,8 +171,6 @@ function Connection(socket) {
     }
 
     //players[i] = new smallpipi(uplayer.id, players[i].x, players[i].y, players[i].r, players[i].c);
-
-
   }
 
 

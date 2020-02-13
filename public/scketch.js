@@ -51,15 +51,15 @@ function draw() {
     createCanvas(windowWidth, windowHeight);
     //background(255);
     translate(width / 2, height / 2);
-for (let i = 0; i < players.length; i++) {
-    if (player.id == players[i].id) {
-        indexofplayer=i;
-        player.r=players[i].r;
+    for (let i = 0; i < players.length; i++) {
+        if (player.id == players[i].id) {
+            indexofplayer=i;
+            player.r=players[i].r;
+        }
     }
-}
-    var newzoom = 120/pos+120/[player.r];
-    zoom = lerp(zoom, newzoom, 0.1);
-        scale(newzoom); 
+    var newzoom = 600/pos;
+    zoom = lerp(zoom, newzoom, 0.5);
+        scale(zoom+120/[player.r]); 
     translate(-player.pos.x, -player.pos.y);
     
 
@@ -75,7 +75,7 @@ for (let i = 0; i < players.length; i++) {
     player.update();
     //console.log(player.pos);
     //player.show();
-    //player.constrain();
+    player.constrain();
 
     var data = {
         velx: player.vx,
@@ -86,7 +86,7 @@ for (let i = 0; i < players.length; i++) {
     
 }
 function updatepeeps(pips) {
-    //players=[];
+    players=[];
     
     for (let i = 0; i < pips.length; i++) {
         players[i] = new Player(pips[i].x, pips[i].y, pips[i].id, pips[i].nickname);
