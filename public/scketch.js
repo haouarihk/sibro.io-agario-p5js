@@ -32,7 +32,10 @@ function setup() {
     this.connecttotheserver = function () {
         socket = io.connect('http://localhost:3000/');
     }
-
+    document.getElementById("play").onclick = function() {
+        socket = io.connect('http://localhost:3000/');
+    login();
+    }
     login();
     socket.on('updatepipis', updatepeeps);
     socket.on('updateyamies', updateyamies);
