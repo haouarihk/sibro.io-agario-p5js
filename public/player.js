@@ -1,10 +1,9 @@
 
-function Player( id, nickname) {
-    this.blobs = [];
+function Player(blobs, id, nickname) {
     this.pos = createVector(0, 0);
     this.nickname = nickname;
     this.id = id;
-
+    this.blobs=blobs;
     this.setrad = function (r) {
         this.r = r;
 

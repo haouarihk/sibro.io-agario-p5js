@@ -9,10 +9,12 @@ var nickname = '';
 function login() {
     nickname = document.getElementById("nickname").value;
     var blobs = [];
-    blobs.push(new Blob(random(-width, width), random(-height, height), 50));
-    player = new Player(socket.id, 'Guest');
-    //player.blobs = blobs;
-    socket.on('connect', function () {
+    blobs.push(new Blob(0,0, 50));
+    player = new Player(blobs,socket.id, 'Guest');
+    //player.blobs=blobs;
+    console.log('YOOO '+blobs.length);
+    socket.on('connect', function () 
+    {
         player.id = socket.id;
         var data = {
             x: player.pos.x,
@@ -42,6 +44,7 @@ function keyPressed() {
     }
 }
 function setup() {
+    
     socket = io.connect('http://localhost:3000/');
     this.connecttotheserver = function () {
         socket = io.connect('http://localhost:3000/');
@@ -55,6 +58,7 @@ function setup() {
     socket.on('updateyamies', updateyamies);
     socket.on('warfeilddata', warfeilddata);
 
+
 }
 
 function searchindexwithid(id) {
@@ -65,7 +69,9 @@ function searchindexwithid(id) {
     }
 }
 function draw() {
-
+//var middot=calculatemid(player.blobs);
+  //  player.x=middot.x;
+    //player.y=middot.y;
     createCanvas(windowWidth, windowHeight - 22);
     //background(255);
     fill(240);
@@ -111,23 +117,25 @@ function updatepeeps(pips) {
     players = [];
 
     for (let i = 0; i < pips.length; i++) {
-        players[i] = new Player(pips[i].id, pips[i].nickname);
-        players[i].r = pips[i].r;
+
         var blobs = [];
         // players[i].updatepos(pips[i].x, pips[i].y);
         for (var j = 0; j < pips[i].blobs.length; j++) {
             var newblob = new Blob(pips[i].blobs[j].x, pips[i].blobs[j].y, pips[i].blobs[j].r);
-            
             blobs.push(newblob);
-            players[i].blobs = blobs;
-           //console.log(" has "+ blobs.length);
         }
+        players[i] = new Player(blobs,pips[i].id, pips[i].nickname);
+        players[i].r = pips[i].r;
 
-        if (player.id == pips[i].id) {
-            //player.updatepos(pips[i].x, pips[i].y);
-            player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
-            indexofplayer = i;
-        }
+       //console.log(" has "+ blobs.length);
+       if (player.id == pips[i].id) {
+        //player.updatepos(pips[i].x, pips[i].y);
+        player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
+        player.setblobs(blobs);
+        indexofplayer = i;
+        
+    }
+        
         //console.log('list players updated' );
 
 
@@ -149,6 +157,17 @@ function warfeilddata(data) {
 }
 function imspectating() {
 
+}
+function calculatemid(arraydots){
+    this.mid=function(){this.x=0,this.y=0};
+    var middle=new this.mid();
+    for(var i =0 ; i<arraydots.length;i++){
+        middle.x+=arraydots[i].x;
+        middle.y+=arraydots[i].y;
+    }
+    middle.x=(middle.x)/arraydots.length;
+    middle.x=(middle.y)/arraydots.length;
+    return middle;
 }
 
 
