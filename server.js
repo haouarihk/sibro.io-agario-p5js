@@ -78,12 +78,25 @@ function food() {
     this.r = Math.floor(Math.random() * 60) + 50;
   }
 }
+function blob(x,y,r){
+  this.x=x;
+  this.y=y;
+  this.r=r;
+  this.updatevel = function (velx, vely) {
+    this.x = Math.min(Math.max(this.x, -5000), 5000);
+    this.y = Math.min(Math.max(this.y, -5000), 5000);
+    this.x += velx;
+    this.y += vely;
+
+  }
+}
 function smallpipi(id, x, y, r, c,nickname) {
   this.id = id;
   this.x = x;
   this.y = y;
   this.r = r;
   this.c = c;
+  this.blobs=[];
   this.nickname =nickname;
   this.updatevel = function (velx, vely) {
     this.x = Math.min(Math.max(this.x, -5000), 5000);
@@ -112,7 +125,8 @@ function updatepipis() {
   comparisionwithweight();
   var data = [];
   for (var i = 0; i < players.length; i++) {
-    data.push({ id: players[i].id, x: players[i].x, y: players[i].y, r: players[i].r, nickname: players[i].nickname });
+    data.push({ blobs:players[i].blobs,id: players[i].id, x: players[i].x, y: players[i].y, r: players[i].r, nickname: players[i].nickname });
+    
   }
   var data2 = [];
   for (var i = 0; i < foods.length; i++) {
@@ -161,7 +175,13 @@ function Connection(socket) {
   //new connection plays one time
   socket.on('ready', playerjoined);
   function playerjoined(newplayer) {
+    var blobs=[];
+    for(var i =0;i<newplayer.Blobs.length;i++){
+      blobs.push(new blob(newplayer.Blobs[i].x,newplayer.Blobs[i].y,200));
+    }
+    blobs.push(new blob(newplayer.Blobs.x,newplayer.y,200));
     players.push(new smallpipi(newplayer.id, newplayer.x, newplayer.y, 200, newplayer.c,newplayer.nickname));
+    players[players.length-1].blobs=blobs;
     //console.log("new player got pushed");
   }
   socket.on('updateplayer', updateplayer);
@@ -171,11 +191,22 @@ function Connection(socket) {
       if (players[index].id == uplayer.id) {
         i = index;
         //console.log('Got' + uplayer.velx);
-        players[i].updatevel(uplayer.velx, uplayer.vely);
+        //players[i].updatevel(uplayer.velx, uplayer.vely);
+        for(let i = 0 ; i<players[index].blobs.length;i++){
+          players[index].blobs[i].updatevel(uplayer.velx, uplayer.vely);
+        }
       }
     }
-
-    //players[i] = new smallpipi(uplayer.id, players[i].x, players[i].y, players[i].r, players[i].c);
+  }
+  socket.on('split',splitplayer);
+  function splitplayer(data){
+    console.log(data.id+' wants to split');
+    for(var i=0;i<players.length;i++){
+      if(players[i].id==data.id){
+        players[i].blobs.push(new blob(players[i].x,players[i].y,players[i].r/2));
+        //players[i].blobs[0].r=players[i].r/2;
+      }
+    }
   }
 
 
