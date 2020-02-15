@@ -90,13 +90,13 @@ function blob(x,y,r){
 
   }
 }
-function smallpipi(id, x, y, r, c,nickname) {
+function smallpipi(id,blobs, x, y, r, c,nickname) {
   this.id = id;
   this.x = x;
   this.y = y;
   this.r = r;
   this.c = c;
-  this.blobs=[];
+  this.blobs=blobs;
   this.nickname =nickname;
   this.updatevel = function (velx, vely) {
     this.x = Math.min(Math.max(this.x, -5000), 5000);
@@ -176,13 +176,13 @@ function Connection(socket) {
   socket.on('ready', playerjoined);
   function playerjoined(newplayer) {
     var blobs=[];
-    for(var i =0;i<newplayer.Blobs.length;i++){
-      blobs.push(new blob(newplayer.Blobs[i].x,newplayer.Blobs[i].y,200));
+    //for(var i =0;i<newplayer.Blobs.length;i++)
+    {
+      //blobs.push(new blob(newplayer.b[i].x,newplayer.b[i].y,200));
     }
-    blobs.push(new blob(newplayer.Blobs.x,newplayer.y,200));
-    players.push(new smallpipi(newplayer.id, newplayer.x, newplayer.y, 200, newplayer.c,newplayer.nickname));
-    players[players.length-1].blobs=blobs;
-    //console.log("new player got pushed");
+    blobs.push(new blob(newplayer.b.x,newplayer.y,200));
+    players.push(new smallpipi(newplayer.id,blobs, newplayer.x, newplayer.y, 200, newplayer.c,newplayer.nickname));
+    console.log("new player got pushed");
   }
   socket.on('updateplayer', updateplayer);
   function updateplayer(uplayer) {
@@ -194,6 +194,7 @@ function Connection(socket) {
         //players[i].updatevel(uplayer.velx, uplayer.vely);
         for(let i = 0 ; i<players[index].blobs.length;i++){
           players[index].blobs[i].updatevel(uplayer.velx, uplayer.vely);
+          // players[index].blobs[i].r
         }
       }
     }

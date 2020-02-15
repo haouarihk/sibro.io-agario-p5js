@@ -20,7 +20,7 @@ function login() {
             x: player.pos.x,
             y: player.pos.y,
             c: color(random(100, 255), random(0, 120), random(0, 120)),
-            Blobs: player.blobs,
+            b:{x:0,y:0,r:0},
             id: player.id,
             nickname: nickname
         }; socket.emit('ready', data);
@@ -69,9 +69,9 @@ function searchindexwithid(id) {
     }
 }
 function draw() {
-//var middot=calculatemid(player.blobs);
-  //  player.x=middot.x;
-    //player.y=middot.y;
+var middot=calculatemid(player.blobs);
+  player.x=middot.x;
+    player.y=middot.y;
     createCanvas(windowWidth, windowHeight - 22);
     //background(255);
     fill(240);
@@ -131,7 +131,7 @@ function updatepeeps(pips) {
        if (player.id == pips[i].id) {
         //player.updatepos(pips[i].x, pips[i].y);
         player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
-        player.setblobs(blobs);
+        player.blobs=blobs;
         indexofplayer = i;
         
     }
