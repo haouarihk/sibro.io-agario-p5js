@@ -54,15 +54,13 @@ function updatepeeps(pips) {
 
   for (let i = 0; i < pips.length; i += 1) {
     const blobs = [];
-    let newblob;
     // players[i].updatepos(pips[i].x, pips[i].y);
     for (let j = 0; j < pips[i].blobs.length; j += 1) {
-      newblob = new Blob(pips[i].nickname,
+      blobs.push(new Blob(pips[i].nickname,
         pips[i].blobs[j].x,
         pips[i].blobs[j].y,
-        pips[i].blobs[j].r);
+        pips[i].blobs[j].r));
     }
-    blobs.push(newblob);
     players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
