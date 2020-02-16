@@ -10,6 +10,9 @@ const players = [];
 const foods = [];
 const foodscount = 10000;
 app.use(express.static('public'));
+const sockets = require('socket.io');
+
+const io = sockets(server);
 console.log('server is running');
 
 function GenerateId() {
@@ -57,7 +60,7 @@ function Generatex(ppls, foodi) {
   }
 }
 
-/*function calculatedis1(other, other2) {
+function calculatedis1(other, other2) {
   const xx = (other2.x - other.x) * (other2.x - other.x);
   const yy = (other2.y - other.y) * (other2.y - other.y);
   const d = Math.sqrt(xx + yy) + 50;
@@ -69,7 +72,7 @@ function Generatex(ppls, foodi) {
     }
     return 2;
   } return null;
-}*/
+}
 
 function Food() {
   this.generate = function generating() {
@@ -100,8 +103,6 @@ function SmallPipi(id, blobs, x, y, r, c, nickname) {
   this.blobs = blobs;
   this.nickname = nickname;
 }
-const sockets = require('socket.io');
-
 function Connection(socket) {
   console.log(`new connection:${socket.id}`);
   // new connection plays one time
@@ -160,7 +161,6 @@ function disconnection(socket) {
   const i = players.indexOf(socket);
   players.splice(i, 1);
 }
-const io = sockets(server);
 io.sockets.on('connection', Connection);
 io.sockets.on('disconnect', disconnection);
 function foodgen() {
@@ -197,27 +197,34 @@ function updatepipis() {
       nickname: players[i].nickname,
     });
   }
+  // broatcasting food data
   const data2 = [];
   for (let i = 0; i < foods.length; i += 1) {
+    // data for food gen
     data2.push({
       id: foods[i].id, x: foods[i].x, y: foods[i].y, r: foods[i].r,
     });
   }
+  // broatcasting people data
   if (players.length !== 0) {
     for (let i = 0; i < players.length; i += 1) {
+      // player(players[i]) eat food
       for (let j = 0; j < foods.length; j += 1) {
-        const killer = calculatedis(players[i], foods[j]);
-        if (killer !== null) {
-          //const aten = foods[j].id;
-          players[i].r += foods[j].r / (players[i].r * 0.2);
-          foods.splice(j, 1);
+        for (let k = 0; k < players[i].blobs.length; k += 1) {
+          // canlculate distance of each blob with each food
+          const killer = calculatedis1(players[i].blobs[k], foods[j]);
+          if (killer !== 0) {
+            players[i].blobs[k].r += foods[j].r / (players[i].blobs[k].r * 0.2);
+            foods.splice(j, 1);
+          }
         }
       }
+      // player(players[i]) eat other player
       for (let j = 0; j < players.length; j += 1) {
         if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
         for (let k = 0; k < players[j].blobs.length; k += 1) {
           for (let l = 0; l < players[i].blobs.length; l += 1) {
-            const killer = calculatedis(players[i].blobs[l], players[j].blobs[k]);
+            const killer = calculatedis1(players[i].blobs[l], players[j].blobs[k]);
 
             if (killer !== 0) {
               if (killer === 1) {

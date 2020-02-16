@@ -47,6 +47,18 @@ function keyPressed() {
     socket.emit('split', data);
   }
 }
+function compare(a, b) {
+  if (a.r < b.r) {
+    return 1;
+  }
+  if (a.r > b.r) {
+    return -1;
+  }
+  return 0;
+}
+function comparisionwithweight() {
+  players.sort(compare);
+}
 // updates
 function updatepeeps(pips) {
   players = [];
@@ -60,7 +72,7 @@ function updatepeeps(pips) {
     }
     players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
     players[i].r = pips[i].r;
-
+    comparisionwithweight();
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
       // player.updatepos(pips[i].x, pips[i].y);
@@ -131,20 +143,20 @@ function calculatemid(arraydots) {
 
 function draw() {
   createCanvas(windowWidth, windowHeight - 22);
-  // background(255);
+
   fill(240);
   square(width, height, 100);
   translate(width / 2, height / 2);
-  for (let i = 0; i < players.length; i += 1) {
-    if (player.id === players[i].id) {
-      indexofplayer = i;
-      player.r = players[i].r;
-    }
+
+  if (searchindexwithid(player.id)) {
+    indexofplayer = i;
+    player.r = players[i].r;
   }
+
   const newzoom = pos;
   zoom = lerp(zoom, newzoom, 0.2);
-  // console.log(newzoom);
   scale(120 / (zoom));
+
   const middot = calculatemid(player.blobs);
   translate(-middot.x, -middot.y);
 
