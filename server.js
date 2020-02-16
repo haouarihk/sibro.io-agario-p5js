@@ -14,7 +14,7 @@ const sockets = require('socket.io');
 
 const io = sockets(server);
 console.log('server is running');
-
+///// Generators
 function GenerateId() {
   const idnew = Math.floor(Math.random() * (50000 + foodscount));
   for (let i = 0; i < foods.length; i += 1) {
@@ -22,12 +22,6 @@ function GenerateId() {
       return GenerateId();
     } return idnew;
   }
-}
-function calculatedis(x1, y1, x2, y2) {
-  const xx = (x1 - x2) * (x1 - x2);
-  const yy = (y1 - y2) * (y1 - y2);
-  const d = Math.sqrt(xx + yy);
-  return d;
 }
 function Generatex(ppls, foodi) {
   const x = Math.floor(Math.random() * 10000) - 5000;
@@ -60,6 +54,14 @@ function Generatex(ppls, foodi) {
   }
 }
 
+
+///// Calculators
+function calculatedis(x1, y1, x2, y2) {
+  const xx = (x1 - x2) * (x1 - x2);
+  const yy = (y1 - y2) * (y1 - y2);
+  const d = Math.sqrt(xx + yy);
+  return d;
+}
 function calculatedis1(other, other2) {
   const d = calculatedis(other.x, other.y, other2.x, other2.y) + 50;
 
@@ -75,6 +77,7 @@ function calculatedis1(other, other2) {
   return null;
 }
 
+///// Classes
 function Food() {
   this.generate = function generating() {
     const saved = Generatex(players, foods);
@@ -104,9 +107,13 @@ function SmallPipi(id, blobs, x, y, r, c, nickname) {
   this.blobs = blobs;
   this.nickname = nickname;
 }
+
+
+///// Events
 function Connection(socket) {
   console.log(`new connection:${socket.id}`);
-  // new connection plays one time
+
+  // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
     blobs.push(new Blob(newplayer.b.x, newplayer.b.y, 200));
@@ -120,15 +127,11 @@ function Connection(socket) {
   }
   socket.on('ready', playerjoined);
 
-
+  // update every blob's velocity
   function updateplayer(uplayer) {
     for (let index = 0; index < players.length; index += 1) {
       if (players[index].id === uplayer.id) {
-        i = index;
-
-        // players[i].updatevel(uplayer.velx, uplayer.vely);
         for (let i = 0; i < players[index].blobs.length; i += 1) {
-          // players[index].blobs[i].updatevel(uplayer.velx, uplayer.vely);
           players[index].blobs[i].updatevel(uplayer.blobsvelx[i], uplayer.blobsvely[i]);
         }
       }
@@ -136,7 +139,7 @@ function Connection(socket) {
   }
   socket.on('updateplayer', updateplayer);
 
-
+  // When a player split
   function splitplayer(data) {
     console.log(`${data.id} wants to split`);
     for (let i = 0; i < players.length; i += 1) {
@@ -144,12 +147,14 @@ function Connection(socket) {
         const { blobs } = players[i];
         const newblobs = [];
         if (players[i].blobs.length < 8) {
+          // store new blobs in newblobs variable
           for (let j = 0; j < players[i].blobs.length; j += 1) {
             if (players[i].blobs.r >= 50) {
               newblobs.push(new Blob(blobs[j].x, blobs[j].y, blobs[j].r / 2));
               // players[i].blobs[j].r /= 2;
             }
           }
+          // return all newblobs items to the player(players[i])
           for (let j = 0; j < newblobs.length; j += 1) {
             players[i].blobs.push(newblobs[j]);
           }
@@ -160,6 +165,7 @@ function Connection(socket) {
   }
   socket.on('split', splitplayer);
 }
+// When someone disconnect
 function disconnection(socket) {
   console.log('Got disconnect!');
 
@@ -168,15 +174,10 @@ function disconnection(socket) {
 }
 io.sockets.on('connection', Connection);
 io.sockets.on('disconnect', disconnection);
-function foodgen() {
-  const newfood = new Food();
-  newfood.generate();
-  if (foods.length < foodscount) {
-    foods.push(newfood);
-    console.log(`${foods.length}/${foodscount} new food with id:${newfood.id} in${newfood.x},${newfood.y}`);
-  }
-}
-setInterval(foodgen, 300);
+
+
+///// functions
+// rerange by their weight
 function compare(a, b) {
   if (a.r < b.r) {
     return 1;
@@ -189,6 +190,17 @@ function compare(a, b) {
 function comparisionwithweight() {
   players.sort(compare);
 }
+
+///// Repeaters
+function foodgen() {
+  const newfood = new Food();
+  newfood.generate();
+  if (foods.length < foodscount) {
+    foods.push(newfood);
+    console.log(`${foods.length}/${foodscount} new food with id:${newfood.id} in${newfood.x},${newfood.y}`);
+  }
+}
+// updating/sending info of everything is hppening to the players
 function updatepipis() {
   comparisionwithweight();
   const data = [];
@@ -251,4 +263,5 @@ function updatepipis() {
   io.sockets.emit('updateyamies', data2);
   io.sockets.emit('updatepipis', data);
 }
+setInterval(foodgen, 300);
 setInterval(updatepipis, 24);
