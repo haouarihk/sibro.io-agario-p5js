@@ -70,8 +70,13 @@ function searchindexwithid(id) {
 }
 function draw() {
 var middot=calculatemid(player.blobs);
-  player.x=middot.x;
+    player.x=middot.x;
     player.y=middot.y;
+    for(var i =0;i<player.blobs.length;i++){
+        fill(0,255,0)
+        line(player.x,player.y,player.blobs[i].x,player.blobs[i].y);
+    
+    }
     createCanvas(windowWidth, windowHeight - 22);
     //background(255);
     fill(240);
