@@ -1,134 +1,187 @@
-var socket;
-var player;
-var players = [];
-var foods = [];
-var zoom = 1;
-var id = '';
-var indexofplayer = 0;
-var nickname='';
+/* eslint-disable linebreak-style */
+/* eslint-disable consistent-return */
+/* eslint-disable radix */
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
+let socket;
+let player;
+let players = [];
+let foods = [];
+let zoom = 1;
+let indexofplayer = 0;
+let Nickname = '';
+// Login
 function login() {
-    nickname=document.getElementById("nickname").value;
-    player = new Player(random(-width, width), random(-height, height), socket.id, 'Guest');
-
-    socket.on('connect', function () {
-    player.id = socket.id; var data = {
-        x: player.pos.x,
-        y: player.pos.y,
-        c: color(random(100, 255), random(0, 120), random(0, 120)),
-        id: player.id,
-        nickname:nickname
+  Nickname = document.getElementById('nickname').value;
+  const blobs = [];
+  blobs.push(new Blob(Nickname, 0, 0, 50));
+  player = new Player(blobs, socket.id, 'Guest');
+  // player.blobs=blobs;
+  console.log(`YOOO ${blobs.length}`);
+  socket.on('connect', () => {
+    player.id = socket.id;
+    const data = {
+      x: player.pos.x,
+      y: player.pos.y,
+      c: color(random(100, 255), random(0, 120), random(0, 120)),
+      b: { x: 0, y: 0, r: 0 },
+      id: player.id,
+      nickname: Nickname,
     }; socket.emit('ready', data);
-    });
-
+  });
 }
-var pos=1;
+// controls
+let pos = 200;
 function mouseWheel(event) {
-    //print(pos);
-    //to zoom in and out
-    pos +=event.delta;
-    pos=constrain(pos,1,2001);
-    //pos=constrain(pos,1,2001);
+  // to zoom in and out
+  pos += event.delta;
+  pos = constrain(pos, 1, 2001);
+}
+function keyPressed() {
+  if (key === 's') {
+    console.log('SPACEBAR DETECTED');
+    // we need it to tell the server that
+    // it got pressed
+    data = { id: player.id };
+    socket.emit('split', data);
   }
-function setup() {
-    socket = io.connect('http://localhost:3000/');
-    this.connecttotheserver = function () {
-        socket = io.connect('http://localhost:3000/');
-    }
-    document.getElementById("play").onclick = function() {
-        socket = io.connect('http://localhost:3000/');
-    login();
-    }
-    login();
-    socket.on('updatepipis', updatepeeps);
-    socket.on('updateyamies', updateyamies);
-    socket.on('warfeilddata', warfeilddata);
-    
 }
 
-function searchindexwithid(id){
-    for(var i=0;i<players.length;i++){
-        if(this.players[i].id==id){
-            return i;
-        }
-    }
-}
-function draw() {
-    
-    createCanvas(windowWidth, windowHeight-22);
-    //background(255);
-    fill(240);
-    square(width, height, 100);
-    translate(width / 2, height / 2);
-    for (let i = 0; i < players.length; i++) {
-        if (player.id == players[i].id) {
-            indexofplayer=i;
-            player.r=players[i].r;
-        }
-    }
-    var newzoom =pos;
-    zoom = lerp(zoom, newzoom, 0.2);
-    //console.log(newzoom);
-        scale(120/([player.r]*(zoom*0.01))); 
-    translate(-player.pos.x, -player.pos.y);
-    
-
-    //fill(100);
-    //square(-5000, -5000, 10000);
-
-    for (let index = 0; index < foods.length; index++) {
-        foods[index].show();
-    }
-    for (let index = 0; index < players.length; index++) {
-        players[index].show();
-    }
-    
-    player.update();
-    //console.log(player.pos);
-    //player.show();
-    player.constrain();
-
-    var data = {
-        velx: player.vx,
-        vely: player.vy,
-        id: player.id
-    };
-    socket.emit('updateplayer', data);
-    
-}
+// updates
 function updatepeeps(pips) {
-    players=[];
-    
-    for (let i = 0; i < pips.length; i++) {
-        players[i] = new Player(pips[i].x, pips[i].y, pips[i].id, pips[i].nickname);
-        players[i].r=pips[i].r;
-        players[i].updatepos(pips[i].x, pips[i].y);
-        if (player.id == pips[i].id) {
-            player.updatepos(pips[i].x, pips[i].y);
-            player.r=lerp(parseInt(player.r),pips[i].r,0.8);
-            indexofplayer=i;
-        }
-        //console.log('list players updated' );
-        
+  players = [];
 
+  for (let i = 0; i < pips.length; i += 1) {
+    const blobs = [];
+    // players[i].updatepos(pips[i].x, pips[i].y);
+    for (let j = 0; j < pips[i].blobs.length; j += 1) {
+      const newblob = new Blob(pips[i].nickname,
+        pips[i].blobs[j].x,
+        pips[i].blobs[j].y,
+        pips[i].blobs[j].r);
+      blobs.push(newblob);
     }
-}
-function updateyamies(yam){
-    foods=[];
-    for(var i=0;i<yam.length;i++)
-    {
-        foods[i]=new Food(0,yam[i].x,yam[i].y,yam[i].r,yam[i].id);
+    players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
+    players[i].r = pips[i].r;
+    // console.log(" has "+ blobs.length);
+    if (player.id === pips[i].id) {
+      // player.updatepos(pips[i].x, pips[i].y);
+      player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
+      player.blobs = blobs;
+      indexofplayer = i;
     }
+    // console.log('list players updated' );
+  }
 }
-function warfeilddata(data){
-    if(data.aterid==player.id){
-        console.log("You KILLED HIM");
-    }else if (data.atenid==player.id){
-        console.log("You are dead");
-        imspectating()
+function updateyamies(yam) {
+  foods = [];
+  for (let i = 0; i < yam.length; i += 1) {
+    foods[i] = new Food(0, yam[i].x, yam[i].y, yam[i].r, yam[i].id);
+  }
+}
+// spectating
+function imspectating() {
+
+}
+function warfeilddata(data) {
+  if (data.aterid === player.id) {
+    console.log('You KILLED HIM');
+  } else if (data.atenid === player.id) {
+    console.log('You are dead');
+    imspectating();
+  }
+}
+
+// setup
+function setup() {
+  socket = io.connect('http://localhost:3000/');
+  this.connecttotheserver = function connetingtoserver() {
+    socket = io.connect('http://localhost:3000/');
+  };
+  // When press play in the html
+  document.getElementById('play').onclick = function onclickplay() {
+    socket = io.connect('http://localhost:3000/');
+    login();
+  };
+  login();
+  socket.on('updatepipis', updatepeeps);
+  socket.on('updateyamies', updateyamies);
+  socket.on('warfeilddata', warfeilddata);
+}
+
+// functions
+function searchindexwithid(id) {
+  for (let i = 0; i < players.length; i += 1) {
+    if (players[i].id === id) {
+      return i;
     }
+    return 0;
+  }
 }
-function imspectating(){
+function calculatemid(arraydots) {
+  this.Mid = function mido() { this.x = 0; this.y = 0; };
+  const middle = new this.Mid();
+  for (let i = 0; i < arraydots.length; i += 1) {
+    middle.x += arraydots[i].x;
+    middle.y += arraydots[i].y;
+  }
 
+  middle.x /= (arraydots.length);
+  middle.y /= (arraydots.length);
+  return middle;
 }
 
+function draw() {
+  createCanvas(windowWidth, windowHeight - 22);
 
+  fill(240);
+  square(width, height, 100);
+  translate(width / 2, height / 2);
+
+  if (searchindexwithid(player.id)) {
+    indexofplayer = i;
+    player.r = players[i].r;
+  }
+
+  const newzoom = pos;
+  zoom = lerp(zoom, newzoom, 0.2);
+  scale(120 / (zoom));
+
+  const middot = calculatemid(player.blobs);
+  translate(-middot.x, -middot.y);
+
+
+  // fill(100);
+  // square(-5000, -5000, 10000);
+
+  for (let index = 0; index < foods.length; index += 1) {
+    foods[index].show();
+  }
+  for (let index = 0; index < players.length; index += 1) {
+    players[index].show();
+  }
+
+  // player.update();
+  for (let index = 0; index < player.blobs.length; index += 1) {
+    player.blobs[index].update();
+  }
+  // console.log(player.pos);
+  // player.show();
+  // player.constrain();
+  const blobsvelxx = [];
+  const blobsvelyy = [];
+  for (let index = 0; index < player.blobs.length; index += 1) {
+    blobsvelxx.push(player.blobs[index].vel.x);
+    blobsvelyy.push(player.blobs[index].vel.y);
+  }
+
+  const data = {
+    velx: player.vx,
+    vely: player.vy,
+    blobsvelx: blobsvelxx,
+    blobsvely: blobsvelyy,
+    id: player.id,
+  };
+  socket.emit('updateplayer', data);
+}
