@@ -23,7 +23,6 @@ function login() {
     player.id = socket.id;
     const data = {
       c: color(random(100, 255), random(0, 120), random(0, 120)),
-      b: { x: 0, y: 0, r: 0 },
       id: player.id,
       nickname: Nickname,
     }; socket.emit('ready', data);
@@ -34,11 +33,11 @@ let pos = 200;
 function mouseWheel(event) {
   // to zoom in and out
   pos += event.delta;
-  pos = constrain(pos, 1, 2001);
+  pos = constrain(pos, 1, 5000);
 }
 function keyPressed() {
   if (key === 's') {
-    console.log('SPACEBAR DETECTED');
+    // console.log('SPACEBAR DETECTED');
     // we need it to tell the server that
     // it got pressed
     data = { id: player.id };
@@ -64,9 +63,9 @@ function updatepeeps(pips) {
     if (player.id === pips[i].id) {
       // player.updatepos(pips[i].x, pips[i].y);
       // player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
-      player.blobs = blobs;
+      player = new Player(blobs, pips[i].id, pips[i].nickname);
       indexofplayer = i;
-      // console.log('list players updated');
+      // console.log(`list players updated ${player.blobs.length}`);
     }
     // console.log('list players updated' );
   }
@@ -131,16 +130,12 @@ function calculatemid(arraydots) {
 
 function draw() {
   createCanvas(windowWidth, windowHeight - 22);
-  background(255);
-  fill(255);
-  square(width, height, 100);
   translate(width / 2, height / 2);
 
   if (searchindexwithid(player.id)) {
     indexofplayer = i;
     player.r = players[i].r;
   }
-
   const newzoom = pos;
   zoom = lerp(zoom, newzoom, 0.2);
   scale(120 / (zoom));
@@ -157,9 +152,7 @@ function draw() {
   }
 
   // player.update();
-  for (let index = 0; index < player.blobs.length; index += 1) {
-    player.blobs[index].update();
-  }
+  player.update();
   // console.log(player.pos);
   // player.show();
   // player.constrain();

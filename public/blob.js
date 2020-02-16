@@ -12,6 +12,8 @@ class Blob {
     this.vy = 0;
     this.vel = createVector(1, 1);
     this.show = function showing() {
+      if (this.x === null) { this.x = 0; }
+      if (this.y === null) { this.y = 0; }
       // showing
       // fill(0, 0, 0);
       // ellipse(x-9, y-1, r * 2, r * 2);

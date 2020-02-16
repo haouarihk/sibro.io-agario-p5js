@@ -11,14 +11,9 @@ class Player {
       this.r = r;
     };
     this.update = function updating() {
-      // calculating mouse possition
-      const vel = createVector(mouseX, mouseY);
-      vel.sub(width / 2, height / 2);
-      vel.setMag(3);
-      this.vx = vel.x;
-      this.vy = vel.y;
-      // adding vel-
-      this.pos.add(vel);
+      for (let i = 0; i < this.blobs.length; i += 1) {
+        this.blobs[i].update();
+      }
     };
     this.updatetext = function updatingtext() {
       socket.on('someonechangedhisname', someonechangedhisname);
@@ -38,8 +33,8 @@ class Player {
     };
     this.constrain = function constrainer() {
       // stop it from going outside of the world
-      this.pos.x = constrain(this.pos.x, -5000, 5000);
-      this.pos.y = constrain(this.pos.y, -5000, 5000);
+      this.pos.x = constrain(this.pos.x, -10000, 10000);
+      this.pos.y = constrain(this.pos.y, -10000, 10000);
     };
   }
 }

@@ -16,8 +16,8 @@ const sockets = require('socket.io');
 const server = app.listen(3000); // The port
 
 // Food settings
-const FoodsMaxCount = 10000; // how manny foods
-const TimerForFoodMaker = 300; // how mutch to wait to make another food object
+const FoodsMaxCount = 1; // how manny foods
+const TimerForFoodMaker = 50; // how mutch to wait to make another food object
 const MaxFoodSize = 200; // how big can the food be
 const MinFoodSize = 120; // how small can the food be
 //
@@ -31,7 +31,7 @@ const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player 
 const MinPlayerSize = 200; // the minimume size that can the player be
 const TimerToRegainYourBlobs = 5000; // how mutch to end the split
 // world Settings
-const worldsize = 5000; // how big the world can be
+const worldsize = 10000; // how big the world can be
 const WorldSizeMin = -worldsize;
 const WorldSizeMax = worldsize;
 //
@@ -62,17 +62,18 @@ function calculatedis1(other, other2) {
 
 
 ///// Generators
-function GenerateId() {
+function generateId() {
   const idnew = Math.floor(Math.random() * (50000 + FoodsMaxCount));
   for (let i = 0; i < foods.length; i += 1) {
     if (foods.id === idnew) {
-      return GenerateId();
+      return generateId();
     } return idnew;
   }
+  return 0;
 }
-function Generatex(ppls, foodi) {
-  const x = Math.floor(Math.random() * 10000) - 5000;
-  const y = Math.floor(Math.random() * 10000) - 5000;
+function GenerateX(ppls, foodi) {
+  const x = Math.floor(Math.random() * WorldSizeMax * 2) + WorldSizeMin;
+  const y = Math.floor(Math.random() * WorldSizeMax * 2) + WorldSizeMin;
   let prob = 0;
 
   for (let i = 0; i < foodi.length; i += 1) {
@@ -96,11 +97,12 @@ function Generatex(ppls, foodi) {
     }
   }
   if (prob !== 0) {
-    return Generatex(ppls, foodi);
+    return GenerateX(ppls, foodi);
   }
   if (prob === 0 || posi !== 0) {
     return { xx: x, yy: y };
   }
+  return null;
 }
 
 ///// Classes
@@ -108,10 +110,10 @@ function Food() {
   this.x = 0;
   this.y = 0;
   this.generate = function generating() {
-    const saved = Generatex(players, foods);
+    const saved = GenerateX(players, foods);
     this.x = saved.xx;
     this.y = saved.yy;
-    this.id = GenerateId();
+    this.id = generateId();
     this.r = Math.floor(Math.random() * MaxFoodSize) + MinFoodSize;
   };
 }
@@ -135,11 +137,13 @@ function Blob(id, x, y, r, Timer) {
         playerindex = i;
       }
     }
+
     players[playerindex].blobs.push(new Blob(this.id,
       this.x,
       this.y,
       this.r / 2,
       TimerToRegainYourBlobs));
+
     this.r /= 2;
     // Count till the time is over and take care of it
     if (this.timertoeatme !== 0) {
@@ -163,7 +167,8 @@ function Connection(socket) {
   // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
-    blobs.push(new Blob(newplayer.id, newplayer.b.x, newplayer.b.y, StartingSize, 0));
+    const generatedXY = new GenerateX(players, foods);
+    blobs.push(new Blob(newplayer.id, generatedXY.xx, generatedXY.yy, StartingSize, 0));
     players.push(new SmallPipi(newplayer.id,
       blobs,
       newplayer.c,
@@ -189,7 +194,7 @@ function Connection(socket) {
     for (let i = 0; i < players.length; i += 1) {
       if (players[i].id === data.id) {
         if (players[i].blobs.length < MaxBlobsForEachPlayer) {
-          // Splice
+        // Splice
           for (let j = 0; j < players[i].blobs.length; j += 1) {
             if (players[i].blobs[j].r > MinSizeToSplit) {
               players[i].blobs[j].split();
@@ -201,6 +206,7 @@ function Connection(socket) {
   }
   socket.on('split', splitplayer);
 }
+
 // When someone disconnect
 function disconnection(socket) {
   console.log('Got disconnect!');
