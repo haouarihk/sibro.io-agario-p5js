@@ -21,6 +21,7 @@ function login() {
             y: player.pos.y,
             c: color(random(100, 255), random(0, 120), random(0, 120)),
             b:{x:0,y:0,r:0},
+
             id: player.id,
             nickname: nickname
         }; socket.emit('ready', data);
@@ -99,14 +100,25 @@ function draw() {
         players[index].show();
     }
 
-    player.update();
+    //player.update();
+    for (let index = 0; index < player.blobs.length; index++) {
+        player.blobs[index].update();
+    }
     //console.log(player.pos);
     //player.show();
     // player.constrain();
-
+    var blobsvelxx=[];
+    var blobsvelyy=[];
+    for (let index = 0; index < player.blobs.length; index++) {
+        blobsvelxx.push(player.blobs[index].vel.x);
+        blobsvelyy.push(player.blobs[index].vel.y);
+    }
+    
     var data = {
         velx: player.vx,
         vely: player.vy,
+        blobsvelx:blobsvelxx,
+        blobsvely:blobsvelyy,
         id: player.id
     };
     socket.emit('updateplayer', data);
