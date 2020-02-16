@@ -14,11 +14,19 @@ const sockets = require('socket.io');
 
 // Variables
 const server = app.listen(3000);
+
+// Food settings
 const FoodsMaxCount = 10000;
 const TimerForFoodMaker = 300;
+const MaxFoodSize = 200;
+const MinFoodSize = 120;
+//
+// Player Settings
+const TimerPlayerGetsOld = 2000;
 const TimerPlayersUpdating = 24;
-const AvregePlayerSpeed = 400;
-//worldsize
+const AvregePlayerSpeed = 2000;
+
+// world Settings
 const WorldSizeMin = -5000;
 const WorldSizeMax = 5000;
 //
@@ -33,7 +41,7 @@ function calculatedis(x1, y1, x2, y2) {
   return d;
 }
 function calculatedis1(other, other2) {
-  const d = calculatedis(other.x, other.y, other2.x, other2.y) + 50;
+  const d = calculatedis(other.x, other.y, other2.x, other2.y);
 
   if (d < other.r + other2.r) {
     if (other.r > other2.r) {
@@ -97,7 +105,7 @@ function Food() {
     this.x = saved.xx;
     this.y = saved.yy;
     this.id = GenerateId();
-    this.r = Math.floor(Math.random() * 60) + 50;
+    this.r = Math.floor(Math.random() * MaxFoodSize) + MinFoodSize;
   };
 }
 function Blob(x, y, r) {
@@ -214,6 +222,15 @@ function foodgen() {
     console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
   }
 }
+function gettingOld() {
+  for (let i = 0; i < players.length; i += 1) {
+    for (let j = 0; j < players[i].blobs.length; j += 1) {
+      if (players[i].blobs[j].r > 200) {
+        players[i].blobs[j].r -= 2;
+      }
+    }
+  }
+}
 // updating/sending info of everything is hppening to the players
 function updatepipis() {
   comparisionwithweight();
@@ -282,5 +299,7 @@ function updatepipis() {
   io.sockets.emit('updateyamies', data2);
   io.sockets.emit('updatepipis', data);
 }
+///// Timers
 setInterval(foodgen, TimerForFoodMaker);
+setInterval(gettingOld, TimerPlayerGetsOld);
 setInterval(updatepipis, TimerPlayersUpdating);

@@ -54,16 +54,16 @@ function updatepeeps(pips) {
 
   for (let i = 0; i < pips.length; i += 1) {
     const blobs = [];
+    let newblob;
     // players[i].updatepos(pips[i].x, pips[i].y);
     for (let j = 0; j < pips[i].blobs.length; j += 1) {
-      const newblob = new Blob(pips[i].nickname,
+      newblob = new Blob(pips[i].nickname,
         pips[i].blobs[j].x,
         pips[i].blobs[j].y,
         pips[i].blobs[j].r);
-      blobs.push(newblob);
     }
+    blobs.push(newblob);
     players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
-    players[i].r = pips[i].r;
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
       // player.updatepos(pips[i].x, pips[i].y);
@@ -175,7 +175,6 @@ function draw() {
     blobsvelxx.push(player.blobs[index].vel.x);
     blobsvelyy.push(player.blobs[index].vel.y);
   }
-
   const data = {
     velx: player.vx,
     vely: player.vy,
