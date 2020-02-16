@@ -5,13 +5,23 @@
 const express = require('express');
 
 const app = express();
-const server = app.listen(3000);
+
 const players = [];
 const foods = [];
-const foodscount = 10000;
+
 app.use(express.static('public'));
 const sockets = require('socket.io');
 
+// Variables
+const server = app.listen(3000);
+const FoodsMaxCount = 10000;
+const TimerForFoodMaker = 300;
+const TimerPlayersUpdating = 24;
+const AvregePlayerSpeed = 400;
+//worldsize
+const WorldSizeMin = -5000;
+const WorldSizeMax = 5000;
+//
 const io = sockets(server);
 console.log('server is running');
 
@@ -40,7 +50,7 @@ function calculatedis1(other, other2) {
 
 ///// Generators
 function GenerateId() {
-  const idnew = Math.floor(Math.random() * (50000 + foodscount));
+  const idnew = Math.floor(Math.random() * (50000 + FoodsMaxCount));
   for (let i = 0; i < foods.length; i += 1) {
     if (foods.id === idnew) {
       return GenerateId();
@@ -95,10 +105,10 @@ function Blob(x, y, r) {
   this.y = y;
   this.r = r;
   this.updatevel = function updatingvel(velx, vely) {
-    this.x = Math.min(Math.max(this.x, -5000), 5000);
-    this.y = Math.min(Math.max(this.y, -5000), 5000);
-    this.x += (200 * velx) / this.r;
-    this.y += (200 * vely) / this.r;
+    this.x = Math.min(Math.max(this.x, WorldSizeXMin), WorldSizeMax);
+    this.y = Math.min(Math.max(this.y, WorldSizeMin), WorldSizeMax);
+    this.x += (AvregePlayerSpeed * velx) / this.r;
+    this.y += (AvregePlayerSpeed * vely) / this.r;
   };
 }
 function SmallPipi(id, blobs, x, y, r, c, nickname) {
@@ -199,9 +209,9 @@ function comparisionwithweight() {
 function foodgen() {
   const newfood = new Food();
   newfood.generate();
-  if (foods.length < foodscount) {
+  if (foods.length < FoodsMaxCount) {
     foods.push(newfood);
-    console.log(`${foods.length}/${foodscount} new food with id:${newfood.id} in${newfood.x},${newfood.y}`);
+    console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
   }
 }
 // updating/sending info of everything is hppening to the players
@@ -272,5 +282,5 @@ function updatepipis() {
   io.sockets.emit('updateyamies', data2);
   io.sockets.emit('updatepipis', data);
 }
-setInterval(foodgen, 300);
-setInterval(updatepipis, 24);
+setInterval(foodgen, TimerForFoodMaker);
+setInterval(updatepipis, TimerPlayersUpdating);

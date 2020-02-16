@@ -47,18 +47,7 @@ function keyPressed() {
     socket.emit('split', data);
   }
 }
-function compare(a, b) {
-  if (a.r < b.r) {
-    return 1;
-  }
-  if (a.r > b.r) {
-    return -1;
-  }
-  return 0;
-}
-function comparisionwithweight() {
-  players.sort(compare);
-}
+
 // updates
 function updatepeeps(pips) {
   players = [];
@@ -75,7 +64,6 @@ function updatepeeps(pips) {
     }
     players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
     players[i].r = pips[i].r;
-    comparisionwithweight();
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
       // player.updatepos(pips[i].x, pips[i].y);
@@ -111,6 +99,7 @@ function setup() {
   this.connecttotheserver = function connetingtoserver() {
     socket = io.connect('http://localhost:3000/');
   };
+  // When press play in the html
   document.getElementById('play').onclick = function onclickplay() {
     socket = io.connect('http://localhost:3000/');
     login();
