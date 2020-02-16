@@ -80,7 +80,6 @@ function updatepeeps(pips) {
       player.blobs = blobs;
       indexofplayer = i;
     }
-
     // console.log('list players updated' );
   }
 }
@@ -122,7 +121,7 @@ function setup() {
 // functions
 function searchindexwithid(id) {
   for (let i = 0; i < players.length; i += 1) {
-    if (this.players[i].id === id) {
+    if (players[i].id === id) {
       return i;
     }
     return 0;
