@@ -105,7 +105,7 @@ function Blob(x, y, r) {
   this.y = y;
   this.r = r;
   this.updatevel = function updatingvel(velx, vely) {
-    this.x = Math.min(Math.max(this.x, WorldSizeXMin), WorldSizeMax);
+    this.x = Math.min(Math.max(this.x, WorldSizeMin), WorldSizeMax);
     this.y = Math.min(Math.max(this.y, WorldSizeMin), WorldSizeMax);
     this.x += (AvregePlayerSpeed * velx) / this.r;
     this.y += (AvregePlayerSpeed * vely) / this.r;
