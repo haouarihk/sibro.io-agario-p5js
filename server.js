@@ -29,6 +29,7 @@ const AvregePlayerSpeed = 2000; // how mutch speed can the player have
 const MinSizeToSplit = 400; // the minimume size for the player to split
 const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
 const MinPlayerSize = 200; // the minimume size that can the player be
+const TimerToRegainYourBlobs = 5000; // how mutch to end the split
 // world Settings
 const worldsize = 5000; // how big the world can be
 const WorldSizeMin = -worldsize;
@@ -114,8 +115,10 @@ function Food() {
     this.r = Math.floor(Math.random() * MaxFoodSize) + MinFoodSize;
   };
 }
-function Blob(id, x, y, r) {
+function Blob(id, x, y, r, Timer) {
   this.x = x;
+  this.timertoeatme = Timer;
+  this.eatmyself = false;
   this.y = y;
   this.r = r;
   this.id = id;
@@ -132,8 +135,16 @@ function Blob(id, x, y, r) {
         playerindex = i;
       }
     }
-    players[playerindex].blobs.push(new Blob(this.id, this.x, this.y, this.r / 2));
+    players[playerindex].blobs.push(new Blob(this.id,
+      this.x,
+      this.y,
+      this.r / 2,
+      TimerToRegainYourBlobs));
     this.r /= 2;
+    // Count till the time is over and take care of it
+    if (this.timertoeatme !== 0) {
+      setInterval(() => { this.eatmyself = true; }, this.timertoeatme);
+    }
   };
 }
 function SmallPipi(id, blobs, c, nickname) {
@@ -152,7 +163,7 @@ function Connection(socket) {
   // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
-    blobs.push(new Blob(newplayer.id, newplayer.b.x, newplayer.b.y, StartingSize));
+    blobs.push(new Blob(newplayer.id, newplayer.b.x, newplayer.b.y, StartingSize, 0));
     players.push(new SmallPipi(newplayer.id,
       blobs,
       newplayer.c,
@@ -296,13 +307,21 @@ function updatepipis() {
                   players[j].blobs.splice(k, 1);
                 } else if (killer === 2) {
                   players[j].blobs[k].r += players[i].blobs[l].r * 0.8;
+                  players[i].blobs.splice(l, 1);
+                }
+                //let warfeilddata = { aterid: ater, atenid: aten };
+                //io.sockets.emit('warfeilddata', warfeilddata);
+              }
+            } else if (players[i].blobs[k].eatmyself) {
+              const killer = calculatedis1(players[i].blobs[l], players[i].blobs[k]);
+              if (killer !== 0) {
+                if (killer === 1) {
+                  players[i].blobs[l].r += players[i].blobs[k].r;
                   players[i].blobs.splice(k, 1);
                 }
-              //let warfeilddata = { aterid: ater, atenid: aten };
-              //io.sockets.emit('warfeilddata', warfeilddata);
+                //let warfeilddata = { aterid: ater, atenid: aten };
+                //io.sockets.emit('warfeilddata', warfeilddata);
               }
-            } else {
-              //console.log('its the same player');
             }
           }
         }
