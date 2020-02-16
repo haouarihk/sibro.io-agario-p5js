@@ -1,7 +1,7 @@
 {
   "name": "projectsibro",
   "version": "1.0.0",
-  "description": "",
+  "description": "agar.io make with p5.js and sockets",
   "main": "server.js",
   "dependencies": {
     "document": "^0.4.7",
@@ -11,11 +11,24 @@
     "socket.io": "^2.3.0",
     "victor": "^1.1.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wolfpat01/sibro.io-agario-p5js.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/wolfpat01/sibro.io-agario-p5js/issues"
+  },
+  "homepage": "https://github.com/wolfpat01/sibro.io-agario-p5js#readme"
 }
