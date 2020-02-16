@@ -35,10 +35,6 @@ class Player {
       for (let i = 0; i < this.blobs.length; i += 1) {
         this.blobs[i].show();
       }
-      // fill(255);
-      // textSize(0.3 * this.r);
-      // textAlign(CENTER);
-      // text(this.nickname, x - 2, y);
     };
     this.constrain = function constrainer() {
       // stop it from going outside of the world

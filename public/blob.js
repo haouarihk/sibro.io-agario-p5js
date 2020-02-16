@@ -3,7 +3,8 @@
 /* eslint-disable radix */
 /* eslint-disable no-undef */
 class Blob {
-  constructor(x, y, r) {
+  constructor(nickname, x, y, r) {
+    this.nickname = nickname;
     this.r = r;
     this.x = x;
     this.y = y;
@@ -18,6 +19,10 @@ class Blob {
       textSize(0.3 * this.r);
       textAlign(CENTER);
       text([parseInt(this.r)], this.x - 2, this.y + [parseInt(this.r)] / 2);
+      fill(255);
+      textSize(0.3 * this.r);
+      textAlign(CENTER);
+      text(this.nickname, x - 2, y);
     };
     this.update = function updating() {
       // calculating mouse possition

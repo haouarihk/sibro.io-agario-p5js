@@ -118,6 +118,8 @@ function Connection(socket) {
       newplayer.nickname));
   }
   socket.on('ready', playerjoined);
+
+
   function updateplayer(uplayer) {
     for (let index = 0; index < players.length; index += 1) {
       if (players[index].id === uplayer.id) {
@@ -132,6 +134,8 @@ function Connection(socket) {
     }
   }
   socket.on('updateplayer', updateplayer);
+
+
   function splitplayer(data) {
     console.log(`${data.id} wants to split`);
     for (let i = 0; i < players.length; i += 1) {

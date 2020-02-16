@@ -15,7 +15,7 @@ let Nickname = '';
 function login() {
   Nickname = document.getElementById('nickname').value;
   const blobs = [];
-  blobs.push(new Blob(0, 0, 50));
+  blobs.push(new Blob(Nickname, 0, 0, 50));
   player = new Player(blobs, socket.id, 'Guest');
   // player.blobs=blobs;
   console.log(`YOOO ${blobs.length}`);
@@ -62,12 +62,15 @@ function comparisionwithweight() {
 // updates
 function updatepeeps(pips) {
   players = [];
-  
+
   for (let i = 0; i < pips.length; i += 1) {
     const blobs = [];
     // players[i].updatepos(pips[i].x, pips[i].y);
     for (let j = 0; j < pips[i].blobs.length; j += 1) {
-      const newblob = new Blob(pips[i].blobs[j].x, pips[i].blobs[j].y, pips[i].blobs[j].r);
+      const newblob = new Blob(pips[i].nickname,
+        pips[i].blobs[j].x,
+        pips[i].blobs[j].y,
+        pips[i].blobs[j].r);
       blobs.push(newblob);
     }
     players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
