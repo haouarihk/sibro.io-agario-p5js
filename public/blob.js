@@ -24,7 +24,7 @@ class Blob {
       fill(255);
       textSize(0.3 * this.r);
       textAlign(CENTER);
-      text(this.nickname, x - 2, y);
+      text(this.nickname, this.x - 2, this.y);
     };
     this.update = function updating() {
       // calculating mouse possition

@@ -66,7 +66,7 @@ function updatepeeps(pips) {
       // player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
       player.blobs = blobs;
       indexofplayer = i;
-      console.log('list players updated');
+      // console.log('list players updated');
     }
     // console.log('list players updated' );
   }
@@ -168,7 +168,7 @@ function draw() {
   for (let index = 0; index < player.blobs.length; index += 1) {
     blobsvelxx.push(player.blobs[index].vx);
     blobsvelyy.push(player.blobs[index].vy);
-    console.log(player.pos);
+    // console.log(player.pos);
   }
   const data = {
     velx: player.vx,

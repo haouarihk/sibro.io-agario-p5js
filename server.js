@@ -12,26 +12,27 @@ const foods = [];
 app.use(express.static('public'));
 const sockets = require('socket.io');
 
-// Variables
-const server = app.listen(3000);
+// Server
+const server = app.listen(3000); // The port
 
 // Food settings
-const FoodsMaxCount = 10000;
-const TimerForFoodMaker = 300;
-const MaxFoodSize = 200;
-const MinFoodSize = 120;
+const FoodsMaxCount = 10000; // how manny foods
+const TimerForFoodMaker = 300; // how mutch to wait to make another food object
+const MaxFoodSize = 200; // how big can the food be
+const MinFoodSize = 120; // how small can the food be
 //
 // Player Settings
-const StartingSize = 600;
-const TimerPlayerGetsOld = 2000;
-const TimerPlayersUpdating = 24;
-const AvregePlayerSpeed = 2000;
-const MinSizeToSplit = 400;
-const MaxBlobsForEachPlayer = 8;
-const MinPlayerSize = 200;
+const StartingSize = 600; // in what size the player start with
+const TimerPlayerGetsOld = 2000; // how mutch to wait till his mass gose down
+const TimerPlayersUpdating = 24; // how mutch to wait till the server sends player info
+const AvregePlayerSpeed = 2000; // how mutch speed can the player have
+const MinSizeToSplit = 400; // the minimume size for the player to split
+const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
+const MinPlayerSize = 200; // the minimume size that can the player be
 // world Settings
-const WorldSizeMin = -5000;
-const WorldSizeMax = 5000;
+const worldsize = 5000; // how big the world can be
+const WorldSizeMin = -worldsize;
+const WorldSizeMax = worldsize;
 //
 const io = sockets(server);
 console.log('server is running');
@@ -46,7 +47,7 @@ function calculatedis(x1, y1, x2, y2) {
 function calculatedis1(other, other2) {
   const d = calculatedis(other.x, other.y, other2.x, other2.y);
 
-  if (d < other.r + other2.r) {
+  if (d <= other.r + other2.r - (other.r / 4)) {
     if (other.r > other2.r) {
       return 1;
     } if (other.r === other2.r) {
@@ -124,6 +125,16 @@ function Blob(id, x, y, r) {
     this.x += (AvregePlayerSpeed * velx) / this.r;
     this.y += (AvregePlayerSpeed * vely) / this.r;
   };
+  this.split = function split() {
+    let playerindex = 0;
+    for (let i = 0; i < players.length; i += 1) {
+      if (players[i].id === this.id) {
+        playerindex = i;
+      }
+    }
+    players[playerindex].blobs.push(new Blob(this.id, this.x, this.y, this.r / 2));
+    this.r /= 2;
+  };
 }
 function SmallPipi(id, blobs, c, nickname) {
   this.id = id;
@@ -166,22 +177,14 @@ function Connection(socket) {
     console.log(`${data.id} wants to split`);
     for (let i = 0; i < players.length; i += 1) {
       if (players[i].id === data.id) {
-        const { blobs } = players[i];
-        const newblobs = [];
         if (players[i].blobs.length < MaxBlobsForEachPlayer) {
-          // store new blobs in newblobs variable
+          // Splice
           for (let j = 0; j < players[i].blobs.length; j += 1) {
-            if (players[i].blobs[j].r >= MinSizeToSplit) {
-              newblobs.push(new Blob(players[i].id, blobs[j].x, blobs[j].y, blobs[j].r / 2));
-              players[i].blobs[j].r /= 2;
+            if (players[i].blobs[j].r > MinSizeToSplit) {
+              players[i].blobs[j].split();
             }
           }
         }
-        // return all newblobs items to the player(players[i])
-        for (let j = 0; j < newblobs.length; j += 1) {
-          players[i].blobs.push(newblobs[j]);
-        }
-        // console.log(players[i].blobs[1].x);
       }
     }
   }
