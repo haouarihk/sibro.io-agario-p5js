@@ -22,6 +22,7 @@ const MaxFoodSize = 200;
 const MinFoodSize = 120;
 //
 // Player Settings
+const StartingSize = 200;
 const TimerPlayerGetsOld = 2000;
 const TimerPlayersUpdating = 24;
 const AvregePlayerSpeed = 2000;
@@ -119,12 +120,10 @@ function Blob(x, y, r) {
     this.y += (AvregePlayerSpeed * vely) / this.r;
   };
 }
-function SmallPipi(id, blobs, x, y, r, c, nickname) {
+function SmallPipi(id, blobs, c, nickname) {
   this.id = id;
-  this.x = x;
-  this.y = y;
-  this.r = r;
   this.c = c;
+  this.r = 0;
   this.blobs = blobs;
   this.nickname = nickname;
 }
@@ -137,12 +136,9 @@ function Connection(socket) {
   // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
-    blobs.push(new Blob(newplayer.b.x, newplayer.b.y, 200));
+    blobs.push(new Blob(newplayer.b.x, newplayer.b.y, StartingSize));
     players.push(new SmallPipi(newplayer.id,
       blobs,
-      newplayer.x,
-      newplayer.y,
-      200,
       newplayer.c,
       newplayer.nickname));
   }
@@ -172,7 +168,7 @@ function Connection(socket) {
           for (let j = 0; j < players[i].blobs.length; j += 1) {
             if (players[i].blobs.r >= 50) {
               newblobs.push(new Blob(blobs[j].x, blobs[j].y, blobs[j].r / 2));
-              // players[i].blobs[j].r /= 2;
+              players[i].blobs[j].r /= 2;
             }
           }
           // return all newblobs items to the player(players[i])
@@ -233,6 +229,14 @@ function gettingOld() {
 }
 // updating/sending info of everything is hppening to the players
 function updatepipis() {
+  // update player radiuse bassed on his blobs
+  for (let i = 0; i < players.length; i += 1) {
+    let rad = 0;
+    for (let j = 0; j < players[i].blobs.length; j += 1) {
+      rad += players[i].blobs[j].r;
+    }
+    players[i].r = rad;
+  }
   comparisionwithweight();
   const data = [];
   for (let i = 0; i < players.length; i += 1) {

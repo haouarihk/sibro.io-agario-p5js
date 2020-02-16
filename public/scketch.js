@@ -22,8 +22,6 @@ function login() {
   socket.on('connect', () => {
     player.id = socket.id;
     const data = {
-      x: player.pos.x,
-      y: player.pos.y,
       c: color(random(100, 255), random(0, 120), random(0, 120)),
       b: { x: 0, y: 0, r: 0 },
       id: player.id,
