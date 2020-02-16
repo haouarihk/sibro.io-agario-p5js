@@ -62,6 +62,7 @@ function comparisionwithweight() {
 // updates
 function updatepeeps(pips) {
   players = [];
+  
   for (let i = 0; i < pips.length; i += 1) {
     const blobs = [];
     // players[i].updatepos(pips[i].x, pips[i].y);
