@@ -69,14 +69,7 @@ function searchindexwithid(id) {
     }
 }
 function draw() {
-var middot=calculatemid(player.blobs);
-    player.x=middot.x;
-    player.y=middot.y;
-    for(var i =0;i<player.blobs.length;i++){
-        fill(0,255,0)
-        line(player.x,player.y,player.blobs[i].x,player.blobs[i].y);
-    
-    }
+
     createCanvas(windowWidth, windowHeight - 22);
     //background(255);
     fill(240);
@@ -92,7 +85,8 @@ var middot=calculatemid(player.blobs);
     zoom = lerp(zoom, newzoom, 0.2);
     //console.log(newzoom);
     scale(120 /  (zoom));
-    translate(-player.pos.x, -player.pos.y);
+    var middot=calculatemid(player.blobs);
+    translate(-middot.x, -middot.y);
 
 
     //fill(100);
@@ -116,6 +110,7 @@ var middot=calculatemid(player.blobs);
         id: player.id
     };
     socket.emit('updateplayer', data);
+    
 
 }
 function updatepeeps(pips) {
@@ -170,8 +165,9 @@ function calculatemid(arraydots){
         middle.x+=arraydots[i].x;
         middle.y+=arraydots[i].y;
     }
-    middle.x=(middle.x)/arraydots.length;
-    middle.x=(middle.y)/arraydots.length;
+
+    middle.x=(middle.x)/(arraydots.length);
+    middle.y=(middle.y)/(arraydots.length);
     return middle;
 }
 
