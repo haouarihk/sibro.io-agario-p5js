@@ -16,7 +16,7 @@ const sockets = require('socket.io');
 const server = app.listen(3000); // The port
 
 // Food settings
-const FoodsMaxCount = 1; // how manny foods
+const FoodsMaxCount = 1000; // how manny foods
 const TimerForFoodMaker = 50; // how mutch to wait to make another food object
 const MaxFoodSize = 200; // how big can the food be
 const MinFoodSize = 120; // how small can the food be
