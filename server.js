@@ -14,6 +14,30 @@ const sockets = require('socket.io');
 
 const io = sockets(server);
 console.log('server is running');
+
+///// Calculators
+function calculatedis(x1, y1, x2, y2) {
+  const xx = (x1 - x2) * (x1 - x2);
+  const yy = (y1 - y2) * (y1 - y2);
+  const d = Math.sqrt(xx + yy);
+  return d;
+}
+function calculatedis1(other, other2) {
+  const d = calculatedis(other.x, other.y, other2.x, other2.y) + 50;
+
+  if (d < other.r + other2.r) {
+    if (other.r > other2.r) {
+      return 1;
+    } if (other.r === other2.r) {
+      return null;
+    } if (other.r < other2.r) {
+      return 2;
+    }
+  }
+  return null;
+}
+
+
 ///// Generators
 function GenerateId() {
   const idnew = Math.floor(Math.random() * (50000 + foodscount));
@@ -52,29 +76,6 @@ function Generatex(ppls, foodi) {
   if (prob === 0 || posi !== 0) {
     return { xx: x, yy: y };
   }
-}
-
-
-///// Calculators
-function calculatedis(x1, y1, x2, y2) {
-  const xx = (x1 - x2) * (x1 - x2);
-  const yy = (y1 - y2) * (y1 - y2);
-  const d = Math.sqrt(xx + yy);
-  return d;
-}
-function calculatedis1(other, other2) {
-  const d = calculatedis(other.x, other.y, other2.x, other2.y) + 50;
-
-  if (d < other.r + other2.r) {
-    if (other.r > other2.r) {
-      return 1;
-    } if (other.r === other2.r) {
-      return null;
-    } if (other.r < other2.r) {
-      return 2;
-    }
-  }
-  return null;
 }
 
 ///// Classes
@@ -190,6 +191,7 @@ function compare(a, b) {
 function comparisionwithweight() {
   players.sort(compare);
 }
+
 
 ///// Repeaters
 function foodgen() {
