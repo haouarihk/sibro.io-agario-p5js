@@ -63,9 +63,10 @@ function updatepeeps(pips) {
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
       // player.updatepos(pips[i].x, pips[i].y);
-      player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
+      // player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
       player.blobs = blobs;
       indexofplayer = i;
+      console.log('list players updated');
     }
     // console.log('list players updated' );
   }
@@ -130,8 +131,8 @@ function calculatemid(arraydots) {
 
 function draw() {
   createCanvas(windowWidth, windowHeight - 22);
-
-  fill(240);
+  background(255);
+  fill(255);
   square(width, height, 100);
   translate(width / 2, height / 2);
 
@@ -147,9 +148,6 @@ function draw() {
   const middot = calculatemid(player.blobs);
   translate(-middot.x, -middot.y);
 
-
-  // fill(100);
-  // square(-5000, -5000, 10000);
 
   for (let index = 0; index < foods.length; index += 1) {
     foods[index].show();
@@ -168,8 +166,9 @@ function draw() {
   const blobsvelxx = [];
   const blobsvelyy = [];
   for (let index = 0; index < player.blobs.length; index += 1) {
-    blobsvelxx.push(player.blobs[index].vel.x);
-    blobsvelyy.push(player.blobs[index].vel.y);
+    blobsvelxx.push(player.blobs[index].vx);
+    blobsvelyy.push(player.blobs[index].vy);
+    console.log(player.pos);
   }
   const data = {
     velx: player.vx,

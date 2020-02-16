@@ -8,6 +8,8 @@ class Blob {
     this.r = r;
     this.x = x;
     this.y = y;
+    this.vx = 0;
+    this.vy = 0;
     this.vel = createVector(1, 1);
     this.show = function showing() {
       // showing
@@ -27,12 +29,10 @@ class Blob {
     this.update = function updating() {
       // calculating mouse possition
       const vel = createVector(mouseX, mouseY);
-      vel.sub(width / 2, height / 2);
+      vel.sub((width / 2), (height / 2));
       vel.setMag(3);
       this.vx = vel.x;
       this.vy = vel.y;
-      // adding vel-
-      this.vel.add(vel);
     };
   }
 }

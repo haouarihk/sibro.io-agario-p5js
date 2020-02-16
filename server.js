@@ -22,11 +22,13 @@ const MaxFoodSize = 200;
 const MinFoodSize = 120;
 //
 // Player Settings
-const StartingSize = 200;
+const StartingSize = 600;
 const TimerPlayerGetsOld = 2000;
 const TimerPlayersUpdating = 24;
 const AvregePlayerSpeed = 2000;
-
+const MinSizeToSplit = 400;
+const MaxBlobsForEachPlayer = 8;
+const MinPlayerSize = 200;
 // world Settings
 const WorldSizeMin = -5000;
 const WorldSizeMax = 5000;
@@ -101,6 +103,8 @@ function Generatex(ppls, foodi) {
 
 ///// Classes
 function Food() {
+  this.x = 0;
+  this.y = 0;
   this.generate = function generating() {
     const saved = Generatex(players, foods);
     this.x = saved.xx;
@@ -109,10 +113,11 @@ function Food() {
     this.r = Math.floor(Math.random() * MaxFoodSize) + MinFoodSize;
   };
 }
-function Blob(x, y, r) {
+function Blob(id, x, y, r) {
   this.x = x;
   this.y = y;
   this.r = r;
+  this.id = id;
   this.updatevel = function updatingvel(velx, vely) {
     this.x = Math.min(Math.max(this.x, WorldSizeMin), WorldSizeMax);
     this.y = Math.min(Math.max(this.y, WorldSizeMin), WorldSizeMax);
@@ -136,7 +141,7 @@ function Connection(socket) {
   // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
-    blobs.push(new Blob(newplayer.b.x, newplayer.b.y, StartingSize));
+    blobs.push(new Blob(newplayer.id, newplayer.b.x, newplayer.b.y, StartingSize));
     players.push(new SmallPipi(newplayer.id,
       blobs,
       newplayer.c,
@@ -163,20 +168,20 @@ function Connection(socket) {
       if (players[i].id === data.id) {
         const { blobs } = players[i];
         const newblobs = [];
-        if (players[i].blobs.length < 8) {
+        if (players[i].blobs.length < MaxBlobsForEachPlayer) {
           // store new blobs in newblobs variable
           for (let j = 0; j < players[i].blobs.length; j += 1) {
-            if (players[i].blobs.r >= 50) {
-              newblobs.push(new Blob(blobs[j].x, blobs[j].y, blobs[j].r / 2));
+            if (players[i].blobs[j].r >= MinSizeToSplit) {
+              newblobs.push(new Blob(players[i].id, blobs[j].x, blobs[j].y, blobs[j].r / 2));
               players[i].blobs[j].r /= 2;
             }
           }
-          // return all newblobs items to the player(players[i])
-          for (let j = 0; j < newblobs.length; j += 1) {
-            players[i].blobs.push(newblobs[j]);
-          }
-          // console.log(players[i].blobs[1].x);
         }
+        // return all newblobs items to the player(players[i])
+        for (let j = 0; j < newblobs.length; j += 1) {
+          players[i].blobs.push(newblobs[j]);
+        }
+        // console.log(players[i].blobs[1].x);
       }
     }
   }
@@ -221,7 +226,7 @@ function foodgen() {
 function gettingOld() {
   for (let i = 0; i < players.length; i += 1) {
     for (let j = 0; j < players[i].blobs.length; j += 1) {
-      if (players[i].blobs[j].r > 200) {
+      if (players[i].blobs[j].r > MinPlayerSize) {
         players[i].blobs[j].r -= 2;
       }
     }
@@ -264,16 +269,18 @@ function updatepipis() {
       for (let j = 0; j < foods.length; j += 1) {
         for (let k = 0; k < players[i].blobs.length; k += 1) {
           // canlculate distance of each blob with each food
-          const killer = calculatedis1(players[i].blobs[k], foods[j]);
-          if (killer === 1) {
-            players[i].blobs[k].r += foods[j].r / (players[i].blobs[k].r * 0.2);
-            foods.splice(j, 1);
+          if (foods !== undefined) {
+            const killer = calculatedis1(players[i].blobs[k], foods[j]);
+            if (killer === 1) {
+              players[i].blobs[k].r += foods[j].r / (players[i].blobs[k].r * 0.2);
+              foods.splice(j, 1);
+            }
           }
         }
       }
       // player(players[i]) eat other player
       for (let j = 0; j < players.length; j += 1) {
-        if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
+        //if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
         for (let k = 0; k < players[j].blobs.length; k += 1) {
           for (let l = 0; l < players[i].blobs.length; l += 1) {
             // If its not the same player
