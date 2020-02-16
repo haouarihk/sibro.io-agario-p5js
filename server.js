@@ -98,13 +98,7 @@ function smallpipi(id,blobs, x, y, r, c,nickname) {
   this.c = c;
   this.blobs=blobs;
   this.nickname =nickname;
-  this.updatevel = function (velx, vely) {
-    this.x = Math.min(Math.max(this.x, -5000), 5000);
-    this.y = Math.min(Math.max(this.y, -5000), 5000);
-    this.x += velx;
-    this.y += vely;
-
-  }
+ 
 }
 
 var sockets = require('socket.io');
@@ -180,7 +174,7 @@ function Connection(socket) {
     {
       //blobs.push(new blob(newplayer.b[i].x,newplayer.b[i].y,200));
     }
-    blobs.push(new blob(newplayer.b.x,newplayer.y,200));
+    blobs.push(new blob(newplayer.b.x,newplayer.b.y,200));
     players.push(new smallpipi(newplayer.id,blobs, newplayer.x, newplayer.y, 200, newplayer.c,newplayer.nickname));
     console.log("new player got pushed");
   }
@@ -194,7 +188,7 @@ function Connection(socket) {
         //players[i].updatevel(uplayer.velx, uplayer.vely);
         for(let i = 0 ; i<players[index].blobs.length;i++){
           players[index].blobs[i].updatevel(uplayer.velx, uplayer.vely);
-          // players[index].blobs[i].r
+          
         }
       }
     }
@@ -204,7 +198,11 @@ function Connection(socket) {
     console.log(data.id+' wants to split');
     for(var i=0;i<players.length;i++){
       if(players[i].id==data.id){
-        players[i].blobs.push(new blob(players[i].x,players[i].y,players[i].r/2));
+        var blobs=players[i].blobs;
+        for(var j=0;j<blobs.length;j++){
+          blobs.push(new blob(blobs[j].x,blobs[j].y,blobs[j].r/2));
+          blobs[j].r/=2;
+        }
         //players[i].blobs[0].r=players[i].r/2;
       }
     }
