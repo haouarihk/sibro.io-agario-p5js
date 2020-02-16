@@ -60,14 +60,16 @@ function Generatex(ppls, foodi) {
     }
   }
   for (let i = 0; i < ppls.length; i += 1) {
-    if (ppls[i].x === x) {
-      if (ppls[i].y === y) {
-        prob += 1;
+    for (let j = 0; j < ppls[i].blobs.length; j += 1) {
+      if (ppls[i].blobs[j].x === x) {
+        if (ppls[i].blobs[j].y === y) {
+          prob += 1;
+        }
       }
-    }
-    const c = ppls[i].r - (calculatedis(ppls[i].x, ppls[i].y, x, y));
-    if (c < 0) {
-      prob += 1;
+      const c = ppls[i].blobs[j].r - (calculatedis(ppls[i].blobs[j].x, ppls[i].blobs[j].y, x, y));
+      if (c < 0) {
+        // prob += 1;
+      }
     }
   }
   if (prob !== 0) {
@@ -232,7 +234,7 @@ function updatepipis() {
         for (let k = 0; k < players[i].blobs.length; k += 1) {
           // canlculate distance of each blob with each food
           const killer = calculatedis1(players[i].blobs[k], foods[j]);
-          if (killer !== 0) {
+          if (killer === 1) {
             players[i].blobs[k].r += foods[j].r / (players[i].blobs[k].r * 0.2);
             foods.splice(j, 1);
           }
@@ -243,18 +245,23 @@ function updatepipis() {
         if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
         for (let k = 0; k < players[j].blobs.length; k += 1) {
           for (let l = 0; l < players[i].blobs.length; l += 1) {
-            const killer = calculatedis1(players[i].blobs[l], players[j].blobs[k]);
+            // If its not the same player
+            if (players[j] !== players[i]) {
+              const killer = calculatedis1(players[i].blobs[l], players[j].blobs[k]);
 
-            if (killer !== 0) {
-              if (killer === 1) {
-                players[i].blobs[l].r += players[j].blobs[k].r * 0.8;
-                players[j].blobs.splice(k, 1);
-              } else if (killer === 2) {
-                players[j].blobs[k].r += players[i].blobs[l].r * 0.8;
-                players[i].blobs.splice(k, 1);
-              }
+              if (killer !== 0) {
+                if (killer === 1) {
+                  players[i].blobs[l].r += players[j].blobs[k].r * 0.8;
+                  players[j].blobs.splice(k, 1);
+                } else if (killer === 2) {
+                  players[j].blobs[k].r += players[i].blobs[l].r * 0.8;
+                  players[i].blobs.splice(k, 1);
+                }
               //let warfeilddata = { aterid: ater, atenid: aten };
               //io.sockets.emit('warfeilddata', warfeilddata);
+              }
+            } else {
+              //console.log('its the same player');
             }
           }
         }
