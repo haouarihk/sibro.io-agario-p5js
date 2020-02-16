@@ -61,17 +61,18 @@ function Generatex(ppls, foodi) {
 }
 
 function calculatedis1(other, other2) {
-  const xx = (other2.x - other.x) * (other2.x - other.x);
-  const yy = (other2.y - other.y) * (other2.y - other.y);
-  const d = Math.sqrt(xx + yy) + 50;
+  const d = calculatedis(other.x, other.y, other2.x, other2.y) + 50;
+
   if (d < other.r + other2.r) {
     if (other.r > other2.r) {
       return 1;
     } if (other.r === other2.r) {
       return null;
+    } if (other.r < other2.r) {
+      return 2;
     }
-    return 2;
-  } return null;
+  }
+  return null;
 }
 
 function Food() {
