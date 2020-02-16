@@ -8,6 +8,8 @@ class Blob {
     this.r = r;
     this.x = x;
     this.y = y;
+    this.vx = 0;
+    this.vy = 0;
     this.vel = createVector(1, 1);
     this.show = function showing() {
       // showing
@@ -22,17 +24,15 @@ class Blob {
       fill(255);
       textSize(0.3 * this.r);
       textAlign(CENTER);
-      text(this.nickname, x - 2, y);
+      text(this.nickname, this.x - 2, this.y);
     };
     this.update = function updating() {
       // calculating mouse possition
       const vel = createVector(mouseX, mouseY);
-      vel.sub(width / 2, height / 2);
+      vel.sub((width / 2), (height / 2));
       vel.setMag(3);
       this.vx = vel.x;
       this.vy = vel.y;
-      // adding vel-
-      this.vel.add(vel);
     };
   }
 }

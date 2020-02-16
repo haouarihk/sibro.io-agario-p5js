@@ -12,15 +12,27 @@ const foods = [];
 app.use(express.static('public'));
 const sockets = require('socket.io');
 
-// Variables
-const server = app.listen(3000);
-const FoodsMaxCount = 10000;
-const TimerForFoodMaker = 300;
-const TimerPlayersUpdating = 24;
-const AvregePlayerSpeed = 400;
-//worldsize
-const WorldSizeMin = -5000;
-const WorldSizeMax = 5000;
+// Server
+const server = app.listen(3000); // The port
+
+// Food settings
+const FoodsMaxCount = 10000; // how manny foods
+const TimerForFoodMaker = 300; // how mutch to wait to make another food object
+const MaxFoodSize = 200; // how big can the food be
+const MinFoodSize = 120; // how small can the food be
+//
+// Player Settings
+const StartingSize = 600; // in what size the player start with
+const TimerPlayerGetsOld = 2000; // how mutch to wait till his mass gose down
+const TimerPlayersUpdating = 24; // how mutch to wait till the server sends player info
+const AvregePlayerSpeed = 2000; // how mutch speed can the player have
+const MinSizeToSplit = 400; // the minimume size for the player to split
+const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
+const MinPlayerSize = 200; // the minimume size that can the player be
+// world Settings
+const worldsize = 5000; // how big the world can be
+const WorldSizeMin = -worldsize;
+const WorldSizeMax = worldsize;
 //
 const io = sockets(server);
 console.log('server is running');
@@ -33,9 +45,9 @@ function calculatedis(x1, y1, x2, y2) {
   return d;
 }
 function calculatedis1(other, other2) {
-  const d = calculatedis(other.x, other.y, other2.x, other2.y) + 50;
+  const d = calculatedis(other.x, other.y, other2.x, other2.y);
 
-  if (d < other.r + other2.r) {
+  if (d <= other.r + other2.r - (other.r / 4)) {
     if (other.r > other2.r) {
       return 1;
     } if (other.r === other2.r) {
@@ -92,31 +104,42 @@ function Generatex(ppls, foodi) {
 
 ///// Classes
 function Food() {
+  this.x = 0;
+  this.y = 0;
   this.generate = function generating() {
     const saved = Generatex(players, foods);
     this.x = saved.xx;
     this.y = saved.yy;
     this.id = GenerateId();
-    this.r = Math.floor(Math.random() * 60) + 50;
+    this.r = Math.floor(Math.random() * MaxFoodSize) + MinFoodSize;
   };
 }
-function Blob(x, y, r) {
+function Blob(id, x, y, r) {
   this.x = x;
   this.y = y;
   this.r = r;
+  this.id = id;
   this.updatevel = function updatingvel(velx, vely) {
     this.x = Math.min(Math.max(this.x, WorldSizeMin), WorldSizeMax);
     this.y = Math.min(Math.max(this.y, WorldSizeMin), WorldSizeMax);
     this.x += (AvregePlayerSpeed * velx) / this.r;
     this.y += (AvregePlayerSpeed * vely) / this.r;
   };
+  this.split = function split() {
+    let playerindex = 0;
+    for (let i = 0; i < players.length; i += 1) {
+      if (players[i].id === this.id) {
+        playerindex = i;
+      }
+    }
+    players[playerindex].blobs.push(new Blob(this.id, this.x, this.y, this.r / 2));
+    this.r /= 2;
+  };
 }
-function SmallPipi(id, blobs, x, y, r, c, nickname) {
+function SmallPipi(id, blobs, c, nickname) {
   this.id = id;
-  this.x = x;
-  this.y = y;
-  this.r = r;
   this.c = c;
+  this.r = 0;
   this.blobs = blobs;
   this.nickname = nickname;
 }
@@ -129,12 +152,9 @@ function Connection(socket) {
   // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
-    blobs.push(new Blob(newplayer.b.x, newplayer.b.y, 200));
+    blobs.push(new Blob(newplayer.id, newplayer.b.x, newplayer.b.y, StartingSize));
     players.push(new SmallPipi(newplayer.id,
       blobs,
-      newplayer.x,
-      newplayer.y,
-      200,
       newplayer.c,
       newplayer.nickname));
   }
@@ -157,21 +177,13 @@ function Connection(socket) {
     console.log(`${data.id} wants to split`);
     for (let i = 0; i < players.length; i += 1) {
       if (players[i].id === data.id) {
-        const { blobs } = players[i];
-        const newblobs = [];
-        if (players[i].blobs.length < 8) {
-          // store new blobs in newblobs variable
+        if (players[i].blobs.length < MaxBlobsForEachPlayer) {
+          // Splice
           for (let j = 0; j < players[i].blobs.length; j += 1) {
-            if (players[i].blobs.r >= 50) {
-              newblobs.push(new Blob(blobs[j].x, blobs[j].y, blobs[j].r / 2));
-              // players[i].blobs[j].r /= 2;
+            if (players[i].blobs[j].r > MinSizeToSplit) {
+              players[i].blobs[j].split();
             }
           }
-          // return all newblobs items to the player(players[i])
-          for (let j = 0; j < newblobs.length; j += 1) {
-            players[i].blobs.push(newblobs[j]);
-          }
-          // console.log(players[i].blobs[1].x);
         }
       }
     }
@@ -214,8 +226,25 @@ function foodgen() {
     console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
   }
 }
+function gettingOld() {
+  for (let i = 0; i < players.length; i += 1) {
+    for (let j = 0; j < players[i].blobs.length; j += 1) {
+      if (players[i].blobs[j].r > MinPlayerSize) {
+        players[i].blobs[j].r -= 2;
+      }
+    }
+  }
+}
 // updating/sending info of everything is hppening to the players
 function updatepipis() {
+  // update player radiuse bassed on his blobs
+  for (let i = 0; i < players.length; i += 1) {
+    let rad = 0;
+    for (let j = 0; j < players[i].blobs.length; j += 1) {
+      rad += players[i].blobs[j].r;
+    }
+    players[i].r = rad;
+  }
   comparisionwithweight();
   const data = [];
   for (let i = 0; i < players.length; i += 1) {
@@ -243,16 +272,18 @@ function updatepipis() {
       for (let j = 0; j < foods.length; j += 1) {
         for (let k = 0; k < players[i].blobs.length; k += 1) {
           // canlculate distance of each blob with each food
-          const killer = calculatedis1(players[i].blobs[k], foods[j]);
-          if (killer === 1) {
-            players[i].blobs[k].r += foods[j].r / (players[i].blobs[k].r * 0.2);
-            foods.splice(j, 1);
+          if (foods !== undefined) {
+            const killer = calculatedis1(players[i].blobs[k], foods[j]);
+            if (killer === 1) {
+              players[i].blobs[k].r += foods[j].r / (players[i].blobs[k].r * 0.2);
+              foods.splice(j, 1);
+            }
           }
         }
       }
       // player(players[i]) eat other player
       for (let j = 0; j < players.length; j += 1) {
-        if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
+        //if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
         for (let k = 0; k < players[j].blobs.length; k += 1) {
           for (let l = 0; l < players[i].blobs.length; l += 1) {
             // If its not the same player
@@ -282,5 +313,7 @@ function updatepipis() {
   io.sockets.emit('updateyamies', data2);
   io.sockets.emit('updatepipis', data);
 }
+///// Timers
 setInterval(foodgen, TimerForFoodMaker);
+setInterval(gettingOld, TimerPlayerGetsOld);
 setInterval(updatepipis, TimerPlayersUpdating);

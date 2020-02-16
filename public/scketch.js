@@ -22,8 +22,6 @@ function login() {
   socket.on('connect', () => {
     player.id = socket.id;
     const data = {
-      x: player.pos.x,
-      y: player.pos.y,
       c: color(random(100, 255), random(0, 120), random(0, 120)),
       b: { x: 0, y: 0, r: 0 },
       id: player.id,
@@ -56,20 +54,19 @@ function updatepeeps(pips) {
     const blobs = [];
     // players[i].updatepos(pips[i].x, pips[i].y);
     for (let j = 0; j < pips[i].blobs.length; j += 1) {
-      const newblob = new Blob(pips[i].nickname,
+      blobs.push(new Blob(pips[i].nickname,
         pips[i].blobs[j].x,
         pips[i].blobs[j].y,
-        pips[i].blobs[j].r);
-      blobs.push(newblob);
+        pips[i].blobs[j].r));
     }
     players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
-    players[i].r = pips[i].r;
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
       // player.updatepos(pips[i].x, pips[i].y);
-      player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
+      // player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
       player.blobs = blobs;
       indexofplayer = i;
+      // console.log('list players updated');
     }
     // console.log('list players updated' );
   }
@@ -134,8 +131,8 @@ function calculatemid(arraydots) {
 
 function draw() {
   createCanvas(windowWidth, windowHeight - 22);
-
-  fill(240);
+  background(255);
+  fill(255);
   square(width, height, 100);
   translate(width / 2, height / 2);
 
@@ -151,9 +148,6 @@ function draw() {
   const middot = calculatemid(player.blobs);
   translate(-middot.x, -middot.y);
 
-
-  // fill(100);
-  // square(-5000, -5000, 10000);
 
   for (let index = 0; index < foods.length; index += 1) {
     foods[index].show();
@@ -172,10 +166,10 @@ function draw() {
   const blobsvelxx = [];
   const blobsvelyy = [];
   for (let index = 0; index < player.blobs.length; index += 1) {
-    blobsvelxx.push(player.blobs[index].vel.x);
-    blobsvelyy.push(player.blobs[index].vel.y);
+    blobsvelxx.push(player.blobs[index].vx);
+    blobsvelyy.push(player.blobs[index].vy);
+    // console.log(player.pos);
   }
-
   const data = {
     velx: player.vx,
     vely: player.vy,
