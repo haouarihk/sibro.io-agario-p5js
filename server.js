@@ -12,8 +12,11 @@ const foods = [];
 app.use(express.static('public'));
 const sockets = require('socket.io');
 
+const PORT = process.env.PORT || 5001;// The port
+
+
 // Server
-const server = app.listen(process.env.PORT || 5000); // The port
+const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
 
 // Food settings
 const FoodsMaxCount = 10000; // how manny foods
