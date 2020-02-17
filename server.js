@@ -173,8 +173,8 @@ function Blob(id, x, y, r, Timer) {
     // setting the magnitude
     velx *= (3 / Mag);
     vely *= (3 / Mag);
-    this.x += velx;
-    this.y += vely;
+    this.x += (AvregePlayerSpeed * velx) / this.r;
+    this.y += (AvregePlayerSpeed * vely) / this.r;
   };
   this.split = function split() {
     let playerindex = 0;
@@ -235,8 +235,12 @@ function Connection(socket) {
   function updateplayer(uplayer) {
     for (let index = 0; index < players.length; index += 1) {
       if (players[index].id === uplayer.id) {
+        // players[index].c = uplayer.c;
         for (let i = 0; i < players[index].blobs.length; i += 1) {
-          players[index].blobs[i].update(uplayer.mousex, uplayer.mousey, uplayer.width, uplayer.height);
+          players[index].blobs[i].update(uplayer.mousex,
+            uplayer.mousey,
+            uplayer.width,
+            uplayer.height);
         }
       }
     }
@@ -326,6 +330,7 @@ function Broadcast() {
       x: players[i].x,
       y: players[i].y,
       r: players[i].r,
+      c: players[i].c,
       nickname: players[i].nickname,
     });
   }
@@ -337,7 +342,7 @@ function Broadcast() {
       id: foods[i].id, x: foods[i].x, y: foods[i].y, r: foods[i].r, type: foods[i].type,
     });
   }
-  // broatcasting people data
+  // Eat Events
   if (players.length !== 0) {
     for (let i = 0; i < players.length; i += 1) {
       // player(players[i]) eat food
