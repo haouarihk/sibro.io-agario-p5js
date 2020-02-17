@@ -9,10 +9,10 @@ class Food {
     this.type = type;
     this.r = r;
     this.show = function showing() {
-      // fill(0, 0, 0);
-      // ellipse(this.x-4,this.y-1,this.r,this.r);
+      // if (type === 0) {
       fill(0, 255, 0);
       ellipse(this.x, this.y, this.r, this.r);
+      // }
     };
   }
 }

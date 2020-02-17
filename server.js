@@ -148,6 +148,7 @@ function GenerateX(ppls, foodi) {
 function Food() {
   this.x = 0;
   this.y = 0;
+  this.type = 0;
   this.generate = function generating() {
     const saved = GenerateX(players, foods);
     this.x = saved.xx;
@@ -163,11 +164,17 @@ function Blob(id, x, y, r, Timer) {
   this.y = y;
   this.r = r;
   this.id = id;
-  this.updatevel = function updatingvel(velx, vely) {
-    this.x = Math.min(Math.max(this.x, WorldSizeMin), WorldSizeMax);
-    this.y = Math.min(Math.max(this.y, WorldSizeMin), WorldSizeMax);
-    this.x += (AvregePlayerSpeed * velx) / this.r;
-    this.y += (AvregePlayerSpeed * vely) / this.r;
+  this.update = function updating(mousex, mousey, width, height) {
+    // calculating mouse possition
+    let velx = mousex - (width / 2);
+    let vely = mousey - (height / 2);
+    //  calculating magnitude
+    Mag = Math.sqrt(velx * velx + vely * vely);
+    // setting the magnitude
+    velx *= (3 / Mag);
+    vely *= (3 / Mag);
+    this.x += velx;
+    this.y += vely;
   };
   this.split = function split() {
     let playerindex = 0;
@@ -229,7 +236,7 @@ function Connection(socket) {
     for (let index = 0; index < players.length; index += 1) {
       if (players[index].id === uplayer.id) {
         for (let i = 0; i < players[index].blobs.length; i += 1) {
-          players[index].blobs[i].updatevel(uplayer.blobsvelx[i], uplayer.blobsvely[i]);
+          players[index].blobs[i].update(uplayer.mousex, uplayer.mousey, uplayer.width, uplayer.height);
         }
       }
     }
@@ -301,7 +308,7 @@ function gettingOld() {
   }
 }
 // updating/sending info of everything is hppening to the players
-function updatepipis() {
+function Broadcast() {
   // update player radiuse bassed on his blobs
   for (let i = 0; i < players.length; i += 1) {
     let rad = 0;
@@ -311,9 +318,9 @@ function updatepipis() {
     players[i].r = rad;
   }
   comparisionwithweight();
-  const data = [];
+  const playersdata = [];
   for (let i = 0; i < players.length; i += 1) {
-    data.push({
+    playersdata.push({
       blobs: players[i].blobs,
       id: players[i].id,
       x: players[i].x,
@@ -323,11 +330,11 @@ function updatepipis() {
     });
   }
   // broatcasting food data
-  const data2 = [];
+  const fooddata = [];
   for (let i = 0; i < foods.length; i += 1) {
     // data for food gen
-    data2.push({
-      id: foods[i].id, x: foods[i].x, y: foods[i].y, r: foods[i].r,
+    fooddata.push({
+      id: foods[i].id, x: foods[i].x, y: foods[i].y, r: foods[i].r, type: foods[i].type,
     });
   }
   // broatcasting people data
@@ -383,10 +390,10 @@ function updatepipis() {
     }
   }
 
-  io.sockets.emit('updateyamies', data2);
-  io.sockets.emit('updatepipis', data);
+  io.sockets.emit('updateyamies', fooddata);
+  io.sockets.emit('updatepipis', playersdata);
 }
 ///// Timers
 setInterval(foodgen, TimerForFoodMaker);
 setInterval(gettingOld, TimerPlayerGetsOld);
-setInterval(updatepipis, TimerPlayersUpdating);
+setInterval(Broadcast, TimerPlayersUpdating);
