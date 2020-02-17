@@ -11,6 +11,9 @@ class Blob {
     this.vx = 0;
     this.vy = 0;
     this.vel = createVector(1, 1);
+    this.setrad = function setrad(r2) {
+      this.r = r2;
+    };
     this.show = function showing() {
       if (this.x === null) { this.x = 0; }
       if (this.y === null) { this.y = 0; }

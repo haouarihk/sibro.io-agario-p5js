@@ -11,6 +11,8 @@ let foods = [];
 let zoom = 1;
 let indexofplayer = 0;
 let Nickname = '';
+let username = '';
+let password = '';
 // Login
 function login() {
   Nickname = document.getElementById('nickname').value;
@@ -26,6 +28,17 @@ function login() {
       id: player.id,
       nickname: Nickname,
     }; socket.emit('ready', data);
+  });
+}
+function login2() {
+  username = document.getElementById('username').value;
+  password = document.getElementById('password').value;
+  socket.on('connect', () => {
+    const data = {
+      id: player.id,
+      user: username,
+      pass: password,
+    }; socket.emit('login', data);
   });
 }
 // controls
@@ -100,7 +113,9 @@ function setup() {
     socket = io();
     login();
   };
-  login();
+  document.getElementById('login').onclick = function onclickplay() {
+    login2();
+  };
   socket.on('updatepipis', updatepeeps);
   socket.on('updateyamies', updateyamies);
   socket.on('warfeilddata', warfeilddata);
@@ -153,6 +168,7 @@ function draw() {
 
   // player.update();
   player.update();
+
   // console.log(player.pos);
   // player.show();
   // player.constrain();

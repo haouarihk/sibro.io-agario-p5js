@@ -2,6 +2,11 @@
 /* eslint-disable spaced-comment */
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
+const fs = require('fs');
+
+
+const acc = fs.readFileSync('accounts.json');
+const accounts = JSON.parse(acc);
 const express = require('express');
 
 const app = express();
@@ -13,6 +18,7 @@ app.use(express.static('public'));
 const sockets = require('socket.io');
 
 const PORT = process.env.PORT || 5001;// The port
+
 
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
@@ -177,6 +183,11 @@ function Connection(socket) {
       newplayer.nickname));
   }
   socket.on('ready', playerjoined);
+
+  function Login(logindata) {
+
+  }
+  socket.on('login', Login);
 
   // update every blob's velocity
   function updateplayer(uplayer) {
