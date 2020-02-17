@@ -92,13 +92,13 @@ function warfeilddata(data) {
 
 // setup
 function setup() {
-  socket = io.connect('http://localhost:3000/');
+  socket = io.connect('http://localhost:5000/');
   this.connecttotheserver = function connetingtoserver() {
-    socket = io.connect('http://localhost:3000/');
+    socket = io.connect('http://localhost:5000/');
   };
   // When press play in the html
   document.getElementById('play').onclick = function onclickplay() {
-    socket = io.connect('http://localhost:3000/');
+    socket = io.connect('http://localhost:5000/');
     login();
   };
   login();
