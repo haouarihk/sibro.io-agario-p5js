@@ -17,7 +17,7 @@
   2-in your command type : node server.js
 
 
-  3-open the browser and navigate to http://localhost:3000/
+  3-open the browser and navigate to http://localhost:5001/
 
 
 
