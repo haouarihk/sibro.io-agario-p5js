@@ -13,7 +13,7 @@ app.use(express.static('public'));
 const sockets = require('socket.io');
 
 // Server
-const server = app.listen(3000); // The port
+const server = app.listen(process.env.PORT || 5000); // The port
 
 // Food settings
 const FoodsMaxCount = 10000; // how manny foods
