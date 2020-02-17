@@ -12,12 +12,7 @@ const foods = [];
 app.use(express.static('public'));
 const sockets = require('socket.io');
 
-<<<<<<< HEAD
 const PORT = process.env.PORT || 5001;// The port
-=======
-const PORT = process.env.PORT || 5000;// The port
->>>>>>> beta
-
 
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
