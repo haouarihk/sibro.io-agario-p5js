@@ -73,13 +73,9 @@ function updatepeeps(pips) {
     players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
-      // player.updatepos(pips[i].x, pips[i].y);
-      // player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
-      player = new Player(blobs, pips[i].id, pips[i].nickname);
+      player = players[i];
       indexofplayer = i;
-      // console.log(`list players updated ${player.blobs.length}`);
     }
-    // console.log('list players updated' );
   }
 }
 function updateyamies(yam) {

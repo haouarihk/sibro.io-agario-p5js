@@ -68,7 +68,7 @@ const AvregePlayerSpeed = 2000; // how mutch speed can the player have
 const MinSizeToSplit = 400; // the minimume size for the player to split
 const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
 const MinPlayerSize = 200; // the minimume size that can the player be
-const TimerToRegainYourBlobs = 5000; // how mutch to end the split
+const TimerToRegainYourBlobs = 0; // how mutch to end the split
 // world Settings
 const worldsize = 10000; // how big the world can be
 const WorldSizeMin = -worldsize;
