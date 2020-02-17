@@ -82,7 +82,7 @@ function updatepeeps(pips) {
 function updateyamies(yam) {
   foods = [];
   for (let i = 0; i < yam.length; i += 1) {
-    foods[i] = new Food(0, yam[i].x, yam[i].y, yam[i].r, yam[i].id);
+    foods[i] = new Food(yam.type, yam[i].x, yam[i].y, yam[i].r, yam[i].id);
   }
 }
 // spectating
@@ -153,7 +153,7 @@ function draw() {
 
   const middot = calculatemid(player.blobs);
   translate(-middot.x, -middot.y);
-
+  player.midpoint = middot;
 
   for (let index = 0; index < foods.length; index += 1) {
     foods[index].show();
@@ -161,26 +161,14 @@ function draw() {
   for (let index = 0; index < players.length; index += 1) {
     players[index].show();
   }
-
-  // player.update();
   player.update();
 
-  // console.log(player.pos);
-  // player.show();
-  // player.constrain();
-  const blobsvelxx = [];
-  const blobsvelyy = [];
-  for (let index = 0; index < player.blobs.length; index += 1) {
-    blobsvelxx.push(player.blobs[index].vx);
-    blobsvelyy.push(player.blobs[index].vy);
-    // console.log(player.pos);
-  }
   const data = {
-    velx: player.vx,
-    vely: player.vy,
-    blobsvelx: blobsvelxx,
-    blobsvely: blobsvelyy,
+    mousex: mouseX,
+    mousey: mouseY,
     id: player.id,
+    width,
+    height,
   };
   socket.emit('updateplayer', data);
 }
