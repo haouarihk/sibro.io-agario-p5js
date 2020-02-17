@@ -19,7 +19,7 @@ function login() {
   const blobs = [];
   blobs.push(new Blob(Nickname, 0, 0, 50));
   player = new Player(blobs, socket.id, 'Guest');
-  // player.blobs=blobs;
+  player.blobs = blobs;
   console.log(`YOOO ${blobs.length}`);
   socket.on('connect', () => {
     player.id = socket.id;
