@@ -3,11 +3,11 @@
 /* eslint-disable no-unused-vars */
 class Player {
   constructor(id, nickname) {
-    this.pos = createVector(0, 0);
     this.middot = createVector(0, 0);
     this.nickname = nickname;
     this.id = id;
     this.blobs = [];
+
     this.setrad = function setrad(r) {
       this.r = r;
     };

@@ -3,13 +3,21 @@
 /* eslint-disable radix */
 /* eslint-disable no-undef */
 class Blob {
-  constructor(nickname, x, y, r) {
+  constructor(nickname, x, y, r, c) {
     this.nickname = nickname;
     this.r = r;
     this.x = x;
     this.y = y;
+    this.c1 = c[0];
+    this.c2 = c[1];
+    this.c3 = c[2];
     this.vx = 0;
     this.vy = 0;
+    this.setcolor = function setcolor(c1, c2, c3) {
+      this.c1 = c1;
+      this.c2 = c2;
+      this.c3 = c3;
+    };
     this.middot = createVector(1, 1);
     this.vel = createVector(1, 1);
     this.setrad = function setrad(r2) {
@@ -18,11 +26,11 @@ class Blob {
     this.show = function showing() {
       if (this.x === null) { this.x = 0; }
       if (this.y === null) { this.y = 0; }
-      // showing
-      // fill(0, 0, 0);
-      // ellipse(x-9, y-1, r * 2, r * 2);
-      fill(50, 200, 0);
+      // body
+      fill(this.c1, this.c2, this.c3);
       ellipse(this.x, this.y, this.r * 2, this.r * 2);
+
+      // text
       fill(255);
       textSize(0.3 * this.r);
       textAlign(CENTER);

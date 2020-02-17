@@ -13,18 +13,21 @@ let indexofplayer = 0;
 let Nickname = '';
 let username = '';
 let password = '';
+let color = [];
 // Login
 function login() {
   Nickname = document.getElementById('nickname').value;
   const blobs = [];
-  blobs.push(new Blob(Nickname, 0, 0, 50));
+  color = [random(50, 200), random(50, 200), random(50, 200)];
+  blobs.push(new Blob(Nickname, 0, 0, 50, color));
   player = new Player(socket.id, 'Guest');
-  player.blobs = blobs;
   console.log(`YOOO ${blobs.length}`);
+  player.blobs = blobs;
   socket.on('connect', () => {
     player.id = socket.id;
+    player.blobs = blobs;
     const data = {
-      c: color(random(100, 255), random(0, 120), random(0, 120)),
+      c: color,
       id: player.id,
       nickname: Nickname,
     }; socket.emit('ready', data);
@@ -68,13 +71,15 @@ function updatepeeps(pips) {
       blobs.push(new Blob(pips[i].nickname,
         pips[i].blobs[j].x,
         pips[i].blobs[j].y,
-        pips[i].blobs[j].r));
+        pips[i].blobs[j].r,
+        pips[i].c));
     }
     players[i] = new Player(pips[i].id, pips[i].nickname);
     players[i].blobs = blobs;
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
       player = players[i];
+      player.blobs = blobs;
       indexofplayer = i;
     }
   }
@@ -169,6 +174,7 @@ function draw() {
     id: player.id,
     width,
     height,
+    c: [player.c1, player.c2, player.c3],
   };
   socket.emit('updateplayer', data);
 }
