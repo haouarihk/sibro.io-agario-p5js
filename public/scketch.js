@@ -92,13 +92,13 @@ function warfeilddata(data) {
 
 // setup
 function setup() {
-  socket = io.connect('http://sibiro.herokuapp.com/');
+  socket = io();
   this.connecttotheserver = function connetingtoserver() {
-    socket = io.connect('http://sibiro.herokuapp.com/');
+    socket = io();
   };
   // When press play in the html
   document.getElementById('play').onclick = function onclickplay() {
-    socket = io.connect('http://sibiro.herokuapp.com/');
+    socket = io();
     login();
   };
   login();
