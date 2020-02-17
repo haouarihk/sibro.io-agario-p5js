@@ -402,3 +402,4 @@ function Broadcast() {
 setInterval(foodgen, TimerForFoodMaker);
 setInterval(gettingOld, TimerPlayerGetsOld);
 setInterval(Broadcast, TimerPlayersUpdating);
+console.log(pross.env.SecuredCode);
