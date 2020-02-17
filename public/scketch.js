@@ -18,7 +18,7 @@ function login() {
   Nickname = document.getElementById('nickname').value;
   const blobs = [];
   blobs.push(new Blob(Nickname, 0, 0, 50));
-  player = new Player(blobs, socket.id, 'Guest');
+  player = new Player(socket.id, 'Guest');
   player.blobs = blobs;
   console.log(`YOOO ${blobs.length}`);
   socket.on('connect', () => {
@@ -70,7 +70,8 @@ function updatepeeps(pips) {
         pips[i].blobs[j].y,
         pips[i].blobs[j].r));
     }
-    players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
+    players[i] = new Player(pips[i].id, pips[i].nickname);
+    players[i].blobs = blobs;
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
       player = players[i];

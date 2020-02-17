@@ -10,6 +10,7 @@ class Blob {
     this.y = y;
     this.vx = 0;
     this.vy = 0;
+    this.middot = createVector(1, 1);
     this.vel = createVector(1, 1);
     this.setrad = function setrad(r2) {
       this.r = r2;
@@ -34,7 +35,7 @@ class Blob {
     this.update = function updating() {
       // calculating mouse possition
       const vel = createVector(mouseX, mouseY);
-      vel.sub((width / 2), (height / 2));
+      vel.sub((width / 2) - this.middot.x, (height / 2) - this.middot.y);
       vel.setMag(3);
       this.vx = vel.x;
       this.vy = vel.y;

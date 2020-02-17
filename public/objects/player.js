@@ -2,17 +2,19 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 class Player {
-  constructor(blobs, id, nickname) {
+  constructor(id, nickname) {
     this.pos = createVector(0, 0);
+    this.middot = createVector(0, 0);
     this.nickname = nickname;
     this.id = id;
-    this.blobs = blobs;
+    this.blobs = [];
     this.setrad = function setrad(r) {
       this.r = r;
     };
     this.update = function updating() {
       for (let i = 0; i < this.blobs.length; i += 1) {
         this.blobs[i].update();
+        this.blobs[i].middot = this.middot;
       }
     };
     this.updatetext = function updatingtext() {
