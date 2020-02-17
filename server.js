@@ -3,11 +3,22 @@
 /* eslint-disable spaced-comment */
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
-const fs = require('fs');
+const objppl = [
+  {
+    un: 'gx',
+    pw: '123456789',
+  },
+  {
+    un: 'wolfpat',
+    pw: '123456789',
+  },
+  {
+    un: 'nbstID',
+    pw: '123456789',
+  },
 
+];
 
-const acc = fs.readFileSync('accounts.json');
-const accounts = JSON.parse(acc);
 const express = require('express');
 
 const app = express();
@@ -20,6 +31,7 @@ const sockets = require('socket.io');
 
 const PORT = process.env.PORT || 5000;// The port
 
+const adminsID = [];
 ////////////////////////////////////////////////// login needed component
 /*const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -204,7 +216,11 @@ function Connection(socket) {
   socket.on('ready', playerjoined);
 
   function Login(logindata) {
-
+    for (let i = 0; i < objppl.length; i += 1) {
+      if (logindata.user === objppl[i].un && logindata.pass === objppl[i].pw) {
+        adminsID.push(logindata.id);
+      }
+    }
   }
   socket.on('login', Login);
 
