@@ -21,7 +21,7 @@ const sockets = require('socket.io');
 const PORT = process.env.PORT || 5000;// The port
 
 ////////////////////////////////////////////////// login needed component
-const cors = require('cors');
+/*const cors = require('cors');
 const bodyParser = require('body-parser');
 const jwt = require('_helpers/jwt');
 const errorHandler = require('_helpers/error-handler');
@@ -37,7 +37,7 @@ app.use(jwt());
 app.use('/users', require('./users/users.controller'));
 
 // global error handler
-app.use(errorHandler);
+app.use(errorHandler);*/
 //////////////////////////////////////////////////
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));

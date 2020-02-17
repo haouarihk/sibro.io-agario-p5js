@@ -23,8 +23,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "start2": "node loginfiles/server.js"
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",

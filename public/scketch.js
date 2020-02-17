@@ -33,13 +33,12 @@ function login() {
 function login2() {
   username = document.getElementById('username').value;
   password = document.getElementById('password').value;
-  socket.on('connect', () => {
-    const data = {
-      id: player.id,
-      user: username,
-      pass: password,
-    }; socket.emit('login', data);
-  });
+
+  const data = {
+    id: player.id,
+    user: username,
+    pass: password,
+  }; socket.emit('login', data);
 }
 // controls
 let pos = 200;
