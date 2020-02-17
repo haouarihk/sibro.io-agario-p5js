@@ -18,8 +18,8 @@ const PORT = process.env.PORT || 5001;// The port
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
 
 // Food settings
-const FoodsMaxCount = 1000; // how manny foods
-const TimerForFoodMaker = 50; // how mutch to wait to make another food object
+const FoodsMaxCount = 100; // how manny foods
+const TimerForFoodMaker = 200; // how mutch to wait to make another food object
 const MaxFoodSize = 200; // how big can the food be
 const MinFoodSize = 120; // how small can the food be
 //
