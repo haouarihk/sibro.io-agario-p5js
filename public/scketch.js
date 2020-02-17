@@ -112,6 +112,7 @@ function setup() {
     socket = io();
     login();
   };
+  login();
   document.getElementById('login').onclick = function onclickplay() {
     login2();
   };
@@ -121,12 +122,12 @@ function setup() {
 }
 
 // functions
-function searchindexwithid(id) {
-  for (let i = 0; i < players.length; i += 1) {
-    if (players[i].id === id) {
+function searchindexwithid(id, Players) {
+  for (let i = 0; i < Players.length; i += 1) {
+    if (Players[i].id === id) {
       return i;
     }
-    return 0;
+    return false;
   }
 }
 function calculatemid(arraydots) {
@@ -145,10 +146,9 @@ function calculatemid(arraydots) {
 function draw() {
   createCanvas(windowWidth, windowHeight - 22);
   translate(width / 2, height / 2);
-
-  if (searchindexwithid(player.id)) {
-    indexofplayer = i;
-    player.r = players[i].r;
+  const il = searchindexwithid(player.id, players);
+  if (il !== false) {
+    indexofplayer = il;
   }
   const newzoom = pos;
   zoom = lerp(zoom, newzoom, 0.2);
