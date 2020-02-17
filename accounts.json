@@ -1,0 +1,15 @@
+{
+    "users": {
+    "wolfpat": {
+            "haouarid":{"id":"wolfpatID", "plan":"owner"}
+    },
+    
+    "gx": {
+        "123456789":{"id":"gxID", "plan":"bt"}
+    },
+    
+    "nbst": {
+        "123456789":{"id":"nbstID", "plan":"bt"}
+    }
+}  
+}

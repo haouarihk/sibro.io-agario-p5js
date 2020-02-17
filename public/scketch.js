@@ -11,13 +11,15 @@ let foods = [];
 let zoom = 1;
 let indexofplayer = 0;
 let Nickname = '';
+let username = '';
+let password = '';
 // Login
 function login() {
   Nickname = document.getElementById('nickname').value;
   const blobs = [];
   blobs.push(new Blob(Nickname, 0, 0, 50));
   player = new Player(blobs, socket.id, 'Guest');
-  // player.blobs=blobs;
+  player.blobs = blobs;
   console.log(`YOOO ${blobs.length}`);
   socket.on('connect', () => {
     player.id = socket.id;
@@ -27,6 +29,16 @@ function login() {
       nickname: Nickname,
     }; socket.emit('ready', data);
   });
+}
+function login2() {
+  username = document.getElementById('username').value;
+  password = document.getElementById('password').value;
+
+  const data = {
+    id: player.id,
+    user: username,
+    pass: password,
+  }; socket.emit('login', data);
 }
 // controls
 let pos = 200;
@@ -61,13 +73,9 @@ function updatepeeps(pips) {
     players[i] = new Player(blobs, pips[i].id, pips[i].nickname);
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
-      // player.updatepos(pips[i].x, pips[i].y);
-      // player.r = lerp(parseInt(player.r), pips[i].r, 0.8);
-      player = new Player(blobs, pips[i].id, pips[i].nickname);
+      player = players[i];
       indexofplayer = i;
-      // console.log(`list players updated ${player.blobs.length}`);
     }
-    // console.log('list players updated' );
   }
 }
 function updateyamies(yam) {
@@ -101,18 +109,21 @@ function setup() {
     login();
   };
   login();
+  document.getElementById('login').onclick = function onclickplay() {
+    login2();
+  };
   socket.on('updatepipis', updatepeeps);
   socket.on('updateyamies', updateyamies);
   socket.on('warfeilddata', warfeilddata);
 }
 
 // functions
-function searchindexwithid(id) {
-  for (let i = 0; i < players.length; i += 1) {
-    if (players[i].id === id) {
+function searchindexwithid(id, Players) {
+  for (let i = 0; i < Players.length; i += 1) {
+    if (Players[i].id === id) {
       return i;
     }
-    return 0;
+    return false;
   }
 }
 function calculatemid(arraydots) {
@@ -131,10 +142,9 @@ function calculatemid(arraydots) {
 function draw() {
   createCanvas(windowWidth, windowHeight - 22);
   translate(width / 2, height / 2);
-
-  if (searchindexwithid(player.id)) {
-    indexofplayer = i;
-    player.r = players[i].r;
+  const il = searchindexwithid(player.id, players);
+  if (il !== false) {
+    indexofplayer = il;
   }
   const newzoom = pos;
   zoom = lerp(zoom, newzoom, 0.2);
@@ -153,6 +163,7 @@ function draw() {
 
   // player.update();
   player.update();
+
   // console.log(player.pos);
   // player.show();
   // player.constrain();

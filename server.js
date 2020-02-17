@@ -1,7 +1,24 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable import/no-unresolved */
 /* eslint-disable spaced-comment */
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
+const objppl = [
+  {
+    un: 'gx',
+    pw: '123456789',
+  },
+  {
+    un: 'wolfpat',
+    pw: '123456789',
+  },
+  {
+    un: 'nbstID',
+    pw: '123456789',
+  },
+
+];
+
 const express = require('express');
 
 const app = express();
@@ -14,13 +31,32 @@ const sockets = require('socket.io');
 
 const PORT = process.env.PORT || 5000;// The port
 
+const adminsID = [];
+////////////////////////////////////////////////// login needed component
+/*const cors = require('cors');
+const bodyParser = require('body-parser');
+const jwt = require('_helpers/jwt');
+const errorHandler = require('_helpers/error-handler');
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(cors());
+
+// use JWT auth to secure the api
+app.use(jwt());
+
+// api routes
+app.use('/users', require('./users/users.controller'));
+
+// global error handler
+app.use(errorHandler);*/
+//////////////////////////////////////////////////
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
 
 // Food settings
-const FoodsMaxCount = 1000; // how manny foods
-const TimerForFoodMaker = 50; // how mutch to wait to make another food object
+const FoodsMaxCount = 100; // how manny foods
+const TimerForFoodMaker = 200; // how mutch to wait to make another food object
 const MaxFoodSize = 200; // how big can the food be
 const MinFoodSize = 120; // how small can the food be
 //
@@ -32,7 +68,7 @@ const AvregePlayerSpeed = 2000; // how mutch speed can the player have
 const MinSizeToSplit = 400; // the minimume size for the player to split
 const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
 const MinPlayerSize = 200; // the minimume size that can the player be
-const TimerToRegainYourBlobs = 5000; // how mutch to end the split
+const TimerToRegainYourBlobs = 0; // how mutch to end the split
 // world Settings
 const worldsize = 10000; // how big the world can be
 const WorldSizeMin = -worldsize;
@@ -178,6 +214,15 @@ function Connection(socket) {
       newplayer.nickname));
   }
   socket.on('ready', playerjoined);
+
+  function Login(logindata) {
+    for (let i = 0; i < objppl.length; i += 1) {
+      if (logindata.user === objppl[i].un && logindata.pass === objppl[i].pw) {
+        adminsID.push(logindata.id);
+      }
+    }
+  }
+  socket.on('login', Login);
 
   // update every blob's velocity
   function updateplayer(uplayer) {
