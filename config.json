@@ -1,0 +1,4 @@
+{
+    "connectionString": "mongodb+srv://admin:admin@sibroaccounts-fceud.mongodb.net/test?retryWrites=true&w=majority",
+    "secret": "sibrosomethingsomething"
+}
