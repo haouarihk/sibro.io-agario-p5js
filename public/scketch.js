@@ -135,23 +135,28 @@ function searchindexwithid(id, Players) {
 function calculatemid(arraydots) {
   this.Mid = function mido() { this.x = 0; this.y = 0; };
   const middle = new this.Mid();
+  let allr = 0;
   for (let i = 0; i < arraydots.length; i += 1) {
-    middle.x += arraydots[i].x;
-    middle.y += arraydots[i].y;
+    middle.x += arraydots[i].x * arraydots[i].r;
+    middle.y += arraydots[i].y * arraydots[i].r;
+    allr += arraydots[i].r;
   }
 
-  middle.x /= (arraydots.length);
-  middle.y /= (arraydots.length);
+  middle.x /= (arraydots.length) + allr;
+  middle.y /= (arraydots.length) + allr;
   return middle;
 }
 
 function draw() {
   createCanvas(windowWidth, windowHeight - 22);
   translate(width / 2, height / 2);
+  // search for the player in the players array
+  // to find his own index and store it on indexofplayer
   const il = searchindexwithid(player.id, players);
   if (il !== false) {
     indexofplayer = il;
   }
+  // zooming accoring to the mouse wheel
   const newzoom = pos;
   zoom = lerp(zoom, newzoom, 0.2);
   scale(120 / (zoom));
@@ -166,6 +171,7 @@ function draw() {
   for (let index = 0; index < players.length; index += 1) {
     players[index].show();
   }
+
   player.update();
 
   const data = {
