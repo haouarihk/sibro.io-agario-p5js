@@ -56,21 +56,21 @@ app.use(errorHandler);*/
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
 
 // Food settings
-const FoodsMaxCount = 100; // how manny foods
+const FoodsMaxCount = 200; // how manny foods
 const TimerForFoodMaker = 200; // how mutch to wait to make another food object
-const MaxFoodSize = 200; // how big can the food be
-const MinFoodSize = 120; // how small can the food be
+const MaxFoodSize = 150; // how big can the food be
+const MinFoodSize = 100; // how small can the food be
 //
 // Player Settings
-const StartingSize = 600; // in what size the player start with
-const TimerPlayerGetsOld = 2000; // how mutch to wait till his mass gose down
+const StartingSize = 800; // in what size the player start with
+const TimerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down
 const TimerPlayersUpdating = 24; // how mutch to wait till the server sends player info
 const AvregePlayerSpeed = 2000; // how mutch speed can the player have
 const MinSizeToSplit = 400; // the minimume size for the player to split
 const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
-const MinPlayerSize = 200; // the minimume size that can the player be
-const PeriodTime = 150; // how mutch to end the split
-const PeriodTimeCounter = 100; // how mutch to end the split 2
+const MinPlayerSize = 202; // the minimume size that can the player be
+const PeriodTime = 30; // how mutch to end the split
+const PeriodTimeCounter = 300; // how mutch to end the split 2
 // world Settings
 const worldsize = 10000; // how big the world can be
 const WorldSizeMin = -worldsize;
@@ -98,7 +98,7 @@ function calculatedis1(other, other2, plusval) {
       return 2;
     }
   }
-  return null;
+  return 3;
 }
 function searchindexwithid(id, Players) {
   for (let i = 0; i < Players.length; i += 1) {
@@ -108,7 +108,38 @@ function searchindexwithid(id, Players) {
     return false;
   }
 }
+function calculatemid(arraydots) {
+  this.Mid = function mido() { this.x = 0; this.y = 0; };
+  const middle = new this.Mid();
+  let allr = 0;
+  for (let i = 0; i < arraydots.length; i += 1) {
+    middle.x += arraydots[i].x * arraydots[i].r;
+    middle.y += arraydots[i].y * arraydots[i].r;
+    allr += arraydots[i].r;
+  }
 
+  middle.x /= (arraydots.length) + allr;
+  middle.y /= (arraydots.length) + allr;
+  return middle;
+}
+function Vector(velx, vely) {
+  this.x = velx;
+  this.y = vely;
+  this.setMag = function setmag(c) {
+    const Mag = Math.sqrt(this.x * this.x + this.y * this.y);
+    if (Mag === 0) {
+      this.x *= Math.random();
+      this.y *= Math.random();
+    } else {
+      this.x *= (c / Mag);
+      this.x *= (c / Mag);
+    }
+  };
+  this.vector = function vector(x1, y1, x2, y2) {
+    this.x = x2 - x1;
+    this.y = y2 - y1;
+  };
+}
 ///// Generators
 function generateId() {
   const idnew = Math.floor(Math.random() * (50000 + FoodsMaxCount));
@@ -174,28 +205,47 @@ function Blob(id, x, y, r, Timer) {
   this.r = r;
   this.id = id;
   this.update = function updating(mousex, mousey, width, height) {
-    // calculating mouse possition
-    let velx = mousex - (width / 2);
-    let vely = mousey - (height / 2);
-    //  calculating magnitude
-    Mag = Math.sqrt(velx * velx + vely * vely);
-    // setting the magnitude
-    velx *= (3 / Mag);
-    vely *= (3 / Mag);
-    this.x += (AvregePlayerSpeed * velx) / this.r;
-    this.y += (AvregePlayerSpeed * vely) / this.r;
-    if (this.timertoeatme <= 0) {
-      this.eatmyself = true;
-    } else {
-      const indexofthisplayer = searchindexwithid(this.id, players);
-      if (indexofthisplayer !== false) {
-        for (let i = 0; i < players[indexofthisplayer].blobs.length; i += 1) {
-          const dis = calculatedis1(this, players[indexofthisplayer].blobs[i],
-            -players[indexofthisplayer].blobs[i].r - this.r + 20);
+    const indexofplayer = searchindexwithid(this.id, players);
+    if (indexofplayer !== false) {
+      const middot = calculatemid(players[indexofplayer].blobs);
+      // calculating mouse possition
+      let velx = (mousex - (width / 2)) + (-this.x + middot.x);
+      let vely = (mousey - (height / 2)) + (-this.y + middot.y);
+      //  calculating magnitude
+      Mag = Math.sqrt(velx * velx + vely * vely);
+      // setting the magnitude
+      velx *= (AvregePlayerSpeed / Mag);
+      vely *= (AvregePlayerSpeed / Mag);
+      this.x += (velx) / this.r;
+      this.y += (vely) / this.r;
+
+      if (this.timertoeatme <= 0) {
+        this.eatmyself = true;
+      } else {
+        this.eatmyself = false;
+      }
+      if (this.eatmyself === true) {
+        for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
+          const dis = calculatedis1(this, players[indexofplayer].blobs[i],
+            -players[indexofplayer].blobs[i].r - this.r + 20);
           if (dis === 1) {
             // this blob will eat another blob
-            this.r += players[indexofthisplayer].blobs[i].r;
-            players[indexofthisplayer].blobs.splice(i, 1);
+            this.r += players[indexofplayer].blobs[i].r;
+            players[indexofplayer].blobs.splice(i, 1);
+          }
+        }
+      } else {
+        for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
+          const dis = calculatedis1(this, players[indexofplayer].blobs[i]);
+          if (dis !== 3) {
+            // physics
+            const vel = new Vector(0, 0);
+            vel.vector(this.x, this.y,
+              players[indexofplayer].blobs[i].x,
+              players[indexofplayer].blobs[i].y);
+            //vel.setMag(10);
+            this.x += vel.x;
+            this.y += vel.y;
           }
         }
       }
@@ -216,7 +266,7 @@ function Blob(id, x, y, r, Timer) {
       PeriodTime));
     this.timertoeatme = PeriodTime;
     this.r /= 2;
-    // Count till the time is over and take care of it
+    // Count tilsl the time is over and take care of it
     if (this.timertoeatme !== 0) {
       //setInterval(() => { this.eatmyself = true; }, this.timertoeatme);
     }
@@ -390,7 +440,9 @@ function Broadcast() {
           for (let l = 0; l < players[i].blobs.length; l += 1) {
             // If its not the same player
             if (players[j] !== players[i]) {
-              const killer = calculatedis1(players[i].blobs[l], players[j].blobs[k], -players[j].blobs[k].r - 50);
+              const killer = calculatedis1(players[i].blobs[l],
+                players[j].blobs[k],
+                -players[j].blobs[k].r - 50);
 
               if (killer !== 0) {
                 if (killer === 1) {
@@ -403,17 +455,17 @@ function Broadcast() {
                 //let warfeilddata = { aterid: ater, atenid: aten };
                 //io.sockets.emit('warfeilddata', warfeilddata);
               }
-            } else if (players[i].blobs[k].eatmyself) {
+            } /*else if (players[i].blobs[k].eatmyself) {
               const killer = calculatedis1(players[i].blobs[l], players[i].blobs[k], 0);
               if (killer !== 0) {
                 if (killer === 1) {
                   players[i].blobs[l].r += players[i].blobs[k].r;
-                  players[i].blobs.splice(k, 1);
+                  //players[i].blobs.splice(k, 1);
                 }
                 //let warfeilddata = { aterid: ater, atenid: aten };
                 //io.sockets.emit('warfeilddata', warfeilddata);
               }
-            }
+            }*/
           }
         }
       }
