@@ -1,4 +1,5 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable consistent-return */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable spaced-comment */
 /* eslint-disable no-undef */
@@ -68,7 +69,8 @@ const AvregePlayerSpeed = 2000; // how mutch speed can the player have
 const MinSizeToSplit = 400; // the minimume size for the player to split
 const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
 const MinPlayerSize = 200; // the minimume size that can the player be
-const TimerToRegainYourBlobs = 0; // how mutch to end the split
+const PeriodTime = 150; // how mutch to end the split
+const PeriodTimeCounter = 100; // how mutch to end the split 2
 // world Settings
 const worldsize = 10000; // how big the world can be
 const WorldSizeMin = -worldsize;
@@ -84,21 +86,28 @@ function calculatedis(x1, y1, x2, y2) {
   const d = Math.sqrt(xx + yy);
   return d;
 }
-function calculatedis1(other, other2) {
+function calculatedis1(other, other2, plusval) {
   const d = calculatedis(other.x, other.y, other2.x, other2.y);
 
-  if (d <= other.r + other2.r - (other.r / 4)) {
+  if (d <= other.r + other2.r - plusval) {
     if (other.r > other2.r) {
       return 1;
     } if (other.r === other2.r) {
-      return null;
+      return 0;
     } if (other.r < other2.r) {
       return 2;
     }
   }
   return null;
 }
-
+function searchindexwithid(id, Players) {
+  for (let i = 0; i < Players.length; i += 1) {
+    if (Players[i].id === id) {
+      return i;
+    }
+    return false;
+  }
+}
 
 ///// Generators
 function generateId() {
@@ -175,6 +184,22 @@ function Blob(id, x, y, r, Timer) {
     vely *= (3 / Mag);
     this.x += (AvregePlayerSpeed * velx) / this.r;
     this.y += (AvregePlayerSpeed * vely) / this.r;
+    if (this.timertoeatme <= 0) {
+      this.eatmyself = true;
+    } else {
+      const indexofthisplayer = searchindexwithid(this.id, players);
+      if (indexofthisplayer !== false) {
+        for (let i = 0; i < players[indexofthisplayer].blobs.length; i += 1) {
+          const dis = calculatedis1(this, players[indexofthisplayer].blobs[i],
+            -players[indexofthisplayer].blobs[i].r - this.r + 20);
+          if (dis === 1) {
+            // this blob will eat another blob
+            this.r += players[indexofthisplayer].blobs[i].r;
+            players[indexofthisplayer].blobs.splice(i, 1);
+          }
+        }
+      }
+    }
   };
   this.split = function split() {
     let playerindex = 0;
@@ -188,12 +213,12 @@ function Blob(id, x, y, r, Timer) {
       this.x,
       this.y,
       this.r / 2,
-      TimerToRegainYourBlobs));
-
+      PeriodTime));
+    this.timertoeatme = PeriodTime;
     this.r /= 2;
     // Count till the time is over and take care of it
     if (this.timertoeatme !== 0) {
-      setInterval(() => { this.eatmyself = true; }, this.timertoeatme);
+      //setInterval(() => { this.eatmyself = true; }, this.timertoeatme);
     }
   };
 }
@@ -350,7 +375,7 @@ function Broadcast() {
         for (let k = 0; k < players[i].blobs.length; k += 1) {
           // canlculate distance of each blob with each food
           if (foods !== undefined) {
-            const killer = calculatedis1(players[i].blobs[k], foods[j]);
+            const killer = calculatedis1(players[i].blobs[k], foods[j], 0);
             if (killer === 1) {
               players[i].blobs[k].r += foods[j].r / (players[i].blobs[k].r * 0.2);
               foods.splice(j, 1);
@@ -365,7 +390,7 @@ function Broadcast() {
           for (let l = 0; l < players[i].blobs.length; l += 1) {
             // If its not the same player
             if (players[j] !== players[i]) {
-              const killer = calculatedis1(players[i].blobs[l], players[j].blobs[k]);
+              const killer = calculatedis1(players[i].blobs[l], players[j].blobs[k], -players[j].blobs[k].r - 50);
 
               if (killer !== 0) {
                 if (killer === 1) {
@@ -379,7 +404,7 @@ function Broadcast() {
                 //io.sockets.emit('warfeilddata', warfeilddata);
               }
             } else if (players[i].blobs[k].eatmyself) {
-              const killer = calculatedis1(players[i].blobs[l], players[i].blobs[k]);
+              const killer = calculatedis1(players[i].blobs[l], players[i].blobs[k], 0);
               if (killer !== 0) {
                 if (killer === 1) {
                   players[i].blobs[l].r += players[i].blobs[k].r;
@@ -398,8 +423,16 @@ function Broadcast() {
   io.sockets.emit('updateyamies', fooddata);
   io.sockets.emit('updatepipis', playersdata);
 }
+function splitingtimeer() {
+  for (let i = 0; i < players.length; i += 1) {
+    for (let j = 0; j < players[i].blobs.length; j += 1) {
+      players[i].blobs[j].timertoeatme -= 1;
+    }
+  }
+}
 ///// Timers
 setInterval(foodgen, TimerForFoodMaker);
 setInterval(gettingOld, TimerPlayerGetsOld);
 setInterval(Broadcast, TimerPlayersUpdating);
+setInterval(splitingtimeer, PeriodTimeCounter);
 console.log(process.env.SecuredCode);
