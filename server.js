@@ -65,7 +65,7 @@ const MinFoodSize = 100; // how small can the food be
 const StartingSize = 800; // in what size the player start with
 const TimerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down
 const TimerPlayersUpdating = 24; // how mutch to wait till the server sends player info
-const AvregePlayerSpeed = 2000; // how mutch speed can the player have
+const AvregePlayerSpeed = 6000; // how mutch speed can the player have
 const MinSizeToSplit = 400; // the minimume size for the player to split
 const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
 const MinPlayerSize = 202; // the minimume size that can the player be
@@ -87,6 +87,7 @@ function calculatedis(x1, y1, x2, y2) {
   return d;
 }
 function calculatedis1(other, other2, plusval) {
+  if (other2 === other) { return 3; }
   const d = calculatedis(other.x, other.y, other2.x, other2.y);
 
   if (d <= other.r + other2.r - plusval) {
@@ -226,26 +227,30 @@ function Blob(id, x, y, r, Timer) {
       }
       if (this.eatmyself === true) {
         for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
-          const dis = calculatedis1(this, players[indexofplayer].blobs[i],
-            -players[indexofplayer].blobs[i].r - this.r + 20);
-          if (dis === 1) {
+          if (this !== players[indexofplayer].blobs[i]) {
+            const dis = calculatedis1(this, players[indexofplayer].blobs[i],
+              -players[indexofplayer].blobs[i].r - this.r + 20);
+            if (dis === 1) {
             // this blob will eat another blob
-            this.r += players[indexofplayer].blobs[i].r;
-            players[indexofplayer].blobs.splice(i, 1);
+              this.r += players[indexofplayer].blobs[i].r;
+              players[indexofplayer].blobs.splice(i, 1);
+            }
           }
         }
       } else {
         for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
-          const dis = calculatedis1(this, players[indexofplayer].blobs[i]);
-          if (dis !== 3) {
+          if (this !== players[indexofplayer].blobs[i]) {
+            const dis = calculatedis1(this, players[indexofplayer].blobs[i]);
+            if (dis !== 3) {
             // physics
-            const vel = new Vector(0, 0);
-            vel.vector(this.x, this.y,
-              players[indexofplayer].blobs[i].x,
-              players[indexofplayer].blobs[i].y);
-            //vel.setMag(10);
-            this.x += vel.x;
-            this.y += vel.y;
+              const vel = new Vector(0, 0);
+              vel.vector(this.x, this.y,
+                players[indexofplayer].blobs[i].x,
+                players[indexofplayer].blobs[i].y);
+              //vel.setMag(10);
+              this.x += vel.x;
+              this.y += vel.y;
+            }
           }
         }
       }
