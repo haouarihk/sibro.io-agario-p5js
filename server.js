@@ -27,7 +27,7 @@ const app = express();
 const players = [];
 const foods = [];
 
-app.use(express.static('public'));
+app.use(express.static(`${__dirname}/public`));
 const sockets = require('socket.io');
 
 const PORT = process.env.PORT || 5000;// The port
@@ -54,10 +54,9 @@ app.use(errorHandler);*/
 //////////////////////////////////////////////////
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
-
 // Food settings
-const FoodsMaxCount = 200; // how manny foods
-const TimerForFoodMaker = 200; // how mutch to wait to make another food object
+const FoodsMaxCount = 1000; // how manny foods
+const TimerForFoodMaker = 100; // how mutch to wait to make another food object
 const MaxFoodSize = 150; // how big can the food be
 const MinFoodSize = 100; // how small can the food be
 //
@@ -87,7 +86,6 @@ function calculatedis(x1, y1, x2, y2) {
   return d;
 }
 function coliders(other, other2, plusval) {
-  if (other2 === other) { return 3; }
   const d = calculatedis(other.x, other.y, other2.x, other2.y);
 
   if (d <= other.r + other2.r - plusval) {
@@ -204,23 +202,18 @@ function Blob(id, x, y, r, Timer) {
   this.vx = 0;
   this.vy = 0;
   this.r = r;
-  this.id = id;
+  this.playerid = id;
   this.timertoeatme = Timer;
   this.eatmyself = false;
 
   this.vel = new Vector(0, 0);
   this.update = function updating(mousex, mousey, width, height) {
-    const indexofplayer = searchindexwithid(this.id, players);
+    const indexofplayer = searchindexwithid(this.playerid, players);
     if (indexofplayer !== false) {
       if (this.timertoeatme <= 0) {
         this.eatmyself = true;
       } else {
         this.eatmyself = false;
-        //console.log(false);
-        for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
-          if (this !== players[indexofplayer].blobs[i]) {
-          }
-        }
       }
       if (this.eatmyself === true) {
         for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
@@ -257,12 +250,12 @@ function Blob(id, x, y, r, Timer) {
   this.split = function split() {
     let playerindex = 0;
     for (let i = 0; i < players.length; i += 1) {
-      if (players[i].id === this.id) {
+      if (players[i].id === this.playerid) {
         playerindex = i;
       }
     }
 
-    players[playerindex].blobs.push(new Blob(this.id,
+    players[playerindex].blobs.push(new Blob(this.playerid,
       this.x + 10,
       this.y + 10,
       this.r / 2,
@@ -311,17 +304,22 @@ function Connection(socket) {
 
   // update every blob's velocity
   function updateplayer(uplayer) {
+    if (socket.id !== uplayer.id) {
+      console.log(socket.id + " is not matched");
+    }
+    // let addthere = 0;
     for (let index = 0; index < players.length; index += 1) {
       if (players[index].id === uplayer.id) {
-        // players[index].c = uplayer.c;
         for (let i = 0; i < players[index].blobs.length; i += 1) {
+          players[index].blobs[i].id = socket.id;
           players[index].blobs[i].update(uplayer.mousex,
             uplayer.mousey,
             uplayer.width,
             uplayer.height);
         }
-      }
+      } // else { addthere += 1; }
     }
+    // if (addthere === players.length) { socket.disconnect(); }
   }
   socket.on('updateplayer', updateplayer);
 
@@ -423,29 +421,26 @@ function Broadcast() {
   // Eat Events
   if (players.length !== 0) {
     for (let i = 0; i < players.length; i += 1) {
-      // player(players[i]) eat food
-      for (let j = 0; j < foods.length; j += 1) {
-        for (let k = 0; k < players[i].blobs.length; k += 1) {
+      for (let l = 0; l < players[i].blobs.length; l += 1) {
+        // player(players[i]) eat food
+        for (let j = 0; j < foods.length; j += 1) {
           // canlculate distance of each blob with each food
           if (foods !== undefined) {
-            const killer = coliders(players[i].blobs[k], foods[j], 0);
+            const killer = coliders(players[i].blobs[l], foods[j], 0);
             if (killer === 1) {
-              players[i].blobs[k].r += foods[j].r / (players[i].blobs[k].r * 0.2);
+              players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.2);
               foods.splice(j, 1);
             }
           }
         }
-      }
-      // player(players[i]) eat other player
-      for (let j = 0; j < players.length; j += 1) {
         //if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
-        for (let k = 0; k < players[j].blobs.length; k += 1) {
-          for (let l = 0; l < players[i].blobs.length; l += 1) {
+        // player(players[i]) eat other player
+        for (let j = 0; j < players.length; j += 1) {
+          for (let k = 0; k < players[j].blobs.length; k += 1) {
             // If its not the same player
-            if (players[j] !== players[i]) {
+            if (players[j] !== players[i] && players.length > 1) {
               const killer = coliders(players[i].blobs[l],
-                players[j].blobs[k],
-                0);
+                players[j].blobs[k], 0);
 
               if (killer !== 0) {
                 if (killer === 1) {
