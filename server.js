@@ -27,7 +27,7 @@ const app = express();
 const players = [];
 const foods = [];
 
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static('./public'));
 const sockets = require('socket.io');
 
 const PORT = process.env.PORT || 5000;// The port
@@ -56,7 +56,7 @@ app.use(errorHandler);*/
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
 // Food settings
 const FoodsMaxCount = 1000; // how manny foods
-const TimerForFoodMaker = 100; // how mutch to wait to make another food object
+const TimerForFoodMaker = 200; // how mutch to wait to make another food object
 const MaxFoodSize = 150; // how big can the food be
 const MinFoodSize = 100; // how small can the food be
 //
@@ -274,13 +274,24 @@ function SmallPipi(id, blobs, c, nickname) {
   this.r = 0;
   this.blobs = blobs;
   this.nickname = nickname;
+  this.indexOf = function getindexfromID(id) {
+    for (let index = 0; index < players.length; index += 1) {
+      if (players[index].id === id) {
+        return index;
+      }
+    }
+  };
 }
 
 
 ///// Events
 function Connection(socket) {
   console.log(`new connection:${socket.id}`);
-
+  socket.on('disconnect', () => {
+    console.log(`${socket.id} disconnected`);
+    const i = players.indexOf(socket.id);
+    players.splice(i, 1);
+  });
   // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
@@ -342,15 +353,8 @@ function Connection(socket) {
   socket.on('split', splitplayer);
 }
 
-// When someone disconnect
-function disconnection(socket) {
-  console.log('Got disconnect!');
-
-  const i = players.indexOf(socket);
-  players.splice(i, 1);
-}
+// When someone connect
 io.sockets.on('connection', Connection);
-io.sockets.on('disconnect', disconnection);
 
 
 ///// functions
@@ -420,55 +424,57 @@ function Broadcast() {
   }
   // Eat Events
   if (players.length !== 0) {
-    for (let i = 0; i < players.length; i += 1) {
-      for (let l = 0; l < players[i].blobs.length; l += 1) {
+    if (players.length !== 0) {
+      for (let i = 0; i < players.length; i += 1) {
+        for (let l = 0; l < players[i].blobs.length; l += 1) {
         // player(players[i]) eat food
-        for (let j = 0; j < foods.length; j += 1) {
+          for (let j = 0; j < foods.length; j += 1) {
           // canlculate distance of each blob with each food
-          if (foods !== undefined) {
-            const killer = coliders(players[i].blobs[l], foods[j], 0);
-            if (killer === 1) {
-              players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.2);
-              foods.splice(j, 1);
+            if (foods !== undefined) {
+              const killer = coliders(players[i].blobs[l], foods[j], 0);
+              if (killer === 1) {
+                players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.2);
+                foods.splice(j, 1);
+              }
             }
           }
-        }
-        //if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
-        // player(players[i]) eat other player
-        for (let j = 0; j < players.length; j += 1) {
-          for (let k = 0; k < players[j].blobs.length; k += 1) {
+          //if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
+          // player(players[i]) eat other player
+          for (let j = 0; j < players.length; j += 1) {
+            for (let k = 0; k < players[j].blobs.length; k += 1) {
             // If its not the same player
-            if (players[j] !== players[i] && players.length > 1) {
-              const killer = coliders(players[i].blobs[l],
-                players[j].blobs[k], 0);
+              if (players[j] !== players[i] && players.length > 1) {
+                const killer = coliders(players[i].blobs[l],
+                  players[j].blobs[k], 0);
 
-              if (killer !== 0) {
-                if (killer === 1) {
-                  players[i].blobs[l].r += players[j].blobs[k].r * 0.8;
-                  players[j].blobs.splice(k, 1);
-                } else if (killer === 2) {
-                  players[j].blobs[k].r += players[i].blobs[l].r * 0.8;
-                  players[i].blobs.splice(l, 1);
-                }
+                if (killer !== 0) {
+                  if (killer === 1) {
+                    players[i].blobs[l].r += players[j].blobs[k].r * 0.8;
+                    players[j].blobs.splice(k, 1);
+                  } else if (killer === 2) {
+                    players[j].blobs[k].r += players[i].blobs[l].r * 0.8;
+                    players[i].blobs.splice(l, 1);
+                  }
                 //let warfeilddata = { aterid: ater, atenid: aten };
                 //io.sockets.emit('warfeilddata', warfeilddata);
-              }
-            } else if (players[i].blobs[k].eatmyself) {
-              const colition = coliders(players[i].blobs[k], players[i].blobs[j]);
-              if (colition !== 3) {
-                const minDist = players[i].blobs[j].r / 2 + players[i].blobs[k].d / 2;
-                const dx = players[i].blobs[j].x - players[i].blobs[k].x;
-                const dy = players[i].blobs[j].y - players[i].blobs[k].y;
-                const angle = Math.atan2(dy, dx);
-                const targetX = players[i].blobs[k].x + Math.cos(angle) * (minDist);
-                const targetY = players[i].blobs[k].y + Math.sin(angle) * (minDist);
-                const ax = (targetX - players[i].blobs[j].x) * 0.5;
-                const ay = (targetY - players[i].blobs[j].y) * 0.5;
-                players[i].blobs[k].vx -= ax;
-                players[i].blobs[k].vy -= ay;
-                console.log(`${ax} , ${ay}`);
-                players[i].blobs[j].vx += ax;
-                players[i].blobs[j].vy += ay;
+                }
+              } else if (players[i].blobs[k].eatmyself) {
+                const colition = coliders(players[i].blobs[k], players[i].blobs[j]);
+                if (colition !== 3) {
+                  const minDist = players[i].blobs[j].r / 2 + players[i].blobs[k].d / 2;
+                  const dx = players[i].blobs[j].x - players[i].blobs[k].x;
+                  const dy = players[i].blobs[j].y - players[i].blobs[k].y;
+                  const angle = Math.atan2(dy, dx);
+                  const targetX = players[i].blobs[k].x + Math.cos(angle) * (minDist);
+                  const targetY = players[i].blobs[k].y + Math.sin(angle) * (minDist);
+                  const ax = (targetX - players[i].blobs[j].x) * 0.5;
+                  const ay = (targetY - players[i].blobs[j].y) * 0.5;
+                  players[i].blobs[k].vx -= ax;
+                  players[i].blobs[k].vy -= ay;
+                  console.log(`${ax} , ${ay}`);
+                  players[i].blobs[j].vx += ax;
+                  players[i].blobs[j].vy += ay;
+                }
               }
             }
           }
@@ -476,7 +482,6 @@ function Broadcast() {
       }
     }
   }
-
   io.sockets.emit('updateyamies', fooddata);
   io.sockets.emit('updatepipis', playersdata);
 }

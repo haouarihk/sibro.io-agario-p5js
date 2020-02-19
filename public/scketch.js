@@ -19,18 +19,19 @@ function login() {
   Nickname = document.getElementById('nickname').value;
   const blobs = [];
   color = [random(50, 200), random(50, 200), random(50, 200)];
-  blobs.push(new Blob(Nickname, 0, 0, 50, color));
-  player = new Player(socket.id, 'Guest');
   console.log(`YOOO ${blobs.length}`);
-  player.blobs = blobs;
+  // blobs.push(new Blob(Nickname, 0, 0, 50, color));
+  player = new Player(socket.id, 'Guest');
+  player.id = socket.id;
   socket.on('connect', () => {
-    player.id = socket.id;
-    player.blobs = blobs;
     const data = {
       c: color,
       id: player.id,
       nickname: Nickname,
     }; socket.emit('ready', data);
+  });
+  socket.on('disconnectThatSoc', () => {
+    socket.disconnect();
   });
 }
 function login2() {
@@ -79,7 +80,6 @@ function updatepeeps(pips) {
     // console.log(" has "+ blobs.length);
     if (player.id === pips[i].id) {
       player = players[i];
-      player.blobs = blobs;
       indexofplayer = i;
     }
   }
