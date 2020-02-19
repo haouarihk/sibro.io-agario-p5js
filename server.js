@@ -309,9 +309,9 @@ function Connection(socket) {
     }
     // let addthere = 0;
     for (let index = 0; index < players.length; index += 1) {
-      if (players[index].id === uplayer.id) {
+      if (players[index].id === uplayer.id && (!isNaN(uplayer.mousex) || !isNaN(uplayer.mousey))) {
         for (let i = 0; i < players[index].blobs.length; i += 1) {
-          players[index].blobs[i].id = socket.id;
+          // players[index].blobs[i].id = uplayer.id;
           players[index].blobs[i].update(uplayer.mousex,
             uplayer.mousey,
             uplayer.width,

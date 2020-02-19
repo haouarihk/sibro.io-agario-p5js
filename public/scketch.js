@@ -173,14 +173,15 @@ function draw() {
   }
 
   player.update();
-
-  const data = {
-    mousex: mouseX,
-    mousey: mouseY,
-    id: player.id,
-    width,
-    height,
-    c: [player.c1, player.c2, player.c3],
-  };
-  socket.emit('updateplayer', data);
+  if (searchindexwithid(player.id, players) !== false) {
+    const data = {
+      mousex: mouseX,
+      mousey: mouseY,
+      id: player.id,
+      width,
+      height,
+      c: [player.c1, player.c2, player.c3],
+    };
+    socket.emit('updateplayer', data);
+  }
 }
