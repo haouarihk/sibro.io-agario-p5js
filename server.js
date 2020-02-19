@@ -65,11 +65,11 @@ const MinFoodSize = 100; // how small can the food be
 const StartingSize = 800; // in what size the player start with
 const TimerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down
 const TimerPlayersUpdating = 24; // how mutch to wait till the server sends player info
-const AvregePlayerSpeed = 6000; // how mutch speed can the player have
+const AvregePlayerSpeed = 20000; // how mutch speed can the player have
 const MinSizeToSplit = 400; // the minimume size for the player to split
 const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
 const MinPlayerSize = 202; // the minimume size that can the player be
-const PeriodTime = 30; // how mutch to end the split
+const PeriodTime = 5; // how mutch to end the split
 const PeriodTimeCounter = 300; // how mutch to end the split 2
 // world Settings
 const worldsize = 10000; // how big the world can be
