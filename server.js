@@ -62,14 +62,14 @@ const MaxFoodSize = 150; // how big can the food be
 const MinFoodSize = 100; // how small can the food be
 //
 // Player Settings
-const StartingSize = 800; // in what size the player start with
+const StartingSize = 1200; // in what size the player start with
 const TimerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down
 const TimerPlayersUpdating = 24; // how mutch to wait till the server sends player info
-const AvregePlayerSpeed = 6000; // how mutch speed can the player have
+const AvregePlayerSpeed = 60000; // how mutch speed can the player have
 const MinSizeToSplit = 400; // the minimume size for the player to split
 const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
 const MinPlayerSize = 202; // the minimume size that can the player be
-const PeriodTime = 30; // how mutch to end the split
+const PeriodTime = 3; // how mutch to end the split
 const PeriodTimeCounter = 300; // how mutch to end the split 2
 // world Settings
 const worldsize = 10000; // how big the world can be
@@ -86,7 +86,7 @@ function calculatedis(x1, y1, x2, y2) {
   const d = Math.sqrt(xx + yy);
   return d;
 }
-function calculatedis1(other, other2, plusval) {
+function coliders(other, other2, plusval) {
   if (other2 === other) { return 3; }
   const d = calculatedis(other.x, other.y, other2.x, other2.y);
 
@@ -128,7 +128,7 @@ function Vector(velx, vely) {
   this.y = vely;
   this.setMag = function setmag(c) {
     const Mag = Math.sqrt(this.x * this.x + this.y * this.y);
-    if (Mag === 0) {
+    if (this.x === 0 && this.y === 0) {
       this.x *= Math.random();
       this.y *= Math.random();
     } else {
@@ -200,35 +200,32 @@ function Food() {
 }
 function Blob(id, x, y, r, Timer) {
   this.x = x;
-  this.timertoeatme = Timer;
-  this.eatmyself = false;
   this.y = y;
+  this.vx = 0;
+  this.vy = 0;
   this.r = r;
   this.id = id;
+  this.timertoeatme = Timer;
+  this.eatmyself = false;
+
+  this.vel = new Vector(0, 0);
   this.update = function updating(mousex, mousey, width, height) {
     const indexofplayer = searchindexwithid(this.id, players);
     if (indexofplayer !== false) {
-      const middot = calculatemid(players[indexofplayer].blobs);
-      // calculating mouse possition
-      let velx = (mousex - (width / 2)) + (-this.x + middot.x);
-      let vely = (mousey - (height / 2)) + (-this.y + middot.y);
-      //  calculating magnitude
-      Mag = Math.sqrt(velx * velx + vely * vely);
-      // setting the magnitude
-      velx *= (AvregePlayerSpeed / Mag);
-      vely *= (AvregePlayerSpeed / Mag);
-      this.x += (velx) / this.r;
-      this.y += (vely) / this.r;
-
       if (this.timertoeatme <= 0) {
         this.eatmyself = true;
       } else {
         this.eatmyself = false;
+        //console.log(false);
+        for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
+          if (this !== players[indexofplayer].blobs[i]) {
+          }
+        }
       }
       if (this.eatmyself === true) {
         for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
           if (this !== players[indexofplayer].blobs[i]) {
-            const dis = calculatedis1(this, players[indexofplayer].blobs[i],
+            const dis = coliders(this, players[indexofplayer].blobs[i],
               -players[indexofplayer].blobs[i].r - this.r + 20);
             if (dis === 1) {
             // this blob will eat another blob
@@ -237,24 +234,25 @@ function Blob(id, x, y, r, Timer) {
             }
           }
         }
-      } else {
-        for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
-          if (this !== players[indexofplayer].blobs[i]) {
-            const dis = calculatedis1(this, players[indexofplayer].blobs[i]);
-            if (dis !== 3) {
-            // physics
-              const vel = new Vector(0, 0);
-              vel.vector(this.x, this.y,
-                players[indexofplayer].blobs[i].x,
-                players[indexofplayer].blobs[i].y);
-              //vel.setMag(10);
-              this.x += vel.x;
-              this.y += vel.y;
-            }
-          }
-        }
       }
+      const middot = calculatemid(players[indexofplayer].blobs);
+      // calculating mouse possition
+      this.vx = (mousex - (width / 2)) + (-this.x + middot.x);
+      this.vy = (mousey - (height / 2)) + (-this.y + middot.y);
+      //  calculating magnitude
+      Mag = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+      // setting the magnitude
+      this.vx *= (AvregePlayerSpeed / Mag);
+      this.vy *= (AvregePlayerSpeed / Mag);
+
+      //this.vx = this.vel.x;
+      //this.vy = this.vel.y;
+      //this.vel.x += this.vx;
+      //this.vel.y += this.vy;
+      //this.vel.setMag(AvregePlayerSpeed);
     }
+    this.x += (this.vx) / this.r;
+    this.y += (this.vy) / this.r;
   };
   this.split = function split() {
     let playerindex = 0;
@@ -265,15 +263,15 @@ function Blob(id, x, y, r, Timer) {
     }
 
     players[playerindex].blobs.push(new Blob(this.id,
-      this.x,
-      this.y,
+      this.x + 10,
+      this.y + 10,
       this.r / 2,
       PeriodTime));
     this.timertoeatme = PeriodTime;
     this.r /= 2;
     // Count tilsl the time is over and take care of it
     if (this.timertoeatme !== 0) {
-      //setInterval(() => { this.eatmyself = true; }, this.timertoeatme);
+    //setInterval(() => { this.eatmyself = true; }, this.timertoeatme);
     }
   };
 }
@@ -430,7 +428,7 @@ function Broadcast() {
         for (let k = 0; k < players[i].blobs.length; k += 1) {
           // canlculate distance of each blob with each food
           if (foods !== undefined) {
-            const killer = calculatedis1(players[i].blobs[k], foods[j], 0);
+            const killer = coliders(players[i].blobs[k], foods[j], 0);
             if (killer === 1) {
               players[i].blobs[k].r += foods[j].r / (players[i].blobs[k].r * 0.2);
               foods.splice(j, 1);
@@ -445,9 +443,9 @@ function Broadcast() {
           for (let l = 0; l < players[i].blobs.length; l += 1) {
             // If its not the same player
             if (players[j] !== players[i]) {
-              const killer = calculatedis1(players[i].blobs[l],
+              const killer = coliders(players[i].blobs[l],
                 players[j].blobs[k],
-                -players[j].blobs[k].r - 50);
+                0);
 
               if (killer !== 0) {
                 if (killer === 1) {
@@ -460,17 +458,24 @@ function Broadcast() {
                 //let warfeilddata = { aterid: ater, atenid: aten };
                 //io.sockets.emit('warfeilddata', warfeilddata);
               }
-            } /*else if (players[i].blobs[k].eatmyself) {
-              const killer = calculatedis1(players[i].blobs[l], players[i].blobs[k], 0);
-              if (killer !== 0) {
-                if (killer === 1) {
-                  players[i].blobs[l].r += players[i].blobs[k].r;
-                  //players[i].blobs.splice(k, 1);
-                }
-                //let warfeilddata = { aterid: ater, atenid: aten };
-                //io.sockets.emit('warfeilddata', warfeilddata);
+            } else if (players[i].blobs[k].eatmyself) {
+              const colition = coliders(players[i].blobs[k], players[i].blobs[j]);
+              if (colition !== 3) {
+                const minDist = players[i].blobs[j].r / 2 + players[i].blobs[k].d / 2;
+                const dx = players[i].blobs[j].x - players[i].blobs[k].x;
+                const dy = players[i].blobs[j].y - players[i].blobs[k].y;
+                const angle = Math.atan2(dy, dx);
+                const targetX = players[i].blobs[k].x + Math.cos(angle) * (minDist);
+                const targetY = players[i].blobs[k].y + Math.sin(angle) * (minDist);
+                const ax = (targetX - players[i].blobs[j].x) * 0.5;
+                const ay = (targetY - players[i].blobs[j].y) * 0.5;
+                players[i].blobs[k].vx -= ax;
+                players[i].blobs[k].vy -= ay;
+                console.log(`${ax} , ${ay}`);
+                players[i].blobs[j].vx += ax;
+                players[i].blobs[j].vy += ay;
               }
-            }*/
+            }
           }
         }
       }
