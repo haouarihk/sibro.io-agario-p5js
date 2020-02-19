@@ -202,13 +202,13 @@ function Blob(id, x, y, r, Timer) {
   this.vx = 0;
   this.vy = 0;
   this.r = r;
-  this.playerid = id;
+  this.id = id;
   this.timertoeatme = Timer;
   this.eatmyself = false;
 
   this.vel = new Vector(0, 0);
   this.update = function updating(mousex, mousey, width, height) {
-    const indexofplayer = searchindexwithid(this.playerid, players);
+    const indexofplayer = searchindexwithid(this.id, players);
     if (indexofplayer !== false) {
       if (this.timertoeatme <= 0) {
         this.eatmyself = true;
@@ -237,7 +237,7 @@ function Blob(id, x, y, r, Timer) {
       // setting the magnitude
       this.vx *= (AvregePlayerSpeed / Mag);
       this.vy *= (AvregePlayerSpeed / Mag);
-
+      console.log(mousex);
       //this.vx = this.vel.x;
       //this.vy = this.vel.y;
       //this.vel.x += this.vx;
@@ -250,12 +250,12 @@ function Blob(id, x, y, r, Timer) {
   this.split = function split() {
     let playerindex = 0;
     for (let i = 0; i < players.length; i += 1) {
-      if (players[i].id === this.playerid) {
+      if (players[i].id === this.id) {
         playerindex = i;
       }
     }
 
-    players[playerindex].blobs.push(new Blob(this.playerid,
+    players[playerindex].blobs.push(new Blob(this.id,
       this.x + 10,
       this.y + 10,
       this.r / 2,
@@ -274,9 +274,9 @@ function SmallPipi(id, blobs, c, nickname) {
   this.r = 0;
   this.blobs = blobs;
   this.nickname = nickname;
-  this.indexOf = function getindexfromID(id) {
+  this.indexOf = function getindexfromID(Id) {
     for (let index = 0; index < players.length; index += 1) {
-      if (players[index].id === id) {
+      if (players[index].id === Id) {
         return index;
       }
     }
@@ -289,18 +289,25 @@ function Connection(socket) {
   console.log(`new connection:${socket.id}`);
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
-    const i = players.indexOf(socket.id);
-    players.splice(i, 1);
+    // socket.emit('disconnectThatSoc');
+    // const i = players.indexOf(socket.id);
+    //players.splice(i, 1);
   });
   // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
-    const generatedXY = new GenerateX(players, foods);
+    const generatedXY = new GenerateX(newplayer, foods);
     blobs.push(new Blob(newplayer.id, generatedXY.xx, generatedXY.yy, StartingSize, 0));
     players.push(new SmallPipi(newplayer.id,
       blobs,
       newplayer.c,
       newplayer.nickname));
+    const settingsofplayer = {
+      blob2: blobs,
+      id: socket.id,
+    };
+    console.log(`YOOO ${settingsofplayer.id}`);
+    socket.emit('set!', settingsofplayer);
   }
   socket.on('ready', playerjoined);
 
@@ -316,19 +323,20 @@ function Connection(socket) {
   // update every blob's velocity
   function updateplayer(uplayer) {
     if (socket.id !== uplayer.id) {
-      // console.log(socket.id + " is not matched");
+      console.log(socket.id + " is not matched");
     }
     // let addthere = 0;
     for (let index = 0; index < players.length; index += 1) {
-      if (players[index].id === uplayer.id && (!isNaN(uplayer.mousex) || !isNaN(uplayer.mousey))) {
+      if (players[index].id === uplayer.id) {
         for (let i = 0; i < players[index].blobs.length; i += 1) {
-          // players[index].blobs[i].id = uplayer.id;
+          players[index].blobs[i].id = uplayer.id;
           players[index].blobs[i].update(uplayer.mousex,
             uplayer.mousey,
             uplayer.width,
             uplayer.height);
+          // console.log(uplayer.id+','+uplayer.mousex);
         }
-      } // else { addthere += 1; }
+      } // else {console.log('Someonelse did ,' + uplayer.mousex);}
     }
     // if (addthere === players.length) { socket.disconnect(); }
   }
@@ -351,6 +359,18 @@ function Connection(socket) {
     }
   }
   socket.on('split', splitplayer);
+  // to make sure that non of no players have body
+  for (let i = 0; i < players.length; i += 1) {
+    let at = false;
+    for (let j = 0; j < io.sockets.length; j += 1) {
+      if (io.sockets[j].id === players[i].id) {
+        at = true;
+      }
+    }
+    if (at === false) {
+      // players.splice(i, 1);
+    }
+  }
 }
 
 // When someone connect
@@ -379,7 +399,7 @@ function foodgen() {
   newfood.generate();
   if (foods.length < FoodsMaxCount) {
     foods.push(newfood);
-    console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
+    // console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
   }
 }
 function gettingOld() {
@@ -401,7 +421,7 @@ function Broadcast() {
     }
     players[i].r = rad;
   }
-  comparisionwithweight();
+  // comparisionwithweight();
   const playersdata = [];
   for (let i = 0; i < players.length; i += 1) {
     playersdata.push({
@@ -431,7 +451,7 @@ function Broadcast() {
           for (let j = 0; j < foods.length; j += 1) {
           // canlculate distance of each blob with each food
             if (foods !== undefined) {
-              const killer = coliders(players[i].blobs[l], foods[j], 0);
+              const killer = 0;//coliders(players[i].blobs[l], foods[j], 0);
               if (killer === 1) {
                 players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.2);
                 foods.splice(j, 1);
@@ -459,7 +479,7 @@ function Broadcast() {
                 //io.sockets.emit('warfeilddata', warfeilddata);
                 }
               } else if (players[i].blobs[k].eatmyself) {
-                const colition = coliders(players[i].blobs[k], players[i].blobs[j]);
+                const colition = 3;//coliders(players[i].blobs[k], players[i].blobs[j]);
                 if (colition !== 3) {
                   const minDist = players[i].blobs[j].r / 2 + players[i].blobs[k].d / 2;
                   const dx = players[i].blobs[j].x - players[i].blobs[k].x;
