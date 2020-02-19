@@ -305,7 +305,7 @@ function Connection(socket) {
   // update every blob's velocity
   function updateplayer(uplayer) {
     if (socket.id !== uplayer.id) {
-      console.log(socket.id + " is not matched");
+      // console.log(socket.id + " is not matched");
     }
     // let addthere = 0;
     for (let index = 0; index < players.length; index += 1) {
