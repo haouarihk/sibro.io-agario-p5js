@@ -237,7 +237,7 @@ function Blob(id, x, y, r, Timer) {
       // setting the magnitude
       this.vx *= (AvregePlayerSpeed / Mag);
       this.vy *= (AvregePlayerSpeed / Mag);
-      console.log(mousex);
+      console.log(indexofplayer);
       //this.vx = this.vel.x;
       //this.vy = this.vel.y;
       //this.vel.x += this.vx;
@@ -323,13 +323,13 @@ function Connection(socket) {
   // update every blob's velocity
   function updateplayer(uplayer) {
     if (socket.id !== uplayer.id) {
-      console.log(socket.id + " is not matched");
+      //console.log(socket.id + " is not matched");
     }
     // let addthere = 0;
     for (let index = 0; index < players.length; index += 1) {
       if (players[index].id === uplayer.id) {
         for (let i = 0; i < players[index].blobs.length; i += 1) {
-          players[index].blobs[i].id = uplayer.id;
+          // players[index].blobs[i].id = uplayer.id;
           players[index].blobs[i].update(uplayer.mousex,
             uplayer.mousey,
             uplayer.width,
@@ -451,7 +451,7 @@ function Broadcast() {
           for (let j = 0; j < foods.length; j += 1) {
           // canlculate distance of each blob with each food
             if (foods !== undefined) {
-              const killer = 0;//coliders(players[i].blobs[l], foods[j], 0);
+              const killer = coliders(players[i].blobs[l], foods[j], 0);
               if (killer === 1) {
                 players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.2);
                 foods.splice(j, 1);
@@ -479,7 +479,7 @@ function Broadcast() {
                 //io.sockets.emit('warfeilddata', warfeilddata);
                 }
               } else if (players[i].blobs[k].eatmyself) {
-                const colition = 3;//coliders(players[i].blobs[k], players[i].blobs[j]);
+                const colition = coliders(players[i].blobs[k], players[i].blobs[j]);
                 if (colition !== 3) {
                   const minDist = players[i].blobs[j].r / 2 + players[i].blobs[k].d / 2;
                   const dx = players[i].blobs[j].x - players[i].blobs[k].x;
