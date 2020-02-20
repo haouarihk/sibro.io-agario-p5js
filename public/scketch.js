@@ -179,10 +179,12 @@ function draw() {
   createCanvas(windowWidth, windowHeight - 22);
   // const menu = new Menu(width / 4, height / 4);
   if (!connected) {
+    toggleOverlay(false);
     // background(0);
     // menu.show();
     return;
   }
+  toggleOverlay(true);
   // menu.hide();
   background(255);
   if (keyIsDown(TAB)) {

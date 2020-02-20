@@ -2,11 +2,11 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
-function toggleOverlay() {
+function toggleOverlay(a) {
   const overlay = document.getElementById('overlay');
   const specialBox = document.getElementById('specialBox');
   overlay.style.opacity = 0.8;
-  if (overlay.style.display === 'block') {
+  if (a) {
     overlay.style.display = 'none';
     specialBox.style.display = 'none';
   } else {

@@ -16,7 +16,9 @@ div#specialBox {
 	margin: 150px auto 0px auto;
 	width: 500px; 
 	height: 300px;
+	padding: 10px;
 	background: #FFF;
+	border: 10px red;
 	color: #000;
 }
 div#wrapper {
