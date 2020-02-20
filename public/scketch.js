@@ -173,6 +173,10 @@ function calculatemid(arraydots) {
 function draw() {
   if (!connected) { return; }
   createCanvas(windowWidth, windowHeight - 22);
+  fill(200);
+  rect((6 * width) / 7, height / 20, 200, 400);
+  const list = new Listing((6 * width) / 7, height / 20, players);
+  list.show();
   translate(width / 2, height / 2);
   // search for the player in the players array
   // to find his own index and store it on indexofplayer
