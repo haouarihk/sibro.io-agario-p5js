@@ -83,9 +83,9 @@ function login() {
     });
   });
   socket.on('disconnectThatSoc', () => {
-    // player = null;
+    player = null;
     players = [];
-    // socket.disconnect();
+    socket.disconnect();
     connected = false;
     console.log('disconnection');
   });
@@ -130,6 +130,7 @@ function setup() {
   };
   // When press play in the html
   document.getElementById('play').onclick = function onclickplay() {
+    if (connected) { socket.disconnect(); }
     login();
   };
   // login();
