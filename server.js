@@ -430,18 +430,9 @@ function gettingOld() {
   }
 }
 // updating/sending info of everything is hppening to the players
-function Broadcast() {
+function Updates() {
   // update player radiuse bassed on his blobs
-  for (let i = 0; i < players.length; i += 1) {
-    let rad = 0;
-    for (let j = 0; j < players[i].blobs.length; j += 1) {
-      rad += players[i].blobs[j].r;
-      // constraining a player to not go outside the world
-      players[i].blobs[j].constrain();
-    }
-    // giving the raduse of his all blobs to him
-    players[i].r = rad;
-  }
+
   comparisionwithweight();
   const playersdata = [];
   for (let i = 0; i < players.length; i += 1) {
@@ -460,8 +451,12 @@ function Broadcast() {
   if (players.length !== 0) {
     if (players.length !== 0) {
       for (let i = 0; i < players.length; i += 1) {
+        let rad = 0;
         for (let l = 0; l < players[i].blobs.length; l += 1) {
-        // player(players[i]) eat food
+          rad += players[i].blobs[l].r;
+          // constraining a player to not go outside the world
+          players[i].blobs[l].constrain();
+          // player(players[i]) eat food
           for (let j = 0; j < foods.length; j += 1) {
           // canlculate distance of each blob with each food
             if (foods !== undefined) {
@@ -518,6 +513,8 @@ function Broadcast() {
             }
           }
         }
+        // giving the raduse of his all blobs to him
+        players[i].r = rad;
       }
     }
   }
@@ -533,6 +530,6 @@ function splitingtimeer() {
 ///// Timers
 setInterval(foodgen, TimerForFoodMaker);
 setInterval(gettingOld, TimerPlayerGetsOld);
-setInterval(Broadcast, TimerPlayersUpdating);
+setInterval(Updates, TimerPlayersUpdating);
 setInterval(splitingtimeer, PeriodTimeCounter);
 console.log(process.env.SecuredCode);
