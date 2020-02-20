@@ -409,7 +409,7 @@ function foodgen() {
     newfood.generate();
     if (foods.length < FoodsMaxCount) {
       foods.push(newfood);
-      console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
+      // console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
     }
   }
   const fooddata = [];
