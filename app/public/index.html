@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/addons/p5.sound.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/overlay.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <meta charset="utf-8" />
+
+  </head>
+  <body>
+    <div id="overlay"></div>
+    <script src="main.js"></script>
+    <script src="other/overlay.js"></script>
+    <script src="objects/blob.js"></script>
+    <script src="objects/player.js"></script>
+    <script src="objects/food.js"></script>
+
+    
+      <!-- End Overlay -->
+      <!-- Start Special Centered Box -->
+    <div id="specialBox">
+
+      Name: <input type="text" id="nickname" value="Guest">
+      <button id="play">start</button> <br /><br />
+      This part not for users yet,<br /> <br /> 
+      username:<input type="text" id="username" value="Guest"><br /> 
+      password:<input type="password" id="password" value="Guest"> <br /><br />
+      <button id="login">Login</button>
+    </div>
+    <!-- End Special Centered Box -->
+    <!-- Start Normal Page Content -->
+    <div id="wrapper">
+
+    </div>
+  </body>
+</html>
