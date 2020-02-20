@@ -55,11 +55,12 @@ app.use(errorHandler);*/
 //////////////////////////////////////////////////
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
+const comparisonTimer = 100; // how mutch to refresh the Top 10 players list
 // Food settings
-const FoodsMaxCount = 1000; // how manny foods
-const howmanyatatime = 50;
+const FoodsMaxCount = 500; // how manny foods
+const howmanyatatime = 100;
 const TimerForFoodMaker = 200; // how mutch to wait to make another food object
-const MaxFoodSize = 150; // how big can the food be
+const MaxFoodSize = 300; // how big can the food be
 const MinFoodSize = 100; // how small can the food be
 //
 // Player Settings
@@ -346,7 +347,7 @@ function Connection(socket) {
   socket.on('updateplayer', updateplayer);
 
   // When a player split
-  function splitplayer(data) {
+  function splitplayer() {
     // console.log(`${data.id} wants to split`);
     for (let i = 0; i < players.length; i += 1) {
       if (players[i].id === socket.id) {
@@ -409,7 +410,6 @@ function foodgen() {
     newfood.generate();
     if (foods.length < FoodsMaxCount) {
       foods.push(newfood);
-      // console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
     }
   }
   const fooddata = [];
@@ -431,19 +431,8 @@ function gettingOld() {
   }
 }
 // updating/sending info of everything is hppening to the players
-function Broadcast() {
+function Updates() {
   // update player radiuse bassed on his blobs
-  for (let i = 0; i < players.length; i += 1) {
-    let rad = 0;
-    for (let j = 0; j < players[i].blobs.length; j += 1) {
-      rad += players[i].blobs[j].r;
-      // constraining a player to not go outside the world
-      players[i].blobs[j].constrain();
-    }
-    // giving the raduse of his all blobs to him
-    players[i].r = rad;
-  }
-  comparisionwithweight();
   const playersdata = [];
   for (let i = 0; i < players.length; i += 1) {
     playersdata.push({
@@ -461,8 +450,12 @@ function Broadcast() {
   if (players.length !== 0) {
     if (players.length !== 0) {
       for (let i = 0; i < players.length; i += 1) {
+        let rad = 0;
         for (let l = 0; l < players[i].blobs.length; l += 1) {
-        // player(players[i]) eat food
+          rad += players[i].blobs[l].r;
+          // constraining a player to not go outside the world
+          players[i].blobs[l].constrain();
+          // player(players[i]) eat food
           for (let j = 0; j < foods.length; j += 1) {
           // canlculate distance of each blob with each food
             if (foods !== undefined) {
@@ -479,7 +472,7 @@ function Broadcast() {
             for (let k = 0; k < players[j].blobs.length; k += 1) {
             // If its not the same player
               if (players.length > 1) {
-                if (players[j] !== players[i] ) {
+                if (players[j] !== players[i]) {
                   const killer = coliders(players[i].blobs[l],
                     players[j].blobs[k], 0);
 
@@ -519,6 +512,8 @@ function Broadcast() {
             }
           }
         }
+        // giving the raduse of his all blobs to him
+        players[i].r = rad;
       }
     }
   }
@@ -534,6 +529,7 @@ function splitingtimeer() {
 ///// Timers
 setInterval(foodgen, TimerForFoodMaker);
 setInterval(gettingOld, TimerPlayerGetsOld);
-setInterval(Broadcast, TimerPlayersUpdating);
+setInterval(Updates, TimerPlayersUpdating);
 setInterval(splitingtimeer, PeriodTimeCounter);
+setInterval(comparisionwithweight, comparisonTimer);
 console.log(process.env.SecuredCode);
