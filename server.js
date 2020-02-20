@@ -346,7 +346,7 @@ function Connection(socket) {
   socket.on('updateplayer', updateplayer);
 
   // When a player split
-  function splitplayer(data) {
+  function splitplayer() {
     // console.log(`${data.id} wants to split`);
     for (let i = 0; i < players.length; i += 1) {
       if (players[i].id === socket.id) {
@@ -409,7 +409,6 @@ function foodgen() {
     newfood.generate();
     if (foods.length < FoodsMaxCount) {
       foods.push(newfood);
-      // console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
     }
   }
   const fooddata = [];
