@@ -2,6 +2,19 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
+function toggleOverlay() {
+  const overlay = document.getElementById('overlay');
+  const specialBox = document.getElementById('specialBox');
+  overlay.style.opacity = 0.8;
+  if (overlay.style.display === 'block') {
+    overlay.style.display = 'none';
+    specialBox.style.display = 'none';
+  } else {
+    overlay.style.display = 'block';
+    specialBox.style.display = 'block';
+  }
+}
+
 class Listing {
   constructor(x, y, players) {
     this.players = players;
@@ -9,6 +22,8 @@ class Listing {
     this.y = y;
     this.count = 10;
     this.show = function showtext() {
+      fill(200);
+      rect((6 * width) / 7, height / 20, 200, 400);
       let counter = 0;
       for (let i = players.length - 1; i >= 0; i -= 1) {
         if (counter !== 10) {
@@ -26,12 +41,15 @@ class Menu {
   constructor(x, y) {
     this.x = x;
     this.y = y;
+    this.textfeild = createInput();
     this.show = function show() {
-      fill(5);
+      fill(100);
       rect(this.x, this.y - 100, 500 + this.x / 2, 500 + this.y / 2);
-      input = createInput();
-      input.position(200, 200);
-      input.size(200, 20);
+      this.textfeild.position((6 * this.x) / 4, this.y);
+      this.textfeild.size(200, 30);
+    };
+    this.hide = function hide() {
+      this.textfeild.size(0, 0);
     };
   }
 }

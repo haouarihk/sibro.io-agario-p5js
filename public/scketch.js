@@ -110,7 +110,8 @@ function mouseWheel(event) {
   pos = constrain(pos, 1, 5000);
 }
 function keyPressed() {
-  if (key === 's') {
+  if (!connected) { return; }
+  if (key === ' ') {
     for (let j = 0; j < player.blobs.length; j += 1) {
       if (player.blobs[j].r > MinSizeToSplit) {
         data = { // id: socket.id
@@ -121,6 +122,10 @@ function keyPressed() {
     // console.log('SPACEBAR DETECTED');
     // we need it to tell the server that
     // it got pressed
+  }
+  if (keyCode === ESCAPE) {
+    socket.disconnect();
+    connected = false;
   }
 }
 
@@ -171,16 +176,19 @@ function calculatemid(arraydots) {
 }
 
 function draw() {
-createCanvas(windowWidth, windowHeight - 22);
-if (!connected) {
-  const menu = new Menu(width / 4, height / 4);
-  menu.show();
-  return;
- }
-  fill(200);
-  rect((6 * width) / 7, height / 20, 200, 400);
-  const list = new Listing((6 * width) / 7, height / 20, players);
-  list.show();
+  createCanvas(windowWidth, windowHeight - 22);
+  // const menu = new Menu(width / 4, height / 4);
+  if (!connected) {
+    // background(0);
+    // menu.show();
+    return;
+  }
+  // menu.hide();
+  background(255);
+  if (keyIsDown(TAB)) {
+    const list = new Listing((6 * width) / 7, height / 20, players);
+    list.show();
+  }
   translate(width / 2, height / 2);
   // search for the player in the players array
   // to find his own index and store it on indexofplayer
