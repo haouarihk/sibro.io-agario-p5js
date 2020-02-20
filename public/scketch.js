@@ -171,8 +171,12 @@ function calculatemid(arraydots) {
 }
 
 function draw() {
-  if (!connected) { return; }
-  createCanvas(windowWidth, windowHeight - 22);
+createCanvas(windowWidth, windowHeight - 22);
+if (!connected) {
+  const menu = new Menu(0, 0);
+  menu.show();
+  return;
+ }
   fill(200);
   rect((6 * width) / 7, height / 20, 200, 400);
   const list = new Listing((6 * width) / 7, height / 20, players);

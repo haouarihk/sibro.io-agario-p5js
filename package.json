@@ -4,7 +4,9 @@
   "description": "agar.io make with p5.js and sockets",
   "main": "server.js",
   "dependencies": {
+    "container": "0.0.2",
     "cool-ascii-faces": "^1.3.4",
+    "docker": "^1.0.0",
     "document": "^0.4.7",
     "express": "^4.17.1",
     "file": "^0.2.2",
