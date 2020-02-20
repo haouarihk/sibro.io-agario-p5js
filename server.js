@@ -55,6 +55,7 @@ app.use(errorHandler);*/
 //////////////////////////////////////////////////
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
+const comparisonTimer = 100; // how mutch to refresh the Top 10 players list
 // Food settings
 const FoodsMaxCount = 500; // how manny foods
 const howmanyatatime = 100;
@@ -432,8 +433,6 @@ function gettingOld() {
 // updating/sending info of everything is hppening to the players
 function Updates() {
   // update player radiuse bassed on his blobs
-
-  comparisionwithweight();
   const playersdata = [];
   for (let i = 0; i < players.length; i += 1) {
     playersdata.push({
@@ -532,4 +531,5 @@ setInterval(foodgen, TimerForFoodMaker);
 setInterval(gettingOld, TimerPlayerGetsOld);
 setInterval(Updates, TimerPlayersUpdating);
 setInterval(splitingtimeer, PeriodTimeCounter);
+setInterval(comparisionwithweight, comparisonTimer);
 console.log(process.env.SecuredCode);
