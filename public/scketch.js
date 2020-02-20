@@ -113,7 +113,8 @@ function keyPressed() {
   if (key === 's') {
     for (let j = 0; j < player.blobs.length; j += 1) {
       if (player.blobs[j].r > MinSizeToSplit) {
-        data = { id: socket.id };
+        data = { // id: socket.id
+        };
         socket.emit('split', data);
       }
     }
@@ -200,7 +201,7 @@ function draw() {
   const data = {
     mousex: mouseX,
     mousey: mouseY,
-    id: socket.id,
+    // id: socket.id,
     width,
     height,
     c: [player.c1, player.c2, player.c3],
