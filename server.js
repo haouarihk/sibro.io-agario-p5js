@@ -347,7 +347,7 @@ function Connection(socket) {
 
   // When a player split
   function splitplayer(data) {
-    console.log(`${data.id} wants to split`);
+    // console.log(`${data.id} wants to split`);
     for (let i = 0; i < players.length; i += 1) {
       if (players[i].id === data.id) {
         if (players[i].blobs.length < MaxBlobsForEachPlayer) {
