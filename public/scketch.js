@@ -173,7 +173,7 @@ function calculatemid(arraydots) {
 function draw() {
 createCanvas(windowWidth, windowHeight - 22);
 if (!connected) {
-  const menu = new Menu(0, 0);
+  const menu = new Menu(width / 4, height / 4);
   menu.show();
   return;
  }

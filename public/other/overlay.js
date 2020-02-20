@@ -27,8 +27,11 @@ class Menu {
     this.x = x;
     this.y = y;
     this.show = function show() {
-      fill(0);
-      rect(x, y, x / 2, y / 2);
+      fill(5);
+      rect(this.x, this.y - 100, 500 + this.x / 2, 500 + this.y / 2);
+      input = createInput();
+      input.position(200, 200);
+      input.size(200, 20);
     };
   }
 }
