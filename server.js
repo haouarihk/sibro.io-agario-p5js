@@ -349,7 +349,7 @@ function Connection(socket) {
   function splitplayer(data) {
     // console.log(`${data.id} wants to split`);
     for (let i = 0; i < players.length; i += 1) {
-      if (players[i].id === data.id) {
+      if (players[i].id === socket.id) {
         if (players[i].blobs.length < MaxBlobsForEachPlayer) {
         // Splice
           for (let j = 0; j < players[i].blobs.length; j += 1) {
