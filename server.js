@@ -73,7 +73,7 @@ const MinPlayerSize = 202; // the minimume size that can the player be
 const PeriodTime = 3; // how mutch to end the split
 const PeriodTimeCounter = 300; // how mutch to end the split 2
 // world Settings
-const worldsize = 100000; // how big the world can be
+const worldsize = 50000; // how big the world can be
 const WorldSizeMin = -worldsize;
 const WorldSizeMax = worldsize;
 //
@@ -309,6 +309,7 @@ function Connection(socket) {
     const settingsofplayer = {
       blob2: blobs,
       id: socket.id,
+      minisizetosplit: MinSizeToSplit,
     };
     socket.emit('set!', settingsofplayer);
   }

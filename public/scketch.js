@@ -13,6 +13,7 @@ let indexofplayer = 0;
 let Nickname = '';
 let username = '';
 let password = '';
+let MinSizeToSplit = 200;
 let color = [];
 let connected = false;
 // Login
@@ -75,6 +76,7 @@ function login() {
       console.log(`YOOO ${socket.id}`);
       player.id = settings.id;
       player.blobs = blobs;
+      MinSizeToSplit = settings.minisizetosplit;
       console.log(socket.id);
       connected = true;
       socket.on('updatepipis', updatepeeps);
@@ -109,11 +111,15 @@ function mouseWheel(event) {
 }
 function keyPressed() {
   if (key === 's') {
+    for (let j = 0; j < player.blobs.length; j += 1) {
+      if (player.blobs[j].r > MinSizeToSplit) {
+        data = { id: socket.id };
+        socket.emit('split', data);
+      }
+    }
     // console.log('SPACEBAR DETECTED');
     // we need it to tell the server that
     // it got pressed
-    data = { id: socket.id };
-    socket.emit('split', data);
   }
 }
 
