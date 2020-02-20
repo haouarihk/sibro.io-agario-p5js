@@ -32,7 +32,7 @@ function updatepeeps(pips) {
     players[i] = new Player(pips[i].id, pips[i].nickname);
     players[i].blobs = blobs;
     // console.log(" has "+ blobs.length);
-    if (player.id === pips[i].id) {
+    if (socket.id === pips[i].id) {
       player = players[i];
       indexofplayer = i;
     }
@@ -57,24 +57,6 @@ function warfeilddata(data) {
   }
 }
 function login() {
-  Nickname = document.getElementById('nickname').value;
-  const blobs = [];
-  color = [random(50, 200), random(50, 200), random(50, 200)];
-  blobs.push(new Blob(Nickname, 0, 0, 50, color));
-  player = new Player(socket.id, 'Guest');
-  console.log(`YOOO ${blobs.length}`);
-  player.blobs = blobs;
-  socket.on('connect', () => {
-    player.id = socket.id;
-    player.blobs = blobs;
-    const data = {
-      c: color,
-      id: player.id,
-      nickname: Nickname,
-    }; socket.emit('ready', data);
-  });
-}
-/*function login() {
   socket = io();
   Nickname = document.getElementById('nickname').value;
   const blobs = [];
@@ -82,7 +64,6 @@ function login() {
   player = new Player(socket.id, 'Guest');
   player.blobs = blobs;
   socket.on('connect', () => {
-
     player.id = socket.id;
     player.blobs = blobs;
     const data = {
@@ -92,7 +73,7 @@ function login() {
     }; socket.emit('ready', data);
     socket.on('set!', (settings) => {
       console.log(`YOOO ${socket.id}`);
-      // player.id = settings.id;
+      player.id = settings.id;
       player.blobs = blobs;
       console.log(socket.id);
       connected = true;
@@ -102,13 +83,13 @@ function login() {
     });
   });
   socket.on('disconnectThatSoc', () => {
-    player = null;
+    // player = null;
     players = [];
-    socket.disconnect();
+    // socket.disconnect();
     connected = false;
     console.log('disconnection');
   });
-}*/
+}
 function login2() {
   username = document.getElementById('username').value;
   password = document.getElementById('password').value;
@@ -131,7 +112,7 @@ function keyPressed() {
     // console.log('SPACEBAR DETECTED');
     // we need it to tell the server that
     // it got pressed
-    data = { id: player.id };
+    data = { id: socket.id };
     socket.emit('split', data);
   }
 }
@@ -142,24 +123,19 @@ function keyPressed() {
 // setup
 function setup() {
   connected = false;
-  socket = io();
+  // socket = io();
   // socket.disconnect();
   this.connecttotheserver = function connetingtoserver() {
     socket = io();
   };
   // When press play in the html
   document.getElementById('play').onclick = function onclickplay() {
-    connected = false;
-    socket.disconnect();
     login();
   };
-  login();
+  // login();
   document.getElementById('login').onclick = function onclickplay() {
     login2();
   };
-  socket.on('updatepipis', updatepeeps);
-  socket.on('updateyamies', updateyamies);
-  socket.on('warfeilddata', warfeilddata);
 }
 
 // functions
@@ -168,8 +144,8 @@ function searchindexwithid(id, Players) {
     if (Players[i].id === id) {
       return i;
     }
-    return false;
   }
+  return false;
 }
 function calculatemid(arraydots) {
   this.Mid = function mido() { this.x = 0; this.y = 0; };
@@ -187,12 +163,12 @@ function calculatemid(arraydots) {
 }
 
 function draw() {
-  // if (!connected) { return; }
+  if (!connected) { return; }
   createCanvas(windowWidth, windowHeight - 22);
   translate(width / 2, height / 2);
   // search for the player in the players array
   // to find his own index and store it on indexofplayer
-  const il = searchindexwithid(player.id, players);
+  const il = searchindexwithid(socket.id, players);
   if (il !== false) {
     indexofplayer = il;
   }
@@ -217,7 +193,7 @@ function draw() {
   const data = {
     mousex: mouseX,
     mousey: mouseY,
-    id: player.id,
+    id: socket.id,
     width,
     height,
     c: [player.c1, player.c2, player.c3],
