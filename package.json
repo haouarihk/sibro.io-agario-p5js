@@ -1,39 +1,28 @@
 {
-  "name": "projectsibro",
+  "name": "sibro.io",
   "version": "1.0.0",
-  "description": "agar.io make with p5.js and sockets",
-  "main": "server.js",
-  "dependencies": {
-    "cool-ascii-faces": "^1.3.4",
-    "document": "^0.4.7",
-    "express": "^4.17.1",
-    "file": "^0.2.2",
-    "fs": "0.0.1-security",
-    "git": "^0.1.5",
-    "jQuery": "^1.7.4",
-    "p5": "^0.10.2",
-    "socket.io": "^2.3.0",
-    "system": "^2.0.1",
-    "victor": "^1.1.0"
-  },
-  "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.20.1"
-  },
+  "description": "the io game",
+  "main": ".eslintrc.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node app/server/server.js"
   },
-  "author": "",
-  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wolfpat01/sibro.io-agario-p5js.git"
   },
-  "keywords": [],
+  "keywords": [
+    "agar.io",
+    "p5.js"
+  ],
+  "author": "haouari haithem",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/wolfpat01/sibro.io-agario-p5js/issues"
   },
-  "homepage": "https://github.com/wolfpat01/sibro.io-agario-p5js#readme"
+  "homepage": "https://github.com/wolfpat01/sibro.io-agario-p5js#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0",
+    "sockets": "^0.4.2"
+  }
 }
