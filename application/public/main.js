@@ -182,6 +182,9 @@ function draw() {
     toggleOverlay(false);
     // background(0);
     // menu.show();
+    if(document.getElementById('nickname').value.length > 10) {
+      document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0,9);
+    }
     return;
   }
   toggleOverlay(true);

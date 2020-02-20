@@ -298,15 +298,22 @@ function Connection(socket) {
       console.log(`${socket.id} sliced in index of ${i}`);
     }
   });
+  function verifynickname(nickname){
+    if(nickname.length > 10) {
+      return nickname.substring(0,9);
+    }
+    return nickname;
+  }
   // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
     const generatedXY = new GenerateX(newplayer, foods);
     blobs.push(new Blob(socket.id, generatedXY.xx, generatedXY.yy, StartingSize, 0));
+
     players.push(new SmallPipi(socket.id,
       blobs,
       newplayer.c,
-      newplayer.nickname));
+      verifynickname(newplayer.nickname)));
     const settingsofplayer = {
       blob2: blobs,
       id: socket.id,
