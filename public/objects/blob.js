@@ -1,4 +1,5 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable prefer-destructuring */
 /* eslint-disable no-unused-vars */
 /* eslint-disable radix */
 /* eslint-disable no-undef */

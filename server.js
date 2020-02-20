@@ -1,4 +1,5 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable radix */
 /* eslint-disable consistent-return */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable spaced-comment */
@@ -27,7 +28,7 @@ const app = express();
 const players = [];
 const foods = [];
 
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static('./public'));
 const sockets = require('socket.io');
 
 const PORT = process.env.PORT || 5000;// The port
@@ -56,7 +57,8 @@ app.use(errorHandler);*/
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
 // Food settings
 const FoodsMaxCount = 1000; // how manny foods
-const TimerForFoodMaker = 100; // how mutch to wait to make another food object
+const howmanyatatime = 50;
+const TimerForFoodMaker = 200; // how mutch to wait to make another food object
 const MaxFoodSize = 150; // how big can the food be
 const MinFoodSize = 100; // how small can the food be
 //
@@ -71,7 +73,7 @@ const MinPlayerSize = 202; // the minimume size that can the player be
 const PeriodTime = 3; // how mutch to end the split
 const PeriodTimeCounter = 300; // how mutch to end the split 2
 // world Settings
-const worldsize = 10000; // how big the world can be
+const worldsize = 50000; // how big the world can be
 const WorldSizeMin = -worldsize;
 const WorldSizeMax = worldsize;
 //
@@ -88,7 +90,7 @@ function calculatedis(x1, y1, x2, y2) {
 function coliders(other, other2, plusval) {
   const d = calculatedis(other.x, other.y, other2.x, other2.y);
 
-  if (d <= other.r + other2.r - plusval) {
+  if (d <= other.r - plusval) {
     if (other.r > other2.r) {
       return 1;
     } if (other.r === other2.r) {
@@ -104,8 +106,8 @@ function searchindexwithid(id, Players) {
     if (Players[i].id === id) {
       return i;
     }
-    return false;
   }
+  return false;
 }
 function calculatemid(arraydots) {
   this.Mid = function mido() { this.x = 0; this.y = 0; };
@@ -138,6 +140,12 @@ function Vector(velx, vely) {
     this.x = x2 - x1;
     this.y = y2 - y1;
   };
+}
+function limitNumberWithinRange(num, min, max) {
+  const MIN = min || 1;
+  const MAX = max || 20;
+  const parsed = parseInt(num);
+  return Math.min(Math.max(parsed, MIN), MAX);
 }
 ///// Generators
 function generateId() {
@@ -202,13 +210,13 @@ function Blob(id, x, y, r, Timer) {
   this.vx = 0;
   this.vy = 0;
   this.r = r;
-  this.playerid = id;
+  this.id = id;
   this.timertoeatme = Timer;
   this.eatmyself = false;
 
   this.vel = new Vector(0, 0);
   this.update = function updating(mousex, mousey, width, height) {
-    const indexofplayer = searchindexwithid(this.playerid, players);
+    const indexofplayer = searchindexwithid(this.id, players);
     if (indexofplayer !== false) {
       if (this.timertoeatme <= 0) {
         this.eatmyself = true;
@@ -237,7 +245,6 @@ function Blob(id, x, y, r, Timer) {
       // setting the magnitude
       this.vx *= (AvregePlayerSpeed / Mag);
       this.vy *= (AvregePlayerSpeed / Mag);
-
       //this.vx = this.vel.x;
       //this.vy = this.vel.y;
       //this.vel.x += this.vx;
@@ -250,22 +257,23 @@ function Blob(id, x, y, r, Timer) {
   this.split = function split() {
     let playerindex = 0;
     for (let i = 0; i < players.length; i += 1) {
-      if (players[i].id === this.playerid) {
+      if (players[i].id === this.id) {
         playerindex = i;
       }
     }
 
-    players[playerindex].blobs.push(new Blob(this.playerid,
+    players[playerindex].blobs.push(new Blob(this.id,
       this.x + 10,
       this.y + 10,
       this.r / 2,
       PeriodTime));
     this.timertoeatme = PeriodTime;
     this.r /= 2;
-    // Count tilsl the time is over and take care of it
-    if (this.timertoeatme !== 0) {
-    //setInterval(() => { this.eatmyself = true; }, this.timertoeatme);
-    }
+  };
+  this.constrain = function constrainer() {
+    // stop it from going outside of the world
+    this.x = limitNumberWithinRange(this.x, WorldSizeMin, WorldSizeMax);
+    this.y = limitNumberWithinRange(this.y, WorldSizeMin, WorldSizeMax);
   };
 }
 function SmallPipi(id, blobs, c, nickname) {
@@ -280,16 +288,30 @@ function SmallPipi(id, blobs, c, nickname) {
 ///// Events
 function Connection(socket) {
   console.log(`new connection:${socket.id}`);
-
+  socket.on('disconnect', () => {
+    console.log(`${socket.id} disconnected`);
+    socket.emit('disconnectThatSoc');
+    const i = searchindexwithid(socket.id, players);
+    if (i !== false) {
+      players.splice(i, 1);
+      console.log(`${socket.id} sliced in index of ${i}`);
+    }
+  });
   // When a new player joins
   function playerjoined(newplayer) {
     const blobs = [];
-    const generatedXY = new GenerateX(players, foods);
-    blobs.push(new Blob(newplayer.id, generatedXY.xx, generatedXY.yy, StartingSize, 0));
-    players.push(new SmallPipi(newplayer.id,
+    const generatedXY = new GenerateX(newplayer, foods);
+    blobs.push(new Blob(socket.id, generatedXY.xx, generatedXY.yy, StartingSize, 0));
+    players.push(new SmallPipi(socket.id,
       blobs,
       newplayer.c,
       newplayer.nickname));
+    const settingsofplayer = {
+      blob2: blobs,
+      id: socket.id,
+      minisizetosplit: MinSizeToSplit,
+    };
+    socket.emit('set!', settingsofplayer);
   }
   socket.on('ready', playerjoined);
 
@@ -305,11 +327,11 @@ function Connection(socket) {
   // update every blob's velocity
   function updateplayer(uplayer) {
     if (socket.id !== uplayer.id) {
-      // console.log(socket.id + " is not matched");
+      //console.log(socket.id + " is not matched");
     }
     // let addthere = 0;
     for (let index = 0; index < players.length; index += 1) {
-      if (players[index].id === uplayer.id) {
+      if (players[index].id === socket.id) {
         for (let i = 0; i < players[index].blobs.length; i += 1) {
           players[index].blobs[i].id = socket.id;
           players[index].blobs[i].update(uplayer.mousex,
@@ -317,7 +339,7 @@ function Connection(socket) {
             uplayer.width,
             uplayer.height);
         }
-      } // else { addthere += 1; }
+      } // else {console.log('Someonelse did ,' + uplayer.mousex);}
     }
     // if (addthere === players.length) { socket.disconnect(); }
   }
@@ -340,43 +362,64 @@ function Connection(socket) {
     }
   }
   socket.on('split', splitplayer);
+  // to make sure that non of no players have body
+  for (let i = 0; i < players.length; i += 1) {
+    let at = false;
+    for (let j = 0; j < io.sockets.length; j += 1) {
+      if (io.sockets[j].id === players[i].id) {
+        at = true;
+      }
+    }
+    if (at === false) {
+      // players.splice(i, 1);
+    }
+  }
 }
 
-// When someone disconnect
-function disconnection(socket) {
-  console.log('Got disconnect!');
-
-  const i = players.indexOf(socket);
-  players.splice(i, 1);
-}
+// When someone connect
 io.sockets.on('connection', Connection);
-io.sockets.on('disconnect', disconnection);
 
 
 ///// functions
 // rerange by their weight
 function compare(a, b) {
-  if (a.r < b.r) {
-    return 1;
+  // Use toUpperCase() to ignore character casing
+  const playerA = a.r;
+  const playerB = b.r;
+
+  let comparison = 0;
+  if (playerA > playerB) {
+    comparison = 1;
+  } else if (playerA < playerB) {
+    comparison = -1;
   }
-  if (a.r > b.r) {
-    return -1;
-  }
-  return 0;
+  return comparison;
 }
+
 function comparisionwithweight() {
+  // it doesn't work yet
   players.sort(compare);
 }
 
 
 ///// Repeaters
 function foodgen() {
-  const newfood = new Food();
-  newfood.generate();
-  if (foods.length < FoodsMaxCount) {
-    foods.push(newfood);
-    console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
+  for (let i = 0; i < howmanyatatime; i += 1) {
+    const newfood = new Food();
+    newfood.generate();
+    if (foods.length < FoodsMaxCount) {
+      foods.push(newfood);
+      console.log(`${foods.length}/${FoodsMaxCount} new food with id: ${newfood.id} in ${newfood.x},${newfood.y}`);
+    }
   }
+  const fooddata = [];
+  for (let i = 0; i < foods.length; i += 1) {
+    // data for food gen
+    fooddata.push({
+      id: foods[i].id, x: foods[i].x, y: foods[i].y, r: foods[i].r, type: foods[i].type,
+    });
+  }
+  io.sockets.emit('updateyamies', fooddata);
 }
 function gettingOld() {
   for (let i = 0; i < players.length; i += 1) {
@@ -394,7 +437,10 @@ function Broadcast() {
     let rad = 0;
     for (let j = 0; j < players[i].blobs.length; j += 1) {
       rad += players[i].blobs[j].r;
+      // constraining a player to not go outside the world
+      players[i].blobs[j].constrain();
     }
+    // giving the raduse of his all blobs to him
     players[i].r = rad;
   }
   comparisionwithweight();
@@ -411,64 +457,64 @@ function Broadcast() {
     });
   }
   // broatcasting food data
-  const fooddata = [];
-  for (let i = 0; i < foods.length; i += 1) {
-    // data for food gen
-    fooddata.push({
-      id: foods[i].id, x: foods[i].x, y: foods[i].y, r: foods[i].r, type: foods[i].type,
-    });
-  }
   // Eat Events
   if (players.length !== 0) {
-    for (let i = 0; i < players.length; i += 1) {
-      for (let l = 0; l < players[i].blobs.length; l += 1) {
+    if (players.length !== 0) {
+      for (let i = 0; i < players.length; i += 1) {
+        for (let l = 0; l < players[i].blobs.length; l += 1) {
         // player(players[i]) eat food
-        for (let j = 0; j < foods.length; j += 1) {
+          for (let j = 0; j < foods.length; j += 1) {
           // canlculate distance of each blob with each food
-          if (foods !== undefined) {
-            const killer = coliders(players[i].blobs[l], foods[j], 0);
-            if (killer === 1) {
-              players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.2);
-              foods.splice(j, 1);
+            if (foods !== undefined) {
+              const killer = coliders(players[i].blobs[l], foods[j], 0);
+              if (killer === 1) {
+                players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.2);
+                foods.splice(j, 1);
+              }
             }
           }
-        }
-        //if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
-        // player(players[i]) eat other player
-        for (let j = 0; j < players.length; j += 1) {
-          for (let k = 0; k < players[j].blobs.length; k += 1) {
+          //if (players[j].velx === 0) { if (players[j].vely === 0) players.splice(j, 1); }
+          // player(players[i]) eat other player
+          for (let j = 0; j < players.length; j += 1) {
+            for (let k = 0; k < players[j].blobs.length; k += 1) {
             // If its not the same player
-            if (players[j] !== players[i] && players.length > 1) {
-              const killer = coliders(players[i].blobs[l],
-                players[j].blobs[k], 0);
+              if (players.length > 1) {
+                if (players[j] !== players[i] ) {
+                  const killer = coliders(players[i].blobs[l],
+                    players[j].blobs[k], 0);
 
-              if (killer !== 0) {
-                if (killer === 1) {
-                  players[i].blobs[l].r += players[j].blobs[k].r * 0.8;
-                  players[j].blobs.splice(k, 1);
-                } else if (killer === 2) {
-                  players[j].blobs[k].r += players[i].blobs[l].r * 0.8;
-                  players[i].blobs.splice(l, 1);
+                  if (killer !== 0) {
+                    if (killer === 1) {
+                      players[i].blobs[l].r += players[j].blobs[k].r * 0.8;
+                      players[j].blobs.splice(k, 1);
+                    } else if (killer === 2) {
+                      players[j].blobs[k].r += players[i].blobs[l].r * 0.8;
+                      players[i].blobs.splice(l, 1);
+                    }
+                    //let warfeilddata = { aterid: ater, atenid: aten };
+                    //io.sockets.emit('warfeilddata', warfeilddata);
+                  }
+                } else
+                if (players[i].blobs[k].eatmyself) {
+                  if (players[i].blobs[k] !== players[i].blobs[j]) {
+                    const colition = 3;// coliders(players[i].blobs[k], players[i].blobs[j]);
+                    if (colition !== 3) {
+                      const minDist = players[i].blobs[j].r / 2 + players[i].blobs[k].d / 2;
+                      const dx = players[i].blobs[j].x - players[i].blobs[k].x;
+                      const dy = players[i].blobs[j].y - players[i].blobs[k].y;
+                      const angle = Math.atan2(dy, dx);
+                      const targetX = players[i].blobs[k].x + Math.cos(angle) * (minDist);
+                      const targetY = players[i].blobs[k].y + Math.sin(angle) * (minDist);
+                      const ax = (targetX - players[i].blobs[j].x) * 0.5;
+                      const ay = (targetY - players[i].blobs[j].y) * 0.5;
+                      players[i].blobs[k].vx -= ax;
+                      players[i].blobs[k].vy -= ay;
+                      console.log(`${ax} , ${ay}`);
+                      players[i].blobs[j].vx += ax;
+                      players[i].blobs[j].vy += ay;
+                    }
+                  }
                 }
-                //let warfeilddata = { aterid: ater, atenid: aten };
-                //io.sockets.emit('warfeilddata', warfeilddata);
-              }
-            } else if (players[i].blobs[k].eatmyself) {
-              const colition = coliders(players[i].blobs[k], players[i].blobs[j]);
-              if (colition !== 3) {
-                const minDist = players[i].blobs[j].r / 2 + players[i].blobs[k].d / 2;
-                const dx = players[i].blobs[j].x - players[i].blobs[k].x;
-                const dy = players[i].blobs[j].y - players[i].blobs[k].y;
-                const angle = Math.atan2(dy, dx);
-                const targetX = players[i].blobs[k].x + Math.cos(angle) * (minDist);
-                const targetY = players[i].blobs[k].y + Math.sin(angle) * (minDist);
-                const ax = (targetX - players[i].blobs[j].x) * 0.5;
-                const ay = (targetY - players[i].blobs[j].y) * 0.5;
-                players[i].blobs[k].vx -= ax;
-                players[i].blobs[k].vy -= ay;
-                console.log(`${ax} , ${ay}`);
-                players[i].blobs[j].vx += ax;
-                players[i].blobs[j].vy += ay;
               }
             }
           }
@@ -476,8 +522,6 @@ function Broadcast() {
       }
     }
   }
-
-  io.sockets.emit('updateyamies', fooddata);
   io.sockets.emit('updatepipis', playersdata);
 }
 function splitingtimeer() {
