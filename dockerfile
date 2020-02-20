@@ -1,7 +1,7 @@
 FROM node:7
-WORKDIR /app2
-COPY package.json /app2
+WORKDIR /app
+COPY package.json /app
 RUN npm install
-COPY . /app2
-CMD node /app/server/server.js
+COPY . /app
+CMD node server.js
 EXPOSE 5000

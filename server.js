@@ -28,7 +28,7 @@ const app = express();
 const players = [];
 const foods = [];
 
-app.use(express.static('./app/public'));
+app.use(express.static('./application/public'));
 const sockets = require('socket.io');
 
 const PORT = process.env.PORT || 5000;// The port
