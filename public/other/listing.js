@@ -14,7 +14,7 @@ class Listing {
           fill(255);
           textAlign(LEFT);
           textSize(20);
-          text(`${i + 1})${this.players[i].nickname}`, this.x + 5, this.y + i * 20 + 5, 20, 20);
+          text(`${i + 1})_${this.players[i].nickname}`, this.x + 5, this.y + i * 20 + 5, 20, 20);
           counter += 1;
         }
       }
