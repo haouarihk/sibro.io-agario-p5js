@@ -56,10 +56,10 @@ app.use(errorHandler);*/
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
 // Food settings
-const FoodsMaxCount = 1000; // how manny foods
-const howmanyatatime = 50;
+const FoodsMaxCount = 500; // how manny foods
+const howmanyatatime = 100;
 const TimerForFoodMaker = 200; // how mutch to wait to make another food object
-const MaxFoodSize = 150; // how big can the food be
+const MaxFoodSize = 300; // how big can the food be
 const MinFoodSize = 100; // how small can the food be
 //
 // Player Settings
@@ -479,7 +479,7 @@ function Broadcast() {
             for (let k = 0; k < players[j].blobs.length; k += 1) {
             // If its not the same player
               if (players.length > 1) {
-                if (players[j] !== players[i] ) {
+                if (players[j] !== players[i]) {
                   const killer = coliders(players[i].blobs[l],
                     players[j].blobs[k], 0);
 
