@@ -4,7 +4,7 @@
   "description": "the io game",
   "main": ".eslintrc.js",
   "scripts": {
-    "test": "node app/server/server.js"
+    "start": "node app/server/server.js"
   },
   "repository": {
     "type": "git",
