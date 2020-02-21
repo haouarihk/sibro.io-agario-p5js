@@ -73,6 +73,7 @@ const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player 
 const MinPlayerSize = 202; // the minimume size that can the player be
 const PeriodTime = 3; // how mutch to end the split
 const PeriodTimeCounter = 300; // how mutch to end the split 2
+const ZoomView = 8;
 // world Settings
 const worldsize = 50000; // how big the world can be
 const WorldSizeMin = -worldsize;
@@ -343,9 +344,9 @@ function Connection(socket) {
   // update every blob's velocity
   function updateplayer(uplayer) {
     if (socket.id !== uplayer.id) {
-      //console.log(socket.id + " is not matched");
+      // console.log(socket.id + " is not matched");
+      // socket.emit('disconnectThatSoc');
     }
-    // let addthere = 0;
     for (let index = 0; index < players.length; index += 1) {
       if (players[index].id === socket.id) {
         for (let i = 0; i < players[index].blobs.length; i += 1) {
@@ -360,7 +361,6 @@ function Connection(socket) {
       // update his middle dot 
       players[index].calculatemidofhisblobs();
     }
-    // if (addthere === players.length) { socket.disconnect(); }
   }
   socket.on('updateplayer', updateplayer);
 
@@ -430,40 +430,7 @@ function foodgen() {
       foods.push(newfood);
     }
   }
-  const fooddata = [];
-  for (let i = 0; i < foods.length; i += 1) {
-    // data for food gen
-    fooddata.push({
-      id: foods[i].id, x: foods[i].x, y: foods[i].y, r: foods[i].r, type: foods[i].type,
-    });
-  }
-  for(var j = 0 ; j< players.length; j += 1){
-    const playersdata = [];
-    for (let i = 0; i < foods.length; i += 1) {
-      // see if its in the same range
-      let dist = calculatedis(
-        players[j].middot.x,
-        players[j].middot.y,
-        foods[i].x,
-        foods[i].y);
-      let itsok = false;
-      if(players[j].zoom * 5  > dist) {
-        itsok = true;
-        // console.log('GOT SOMETHING '+players[j].zoom  +','+ dist );
-      }
-
-      // push the data
-      fooddata.push({
-        isitok: itsok,
-        id: (itsok)?foods[i].id:false,
-        x: (itsok)?foods[i].x:false,
-        y: (itsok)?foods[i].y:false,
-        r: (itsok)?foods[i].r:false,
-        type: (itsok)?foods[i].type:false,
-      });
-    }
-    io.to(players[j].id).emit('updateyamies',fooddata);
-  }
+  
   // io.sockets.emit('updateyamies', fooddata);
 }
 function gettingOld() {
@@ -551,7 +518,33 @@ function Updates() {
   }
   if(players.length>0){
   for(var j = 0 ; j< players.length; j += 1){
+    const fooddata = [];
     const playersdata = [];
+    // Updating foods
+    for (let i = 0; i < foods.length; i += 1) {
+      // see if its in the same range
+      let dist = calculatedis(
+        players[j].middot.x,
+        players[j].middot.y,
+        foods[i].x,
+        foods[i].y);
+      let itsok = false;
+      if(players[j].zoom * ZoomView  > dist) {
+        itsok = true;
+        // console.log('GOT SOMETHING '+players[j].zoom  +','+ dist );
+      }
+
+      // push the data
+      fooddata.push({
+        isitok: itsok,
+        id: (itsok)?foods[i].id:false,
+        x: (itsok)?foods[i].x:false,
+        y: (itsok)?foods[i].y:false,
+        r: (itsok)?foods[i].r:false,
+        type: (itsok)?foods[i].type:false,
+      });
+    }
+    // Updating players
     for (let i = 0; i < players.length; i += 1) {
       // see if its in the same range
       let dist = calculatedis(
@@ -560,7 +553,7 @@ function Updates() {
         players[i].middot.x,
         players[i].middot.y);
       let itsok = false;
-      if(players[j].zoom * 5  > dist) {
+      if(players[j].zoom * ZoomView  > dist) {
         itsok = true;
        // console.log('GOT SOMETHING '+players[j].zoom  +','+ dist );
       }
@@ -578,6 +571,7 @@ function Updates() {
         nickname: players[i].nickname,
       });
     }
+    io.to(players[j].id).emit('updateyamies',fooddata);
     io.to(players[j].id).emit('updatepipis',playersdata);
   }
 }
