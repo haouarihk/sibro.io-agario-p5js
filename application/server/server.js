@@ -282,7 +282,15 @@ function SmallPipi(id, blobs, c, nickname) {
   this.c = c;
   this.r = 0;
   this.blobs = blobs;
+  this.zoom = 1;
   this.nickname = nickname;
+  this.middot = new Vector(0,0);
+  // this function for saving ram
+  this.calculatemidofhisblobs = function cmohb(){
+    const newmiddot = calculatemid(this.blobs);
+    this.middot.x = newmiddot.x;
+    this.middot.y = newmiddot.y;
+  }
 }
 
 
@@ -346,8 +354,11 @@ function Connection(socket) {
             uplayer.mousey,
             uplayer.width,
             uplayer.height);
+          players[index].zoom = uplayer.zoomsize;
         }
-      } // else {console.log('Someonelse did ,' + uplayer.mousex);}
+      }
+      // update his middle dot 
+      players[index].calculatemidofhisblobs();
     }
     // if (addthere === players.length) { socket.disconnect(); }
   }
@@ -426,7 +437,34 @@ function foodgen() {
       id: foods[i].id, x: foods[i].x, y: foods[i].y, r: foods[i].r, type: foods[i].type,
     });
   }
-  io.sockets.emit('updateyamies', fooddata);
+  for(var j = 0 ; j< players.length; j += 1){
+    const playersdata = [];
+    for (let i = 0; i < foods.length; i += 1) {
+      // see if its in the same range
+      let dist = calculatedis(
+        players[j].middot.x,
+        players[j].middot.y,
+        foods[i].x,
+        foods[i].y);
+      let itsok = false;
+      if(players[j].zoom * 5  > dist) {
+        itsok = true;
+        // console.log('GOT SOMETHING '+players[j].zoom  +','+ dist );
+      }
+
+      // push the data
+      fooddata.push({
+        isitok: itsok,
+        id: (itsok)?foods[i].id:false,
+        x: (itsok)?foods[i].x:false,
+        y: (itsok)?foods[i].y:false,
+        r: (itsok)?foods[i].r:false,
+        type: (itsok)?foods[i].type:false,
+      });
+    }
+    io.to(players[j].id).emit('updateyamies',fooddata);
+  }
+  // io.sockets.emit('updateyamies', fooddata);
 }
 function gettingOld() {
   for (let i = 0; i < players.length; i += 1) {
@@ -439,26 +477,13 @@ function gettingOld() {
 }
 // updating/sending info of everything is hppening to the players
 function Updates() {
-  // update player radiuse bassed on his blobs
-  const playersdata = [];
-  for (let i = 0; i < players.length; i += 1) {
-    playersdata.push({
-      blobs: players[i].blobs,
-      id: players[i].id,
-      x: players[i].x,
-      y: players[i].y,
-      r: players[i].r,
-      c: players[i].c,
-      nickname: players[i].nickname,
-    });
-  }
-  // broatcasting food data
   // Eat Events
   if (players.length !== 0) {
     if (players.length !== 0) {
       for (let i = 0; i < players.length; i += 1) {
         let rad = 0;
         for (let l = 0; l < players[i].blobs.length; l += 1) {
+          // calculate raidiuse of all his blobs
           rad += players[i].blobs[l].r;
           // constraining a player to not go outside the world
           players[i].blobs[l].constrain();
@@ -524,7 +549,39 @@ function Updates() {
       }
     }
   }
-  io.sockets.emit('updatepipis', playersdata);
+  if(players.length>0){
+  for(var j = 0 ; j< players.length; j += 1){
+    const playersdata = [];
+    for (let i = 0; i < players.length; i += 1) {
+      // see if its in the same range
+      let dist = calculatedis(
+        players[j].middot.x,
+        players[j].middot.y,
+        players[i].middot.x,
+        players[i].middot.y);
+      let itsok = false;
+      if(players[j].zoom * 5  > dist) {
+        itsok = true;
+       // console.log('GOT SOMETHING '+players[j].zoom  +','+ dist );
+      }
+
+      // push the data
+      playersdata.push({
+        isitok: itsok,
+        id: players[i].id,
+        x:(itsok)?players[i].x:false,
+        y:(itsok)?players[i].y:false,
+        r:players[i].r,
+
+        blobs:(itsok)?players[i].blobs:false,
+        c:(itsok)?players[i].c:false,
+        nickname: players[i].nickname,
+      });
+    }
+    io.to(players[j].id).emit('updatepipis',playersdata);
+  }
+}
+  // io.sockets.emit('updatepipis', playersdata);
 }
 function splitingtimeer() {
   for (let i = 0; i < players.length; i += 1) {
