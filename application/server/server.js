@@ -460,7 +460,7 @@ function Updates() {
             if (foods !== undefined) {
               const killer = coliders(players[i].blobs[l], foods[j], 0);
               if (killer === 1) {
-                players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.2);
+                players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.02);
                 foods.splice(j, 1);
               }
             }

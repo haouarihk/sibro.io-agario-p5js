@@ -16,6 +16,9 @@ let password = '';
 let MinSizeToSplit = 200;
 let color = [];
 let connected = false;
+function preload() {
+ br = loadFont('fonts/br2.ttf');
+}
 // Login
 function updatepeeps(pips) {
   players = [];
@@ -195,7 +198,7 @@ function draw() {
   }
   toggleOverlay(true);
   // menu.hide();
-  background(255);
+  background(0);
   const list = new Listing((6 * width) / 7, height / 20, players);
   list.show();
 
@@ -220,9 +223,11 @@ function draw() {
       foods[index].show();
     }
   }
+  stroke(255);
+  strokeWeight(20);
   for (let index = 0; index < players.length; index += 1) {
     if(players[index]) {
-      players[index].show();
+      players[index].show(br);
     }
   }
 

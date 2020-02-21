@@ -29,7 +29,10 @@ class Blob {
     var maxX = 49980;
     var minY = -49980;
     var maxY = 49980;
-    this.show = function showing() {
+    this.preload = function preload(){
+      br = loadFont('fonts/br.ttf');
+    }
+    this.show = function showing(br) {
       if (this.x === null) { this.x = 0; }
       if (this.y === null) { this.y = 0; }
       // body
@@ -66,11 +69,16 @@ class Blob {
       endShape(CLOSE);
 
       // text
+
+      textFont(br);
       fill(255);
+      stroke(8);
       textSize(0.3 * this.r);
       textAlign(CENTER);
       text([parseInt(this.r)], this.x - 2, this.y + [parseInt(this.r)] / 2);
-      fill(255);
+      fill(255,0,0);
+      stroke(0);
+      strokeWeight(10)
       textSize(0.3 * this.r);
       textAlign(CENTER);
       text(this.nickname, this.x - 2, this.y);
