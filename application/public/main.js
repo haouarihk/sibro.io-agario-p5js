@@ -217,11 +217,13 @@ function draw() {
 
   for (let index = 0; index < foods.length; index += 1) {
     if(foods[index]) {
-    foods[index].show();
+      foods[index].show();
     }
   }
   for (let index = 0; index < players.length; index += 1) {
-    players[index].show();
+    if(players[index]) {
+      players[index].show();
+    }
   }
 
   player.update();
