@@ -4,7 +4,7 @@
   "description": "the io game",
   "main": ".eslintrc.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node application/server/server.js"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/wolfpat01/sibro.io-agario-p5js#readme",
   "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "^2.3.0"
+    "express": "*",
+    "socket.io": "*"
   }
 }
