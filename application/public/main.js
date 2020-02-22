@@ -103,8 +103,8 @@ function login() {
   });
 }
 function login2() {
-  username = document.getElementById('username').value;
-  password = document.getElementById('password').value;
+  username = document.getElementById('Username').value;
+  password = document.getElementById('Password').value;
 
   const data = {
     id: socket.id,
@@ -189,15 +189,17 @@ function draw() {
   createCanvas(windowWidth, windowHeight - 22);
   // const menu = new Menu(width / 4, height / 4);
   if (!connected) {
-    toggleOverlay(false);
     // background(0);
     // menu.show();
+    document.getElementById("game").style.visibility = "hidden"; 
+    document.getElementById("Login").style.visibility = "visible"; 
     if(document.getElementById('nickname').value.length > 10) {
       document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0,9);
     }
     return;
   }
-  toggleOverlay(true);
+  document.getElementById("Login").style.visibility = "hidden"; 
+  document.getElementById("game").style.visibility = "visible";
   // menu.hide();
   background(0);
   const list = new Listing((6 * width) / 7, height / 20, players);
