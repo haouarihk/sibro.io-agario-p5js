@@ -1,38 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/addons/p5.sound.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/overlay.css">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <meta charset="utf-8" />
-
-  </head>
-  <body>
-    <div id="overlay"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/addons/p5.sound.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<link href="css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="other/jquery.js"></script>
+<script src="other/bootstrap.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+<div id="game"></div>
     <script src="main.js"></script>
     <script src="other/overlay.js"></script>
     <script src="objects/blob.js"></script>
     <script src="objects/player.js"></script>
     <script src="objects/food.js"></script>
-
+   
+<div class="Login" id="Login">
+    <h1 color="green">Sibro.io</h1>
+    <h1>Play</h1>
+    <input type="text" name="u" placeholder="Nickname" id = "nickname" />
+    <button id="play" type="submit" class="btn btn-primary btn-block btn-large">Let me in.</button>
+    <br/>
+    <hr size="6" width="100%"  color="white">
+    <h1>Login</h1>
+    <form method="post">
+    	<input id = "Username" type="text" name="u" placeholder="Username" required="required" />
+        <input id = "Password"  type="password" name="p" placeholder="Password" required="required" />
+        <button id="login" type="submit" class="btn btn-primary btn-block btn-large">Login</button>
+    </form>
     
-      <!-- End Overlay -->
-      <!-- Start Special Centered Box -->
-    <div id="specialBox">
-
-      Name: <input type="text" id="nickname" value="Guest">
-      <button id="play">start</button> <br /><br />
-      This part not for users yet,<br /> <br /> 
-      username:<input type="text" id="username" value="Guest"><br /> 
-      password:<input type="password" id="password" value="Guest"> <br /><br />
-      <button id="login">Login</button>
-    </div>
-    <!-- End Special Centered Box -->
-    <!-- Start Normal Page Content -->
-    <div id="wrapper">
-
-    </div>
-  </body>
-</html>
+    <br>
+   
+</div>
