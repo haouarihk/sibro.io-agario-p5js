@@ -16,23 +16,29 @@ let password = '';
 let MinSizeToSplit = 200;
 let color = [];
 let connected = false;
+function preload() {
+ br = loadFont('fonts/br2.ttf');
+}
 // Login
 function updatepeeps(pips) {
   players = [];
 
   for (let i = 0; i < pips.length; i += 1) {
     const blobs = [];
-    // players[i].updatepos(pips[i].x, pips[i].y);
     for (let j = 0; j < pips[i].blobs.length; j += 1) {
-      blobs.push(new Blob(pips[i].nickname,
-        pips[i].blobs[j].x,
-        pips[i].blobs[j].y,
-        pips[i].blobs[j].r,
-        pips[i].c));
+      if(pips[i].isitok){
+        blobs.push(new Blob(pips[i].nickname,
+          pips[i].blobs[j].x,
+          pips[i].blobs[j].y,
+          pips[i].blobs[j].r,
+          pips[i].c));
+
+      }
     }
     players[i] = new Player(pips[i].id, pips[i].nickname);
-    players[i].blobs = blobs;
-    // console.log(" has "+ blobs.length);
+    if(pips[i].isitok){
+      players[i].blobs = blobs;
+    }
     if (socket.id === pips[i].id) {
       player = players[i];
       indexofplayer = i;
@@ -42,13 +48,17 @@ function updatepeeps(pips) {
 function updateyamies(yam) {
   foods = [];
   for (let i = 0; i < yam.length; i += 1) {
+    if(yam[i].isitok) {
     foods[i] = new Food(yam.type, yam[i].x, yam[i].y, yam[i].r, yam[i].id);
+    foods[i].type = yam.type;
+    }
   }
 }
 // spectating
 function imspectating() {
 
 }
+// not using that function 
 function warfeilddata(data) {
   if (data.aterid === player.id) {
     console.log('You KILLED HIM');
@@ -182,11 +192,14 @@ function draw() {
     toggleOverlay(false);
     // background(0);
     // menu.show();
+    if(document.getElementById('nickname').value.length > 10) {
+      document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0,9);
+    }
     return;
   }
   toggleOverlay(true);
   // menu.hide();
-  background(255);
+  background(0);
   const list = new Listing((6 * width) / 7, height / 20, players);
   list.show();
 
@@ -207,10 +220,16 @@ function draw() {
   player.midpoint = middot;
 
   for (let index = 0; index < foods.length; index += 1) {
-    foods[index].show();
+    if(foods[index]) {
+      foods[index].show();
+    }
   }
+  stroke(255);
+  strokeWeight(20);
   for (let index = 0; index < players.length; index += 1) {
-    players[index].show();
+    if(players[index]) {
+      players[index].show(br);
+    }
   }
 
   player.update();
@@ -219,6 +238,7 @@ function draw() {
     mousex: mouseX,
     mousey: mouseY,
     // id: socket.id,
+    zoomsize:parseInt(zoom),
     width,
     height,
     c: [player.c1, player.c2, player.c3],

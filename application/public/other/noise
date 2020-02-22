@@ -1,0 +1,22 @@
+var dotquality = 2000;
+function setup() {
+  createCanvas(800, 600);
+}
+
+function draw() {
+  background(0);
+  translate(width/2,height/2);
+  stroke(255);
+  var middotx = 0;
+  var middoty = 0;
+  beginShape();
+  
+  for(let i =0; i< dotquality;i++) {
+    var r = noise(i) * 300;
+    var angle = i * 2 * PI / dotquality;
+    var dx = r * cos(angle);
+    var dy = r * sin(angle);
+    vertex(middotx + dx, middoty + dy);
+  }
+  endShape();
+}

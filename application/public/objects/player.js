@@ -28,9 +28,9 @@ class Player {
       this.pos.x = newx;
       this.pos.y = newy;
     };
-    this.show = function showing() {
+    this.show = function showing(br) {
       for (let i = 0; i < this.blobs.length; i += 1) {
-        this.blobs[i].show();
+        this.blobs[i].show(br);
       }
     };
     this.constrain = function constrainer() {
