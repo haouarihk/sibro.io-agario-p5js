@@ -50,6 +50,7 @@ function updateyamies(yam) {
   for (let i = 0; i < yam.length; i += 1) {
     if(yam[i].isitok) {
     foods[i] = new Food(yam.type, yam[i].x, yam[i].y, yam[i].r, yam[i].id);
+    foods[i].type = yam.type;
     }
   }
 }

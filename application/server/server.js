@@ -56,24 +56,29 @@ app.use(errorHandler);*/
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
 const comparisonTimer = 100; // how mutch to refresh the Top 10 players list
+//
 // Food settings
-const FoodsMaxCount = 500; // how manny foods
-const howmanyatatime = 200;
+const FoodsMaxCount = 500; // how manny foods (default 500)
+const howManyEvrytime = 200; // how much everytime (default 200)
 const TimerForFoodMaker = 200; // how mutch to wait to make another food object
-const MaxFoodSize = 300; // how big can the food be
-const MinFoodSize = 100; // how small can the food be
+const MaxFoodSize = 300; // how big can the food be (default 300)
+const MinFoodSize = 100; // how small can the food be (default 100)
+const howmanytypes = 2; // how many kinds of food (don't touch that if you haven't read the code) (default 2)
+const fortype1toshowup = 20;
+const fortype2toshowup = 23;
 //
 // Player Settings
-const StartingSize = 1200; // in what size the player start with
-const TimerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down
-const TimerPlayersUpdating = 24; // how mutch to wait till the server sends player info
-const AvregePlayerSpeed = 60000; // how mutch speed can the player have
-const MinSizeToSplit = 400; // the minimume size for the player to split
-const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have
-const MinPlayerSize = 202; // the minimume size that can the player be
-const PeriodTime = 3; // how mutch to end the split
-const PeriodTimeCounter = 300; // how mutch to end the split 2
-const ZoomView = 8;
+const StartingSize = 1200; // in what size the player start with (default 1200)
+const TimerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down (default 5000)
+const TimerPlayersUpdating = 24; // how mutch to wait till the server sends player info (default 24)
+const AvregePlayerSpeed = 60000; // how mutch speed can the player have (default 60000)
+const MinSizeToSplit = 400; // the minimume size for the player to split (default 400)
+const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have (default 8)
+const MinPlayerSize = 200; // the minimume size that can the player be (default 200)
+const PeriodTime = 3; // how mutch to end the split (default 3)
+const PeriodTimeCounter = 300; // how mutch to end the split 2 (default 300)
+const ZoomView = 8; // how much can the player see the world (default 8)
+//
 // world Settings
 const worldsize = 50000; // how big the world can be
 const WorldSizeMin = -worldsize;
@@ -192,7 +197,17 @@ function GenerateX(ppls, foodi) {
   }
   return null;
 }
+function typegenerator() {
+  let types = [];
+  for(let i = 0; i < fortype1toshowup; i +=1) {
+    types[i] = 1;
+  }
+  for(let i = fortype1toshowup; i < fortype2toshowup; i +=1) {
+    types[i] = 2;
+  }
 
+  return types[parseInt(Math.random() * (types.length - 1))];
+}
 ///// Classes
 function Food() {
   this.x = 0;
@@ -204,6 +219,7 @@ function Food() {
     this.y = saved.yy;
     this.id = generateId();
     this.r = Math.floor(Math.random() * MaxFoodSize) + MinFoodSize;
+    this.type = typegenerator();
   };
 }
 function Blob(id, x, y, r, Timer) {
@@ -423,7 +439,7 @@ function comparisionwithweight() {
 
 ///// Repeaters
 function foodgen() {
-  for (let i = 0; i < howmanyatatime; i += 1) {
+  for (let i = 0; i < howManyEvrytime; i += 1) {
     const newfood = new Food();
     newfood.generate();
     if (foods.length < FoodsMaxCount) {
@@ -516,6 +532,7 @@ function Updates() {
       }
     }
   }
+  // updating stuff
   if(players.length>0){
   for(var j = 0 ; j< players.length; j += 1){
     const fooddata = [];
@@ -544,6 +561,7 @@ function Updates() {
         type: (itsok)?foods[i].type:false,
       });
     }
+
     // Updating players
     for (let i = 0; i < players.length; i += 1) {
       // see if its in the same range

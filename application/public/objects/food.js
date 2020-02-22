@@ -6,13 +6,21 @@ class Food {
     this.id = id;
     this.x = x;
     this.y = y;
+    // type 0 is the normal type
+    // type 1 is the eat to split type usually bigger than the avrege size
     this.type = type;
     this.r = r;
     this.show = function showing() {
-      // if (type === 0) {
-      fill(0, 255, 0);
-      ellipse(this.x, this.y, this.r, this.r);
-      // }
-    };
+      switch (1) {
+        case 1:
+          fill(0, 250, 0);
+          ellipse(this.x, this.y, this.r, this.r);
+          break;
+        case 2:
+          fill(0, 255, 0);
+          ellipse(this.x, this.y, this.r * 2, this.r * 2);
+          break;
+        }
+      };
+    }
   }
-}
