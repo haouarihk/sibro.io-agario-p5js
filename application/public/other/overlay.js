@@ -22,7 +22,7 @@ class Listing {
     this.y = y;
     this.count = 10;
     this.show = function showtext() {
-      fill(200);
+      fill(50);
       rect((6 * width) / 7, height / 20, 200, 400);
       let counter = 0;
       for (let i = players.length - 1; i >= 0; i -= 1) {

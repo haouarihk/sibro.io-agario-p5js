@@ -58,7 +58,7 @@ const server = app.listen(PORT, () => console.log(`Server is listening on port $
 const comparisonTimer = 100; // how mutch to refresh the Top 10 players list
 // Food settings
 const FoodsMaxCount = 500; // how manny foods
-const howmanyatatime = 100;
+const howmanyatatime = 200;
 const TimerForFoodMaker = 200; // how mutch to wait to make another food object
 const MaxFoodSize = 300; // how big can the food be
 const MinFoodSize = 100; // how small can the food be

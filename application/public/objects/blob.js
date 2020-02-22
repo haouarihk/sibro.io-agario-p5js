@@ -45,8 +45,8 @@ class Blob {
       for(let i =0; i< TWO_PI;i += PI/40) {
         var ofsetx = map(cos(i),-1,1,0,10);
         var ofsety = map(sin(i),-1,1,0,10);
-        var r = map(noise(ofsetx/2  + this.x/this.r ,ofsety/2+ this.y/this.r , timer/this.r),0,1,0,this.r/10 * 2) + this.r;
-        if((i <= PI/2 && (i >= 3 * PI / 2) && this.x < minX)) {
+        var r = map(noise(ofsetx/2  + this.x/this.r ,ofsety/2+ this.y/this.r , timer/this.r),0,1,0,this.r/10 * 0.7) + this.r;
+        /*if((i <= PI/2 && (i >= 3 * PI / 2) && this.x < minX)) {
           r = map(noise(ofsetx/2  + this.x/this.r ,ofsety/2+ this.y/this.r , timer/this.r),0,1,0,this.r/100 * 2) + this.r;
           console.log("minx");
         }
@@ -61,7 +61,7 @@ class Blob {
         if((i >= 2*PI && (i <= PI) && this.y > maxY)) {
           r = map(noise(ofsetx/2  + this.x/this.r ,ofsety/2+ this.y/this.r , timer/this.r),0,1,0,this.r/100 * 2) + this.r;
           console.log("maxy");
-        }
+        }*/
         var dx = r * cos(i);
         var dy = r * sin(i);
         vertex(middotx + dx, middoty + dy);
