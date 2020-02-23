@@ -283,7 +283,6 @@ function Blob(id, x, y, r, Timer) {
 
       this.x += (this.vx) / this.r;
       this.y += (this.vy) / this.r;
-      console.log(players[indexofplayer].id+" hkaya "+ this.x+" hkaya "+ this.y);
 
     }
    
