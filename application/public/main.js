@@ -10,7 +10,7 @@ let players = [];
 let foods = [];
 let zoom = 1;
 let indexofplayer = 0;
-let Nickname = '';
+let nickname = '';
 let username = '';
 let password = '';
 let MinSizeToSplit = 200;
@@ -69,7 +69,7 @@ function warfeilddata(data) {
 }
 function login() {
   socket = io();
-  Nickname = document.getElementById('nickname').value;
+  nickname = document.getElementById('nickname').value;
   const blobs = [];
   color = [random(50, 200), random(50, 200), random(50, 200)];
   player = new Player(socket.id, 'Guest');
@@ -77,11 +77,11 @@ function login() {
   socket.on('connect', () => {
     player.id = socket.id;
     player.blobs = blobs;
-    const data = {
-      c: color,
-      id: player.id,
-      nickname: Nickname,
-    }; socket.emit('ready', data);
+    
+    const id =player.id;
+    const data = {color,id,nickname};
+
+    socket.emit('ready', data);
     socket.on('set!', (settings) => {
       console.log(`YOOO ${socket.id}`);
       player.id = settings.id;

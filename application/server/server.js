@@ -58,21 +58,21 @@ const server = app.listen(PORT, () => console.log(`Server is listening on port $
 const comparisonTimer = 100; // how mutch to refresh the Top 10 players list
 //
 // Food settings
-const FoodsMaxCount = 500; // how manny foods (default 500)
+const foodsMaxCount = 500; // how manny foods (default 500)
 const howManyEvrytime = 200; // how much everytime (default 200)
-const TimerForFoodMaker = 200; // how mutch to wait to make another food object
-const MaxFoodSize = 300; // how big can the food be (default 300)
-const MinFoodSize = 100; // how small can the food be (default 100)
-const howmanytypes = 2; // how many kinds of food (don't touch that if you haven't read the code) (default 2)
+const timerForFoodMaker = 200; // how mutch to wait to make another food object
+const maxFoodSize = 300; // how big can the food be (default 300)
+const minFoodSize = 100; // how small can the food be (default 100)
+const howManyYypes = 2; // how many kinds of food (don't touch that if you haven't read the code) (default 2)
 const fortype1toshowup = 20;
 const fortype2toshowup = 23;
 //
 // Player Settings
-const StartingSize = 1200; // in what size the player start with (default 1200)
-const TimerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down (default 5000)
-const TimerPlayersUpdating = 24; // how mutch to wait till the server sends player info (default 24)
+const startingSize = 1200; // in what size the player start with (default 1200)
+const timerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down (default 5000)
+const timerPlayersUpdating = 24; // how mutch to wait till the server sends player info (default 24)
 const AvregePlayerSpeed = 60000; // how mutch speed can the player have (default 60000)
-const MinSizeToSplit = 400; // the minimume size for the player to split (default 400)
+const minSizeToSplit = 400; // the minimume size for the player to split (default 400)
 const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have (default 8)
 const MinPlayerSize = 200; // the minimume size that can the player be (default 200)
 const PeriodTime = 3; // how mutch to end the split (default 3)
@@ -80,46 +80,60 @@ const PeriodTimeCounter = 300; // how mutch to end the split 2 (default 300)
 const ZoomView = 8; // how much can the player see the world (default 8)
 //
 // world Settings
-const worldsize = 50000; // how big the world can be
-const WorldSizeMin = -worldsize;
-const WorldSizeMax = worldsize;
+const worldSize = 50000; // how big the world can be
+const worldSizeMin = -worldSize;
+const worldSizeMax = worldSize;
 //
 const io = sockets(server);
 console.log('server is running');
-
+const collisionState={
+  sameSize:0,
+  firstPlayerBigger:1,
+  secondPlayerBigger:2, 
+  noCollision:3
+}
 ///// Calculators
-function calculatedis(x1, y1, x2, y2) {
+function calculateDis(x1, y1, x2, y2) {
   const xx = (x1 - x2) * (x1 - x2);
   const yy = (y1 - y2) * (y1 - y2);
   const d = Math.sqrt(xx + yy);
   return d;
 }
-function coliders(other, other2, plusval) {
-  const d = calculatedis(other.x, other.y, other2.x, other2.y);
 
-  if (d <= other.r - plusval) {
-    if (other.r > other2.r) {
-      return 1;
-    } if (other.r === other2.r) {
-      return 0;
-    } if (other.r < other2.r) {
-      return 2;
+function getCollisionState(player1, player2, minDiff) {
+  const distance = calculateDis(player1.x, player1.y, player2.x, player2.y);
+
+  if (distance <= player1.r) {
+    if (player1.r > player2.r - minDiff) {
+      return collisionState.firstPlayerBigger;
+    } if (player1.r === player2.r - minDiff) {
+      return collisionState.sameSize;
+    } if (player1.r < player2.r - minDiff) {
+      return collisionState.secondPlayerBigger;
     }
   }
-  return 3;
+  return collisionState.noCollision;
 }
-function searchindexwithid(id, Players) {
-  for (let i = 0; i < Players.length; i += 1) {
-    if (Players[i].id === id) {
+
+function getIndexById(id, players) {
+  
+  for (let i = 0; i < players.length; i += 1) {
+    if (players[i].id === id) {
       return i;
     }
   }
-  return false;
+
+
+
+  return players.indexOf();
 }
+
 function calculatemid(arraydots) {
-  this.Mid = function mido() { this.x = 0; this.y = 0; };
-  const middle = new this.Mid();
+
+  const middle = { x = 0, y : 0 };
+  
   let allr = 0;
+
   for (let i = 0; i < arraydots.length; i += 1) {
     middle.x += arraydots[i].x * arraydots[i].r;
     middle.y += arraydots[i].y * arraydots[i].r;
@@ -130,24 +144,27 @@ function calculatemid(arraydots) {
   middle.y /= (arraydots.length) + allr;
   return middle;
 }
+
 function Vector(velx, vely) {
   this.x = velx;
   this.y = vely;
   this.setMag = function setmag(c) {
     const Mag = Math.sqrt(this.x * this.x + this.y * this.y);
     if (this.x === 0 && this.y === 0) {
-      this.x *= Math.random();
-      this.y *= Math.random();
+      this.x = Math.random();
+      this.y = Math.random();
     } else {
       this.x *= (c / Mag);
       this.x *= (c / Mag);
     }
   };
+
   this.vector = function vector(x1, y1, x2, y2) {
     this.x = x2 - x1;
     this.y = y2 - y1;
   };
 }
+
 function limitNumberWithinRange(num, min, max) {
   const MIN = min || 1;
   const MAX = max || 20;
@@ -156,7 +173,7 @@ function limitNumberWithinRange(num, min, max) {
 }
 ///// Generators
 function generateId() {
-  const idnew = Math.floor(Math.random() * (50000 + FoodsMaxCount));
+  const idnew = Math.floor(Math.random() * (50000 + foodsMaxCount));
   for (let i = 0; i < foods.length; i += 1) {
     if (foods.id === idnew) {
       return generateId();
@@ -164,9 +181,10 @@ function generateId() {
   }
   return 0;
 }
-function GenerateX(ppls, foodi) {
-  const x = Math.floor(Math.random() * WorldSizeMax * 2) + WorldSizeMin;
-  const y = Math.floor(Math.random() * WorldSizeMax * 2) + WorldSizeMin;
+
+function getPosition(ppls, foodi) {
+  const x = Math.floor(Math.random() * worldSizeMax * 2) + worldSizeMin;
+  const y = Math.floor(Math.random() * worldSizeMax * 2) + worldSizeMin;
   let prob = 0;
 
   for (let i = 0; i < foodi.length; i += 1) {
@@ -183,20 +201,21 @@ function GenerateX(ppls, foodi) {
           prob += 1;
         }
       }
-      const c = ppls[i].blobs[j].r - (calculatedis(ppls[i].blobs[j].x, ppls[i].blobs[j].y, x, y));
+      const c = ppls[i].blobs[j].r - (calculateDis(ppls[i].blobs[j].x, ppls[i].blobs[j].y, x, y));
       if (c < 0) {
         // prob += 1;
       }
     }
   }
   if (prob !== 0) {
-    return GenerateX(ppls, foodi);
+    return getPosition(ppls, foodi);
   }
   if (prob === 0 || posi !== 0) {
     return { xx: x, yy: y };
   }
   return null;
 }
+
 function typegenerator() {
   let types = [];
   for(let i = 0; i < fortype1toshowup; i +=1) {
@@ -208,17 +227,18 @@ function typegenerator() {
 
   return types[parseInt(Math.random() * (types.length - 1))];
 }
+
 ///// Classes
 function Food() {
   this.x = 0;
   this.y = 0;
   this.type = 0;
   this.generate = function generating() {
-    const saved = GenerateX(players, foods);
+    const saved = getPosition(players, foods);
     this.x = saved.xx;
     this.y = saved.yy;
     this.id = generateId();
-    this.r = Math.floor(Math.random() * MaxFoodSize) + MinFoodSize;
+    this.r = Math.floor(Math.random() * maxFoodSize) + minFoodSize;
     this.type = typegenerator();
   };
 }
@@ -234,8 +254,8 @@ function Blob(id, x, y, r, Timer) {
 
   this.vel = new Vector(0, 0);
   this.update = function updating(mousex, mousey, width, height) {
-    const indexofplayer = searchindexwithid(this.id, players);
-    if (indexofplayer !== false) {
+    const indexofplayer = getIndexById(this.id, players);
+    if (indexofplayer !== -1) {
       if (this.timertoeatme <= 0) {
         this.eatmyself = true;
       } else {
@@ -244,7 +264,7 @@ function Blob(id, x, y, r, Timer) {
       if (this.eatmyself === true) {
         for (let i = 0; i < players[indexofplayer].blobs.length; i += 1) {
           if (this !== players[indexofplayer].blobs[i]) {
-            const dis = coliders(this, players[indexofplayer].blobs[i],
+            const dis = getCollisionState(this, players[indexofplayer].blobs[i],
               -players[indexofplayer].blobs[i].r - this.r + 20);
             if (dis === 1) {
             // this blob will eat another blob
@@ -268,10 +288,14 @@ function Blob(id, x, y, r, Timer) {
       //this.vel.x += this.vx;
       //this.vel.y += this.vy;
       //this.vel.setMag(AvregePlayerSpeed);
+    
+      this.x += (this.vx) / this.r;
+      this.y += (this.vy) / this.r;
     }
-    this.x += (this.vx) / this.r;
-    this.y += (this.vy) / this.r;
+
+   
   };
+
   this.split = function split() {
     let playerindex = 0;
     for (let i = 0; i < players.length; i += 1) {
@@ -290,11 +314,12 @@ function Blob(id, x, y, r, Timer) {
   };
   this.constrain = function constrainer() {
     // stop it from going outside of the world
-    this.x = limitNumberWithinRange(this.x, WorldSizeMin, WorldSizeMax);
-    this.y = limitNumberWithinRange(this.y, WorldSizeMin, WorldSizeMax);
+    this.x = limitNumberWithinRange(this.x, worldSizeMin, worldSizeMax);
+    this.y = limitNumberWithinRange(this.y, worldSizeMin, worldSizeMax);
   };
 }
-function SmallPipi(id, blobs, c, nickname) {
+
+function Player(id, blobs, c, nickname) {
   this.id = id;
   this.c = c;
   this.r = 0;
@@ -317,36 +342,40 @@ function Connection(socket) {
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
     socket.emit('disconnectThatSoc');
-    const i = searchindexwithid(socket.id, players);
+    const i = getIndexById(socket.id, players);
     if (i !== false) {
       players.splice(i, 1);
       console.log(`${socket.id} sliced in index of ${i}`);
     }
   });
-  function verifynickname(nickname){
+  function checkNickname(nickname){
     if(nickname.length > 10) {
       return nickname.substring(0,9);
     }
     return nickname;
   }
   // When a new player joins
-  function playerjoined(newplayer) {
+  function newPlayer(playerInfo) {
     const blobs = [];
-    const generatedXY = new GenerateX(newplayer, foods);
-    blobs.push(new Blob(socket.id, generatedXY.xx, generatedXY.yy, StartingSize, 0));
+    const position = new getPosition(playerInfo, foods);
+    
+    blobs.push(new Blob(socket.id, position.xx, position.yy, startingSize, 0));
 
-    players.push(new SmallPipi(socket.id,
+    players.push(new Player(socket.id,
       blobs,
-      newplayer.c,
-      verifynickname(newplayer.nickname)));
+      playerInfo.color,
+      checkNickname(playerInfo.nickname)));
+
     const settingsofplayer = {
-      blob2: blobs,
+      blobs,
       id: socket.id,
-      minisizetosplit: MinSizeToSplit,
+      minSizeToSplit,
     };
+
     socket.emit('set!', settingsofplayer);
   }
-  socket.on('ready', playerjoined);
+
+  socket.on('ready', newPlayer);
 
   function Login(logindata) {
     for (let i = 0; i < objppl.length; i += 1) {
@@ -355,6 +384,7 @@ function Connection(socket) {
       }
     }
   }
+
   socket.on('login', Login);
 
   // update every blob's velocity
@@ -388,7 +418,7 @@ function Connection(socket) {
         if (players[i].blobs.length < MaxBlobsForEachPlayer) {
         // Splice
           for (let j = 0; j < players[i].blobs.length; j += 1) {
-            if (players[i].blobs[j].r > MinSizeToSplit) {
+            if (players[i].blobs[j].r > minSizeToSplit) {
               players[i].blobs[j].split();
             }
           }
@@ -415,25 +445,11 @@ function Connection(socket) {
 io.sockets.on('connection', Connection);
 
 
-///// functions
-// rerange by their weight
-function compare(a, b) {
-  // Use toUpperCase() to ignore character casing
-  const playerA = a.r;
-  const playerB = b.r;
 
-  let comparison = 0;
-  if (playerA > playerB) {
-    comparison = 1;
-  } else if (playerA < playerB) {
-    comparison = -1;
-  }
-  return comparison;
-}
 
 function comparisionwithweight() {
   // it doesn't work yet
-  players.sort(compare);
+  players.sort((player1,player2)=>player2.r-player1.r);
 }
 
 
@@ -442,7 +458,7 @@ function foodgen() {
   for (let i = 0; i < howManyEvrytime; i += 1) {
     const newfood = new Food();
     newfood.generate();
-    if (foods.length < FoodsMaxCount) {
+    if (foods.length < foodsMaxCount) {
       foods.push(newfood);
     }
   }
@@ -474,7 +490,7 @@ function Updates() {
           for (let j = 0; j < foods.length; j += 1) {
           // canlculate distance of each blob with each food
             if (foods !== undefined) {
-              const killer = coliders(players[i].blobs[l], foods[j], 0);
+              const killer = getCollisionState(players[i].blobs[l], foods[j], 0);
               if (killer === 1) {
                 players[i].blobs[l].r += foods[j].r / (players[i].blobs[l].r * 0.02);
                 foods.splice(j, 1);
@@ -488,7 +504,7 @@ function Updates() {
             // If its not the same player
               if (players.length > 1) {
                 if (players[j] !== players[i]) {
-                  const killer = coliders(players[i].blobs[l],
+                  const killer = getCollisionState(players[i].blobs[l],
                     players[j].blobs[k], 0);
 
                   if (killer !== 0) {
@@ -540,7 +556,7 @@ function Updates() {
     // Updating foods
     for (let i = 0; i < foods.length; i += 1) {
       // see if its in the same range
-      let dist = calculatedis(
+      let dist = calculateDis(
         players[j].middot.x,
         players[j].middot.y,
         foods[i].x,
@@ -565,7 +581,7 @@ function Updates() {
     // Updating players
     for (let i = 0; i < players.length; i += 1) {
       // see if its in the same range
-      let dist = calculatedis(
+      let dist = calculateDis(
         players[j].middot.x,
         players[j].middot.y,
         players[i].middot.x,
@@ -595,6 +611,7 @@ function Updates() {
 }
   // io.sockets.emit('updatepipis', playersdata);
 }
+
 function splitingtimeer() {
   for (let i = 0; i < players.length; i += 1) {
     for (let j = 0; j < players[i].blobs.length; j += 1) {
@@ -603,9 +620,9 @@ function splitingtimeer() {
   }
 }
 ///// Timers
-setInterval(foodgen, TimerForFoodMaker);
-setInterval(gettingOld, TimerPlayerGetsOld);
-setInterval(Updates, TimerPlayersUpdating);
+setInterval(foodgen, timerForFoodMaker);
+setInterval(gettingOld, timerPlayerGetsOld);
+setInterval(Updates, timerPlayersUpdating);
 setInterval(splitingtimeer, PeriodTimeCounter);
 setInterval(comparisionwithweight, comparisonTimer);
 console.log(process.env.SecuredCode);
