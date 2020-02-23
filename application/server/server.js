@@ -33,7 +33,6 @@ const sockets = require('socket.io');
 
 const PORT = process.env.PORT || 5000;// The port
 
-const adminsID = [];
 ////////////////////////////////////////////////// login needed component
 /*const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -55,7 +54,7 @@ app.use(errorHandler);*/
 //////////////////////////////////////////////////
 // Server
 const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
-const comparisonTimer = 100; // how mutch to refresh the Top 10 players list
+const comparisonTimer = 100; // how much to refresh the Top 10 players list
 //
 // Food settings
 const foodsMaxCount = 500; // how manny foods (default 500)
@@ -64,25 +63,25 @@ const timerForFoodMaker = 200; // how mutch to wait to make another food object
 const maxFoodSize = 300; // how big can the food be (default 300)
 const minFoodSize = 100; // how small can the food be (default 100)
 const howManyYypes = 2; // how many kinds of food (don't touch that if you haven't read the code) (default 2)
-const fortype1toshowup = 20;
-const fortype2toshowup = 23;
+  const fortype1toshowup = 20;
+  const fortype2toshowup = 23;
 //
 // Player Settings
 const startingSize = 1200; // in what size the player start with (default 1200)
 const timerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down (default 5000)
 const timerPlayersUpdating = 24; // how mutch to wait till the server sends player info (default 24)
-const AvregePlayerSpeed = 60000; // how mutch speed can the player have (default 60000)
+const avregePlayerSpeed = 60000; // how mutch speed can the player have (default 60000)
 const minSizeToSplit = 400; // the minimume size for the player to split (default 400)
-const MaxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have (default 8)
-const MinPlayerSize = 200; // the minimume size that can the player be (default 200)
-const PeriodTime = 3; // how mutch to end the split (default 3)
-const PeriodTimeCounter = 300; // how mutch to end the split 2 (default 300)
-const ZoomView = 8; // how much can the player see the world (default 8)
+const maxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have (default 8)
+const minPlayerSize = 200; // the minimume size that can the player be (default 200)
+const periodTime = 3; // how mutch to end the split (default 3)
+const periodTimeCounter = 300; // how mutch to end the split 2 (default 300)
+const zoomView = 8; // how much can the player see the world (default 8)
 //
-// world Settings
+// World Settings
 const worldSize = 50000; // how big the world can be
-const worldSizeMin = -worldSize;
-const worldSizeMax = worldSize;
+  const worldSizeMin = -worldSize;
+  const worldSizeMax = worldSize;
 //
 const io = sockets(server);
 console.log('server is running');
@@ -96,8 +95,8 @@ const collisionState={
 function calculateDis(x1, y1, x2, y2) {
   const xx = (x1 - x2) * (x1 - x2);
   const yy = (y1 - y2) * (y1 - y2);
-  const d = Math.sqrt(xx + yy);
-  return d;
+  const distance = Math.sqrt(xx + yy);
+  return distance;
 }
 
 function getCollisionState(player1, player2, minDiff) {
@@ -281,8 +280,8 @@ function Blob(id, x, y, r, Timer) {
       //  calculating magnitude
       Mag = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
       // setting the magnitude
-      this.vx *= (AvregePlayerSpeed / Mag);
-      this.vy *= (AvregePlayerSpeed / Mag);
+      this.vx *= (avregePlayerSpeed / Mag);
+      this.vy *= (avregePlayerSpeed / Mag);
       //this.vx = this.vel.x;
       //this.vy = this.vel.y;
       //this.vel.x += this.vx;
@@ -308,8 +307,8 @@ function Blob(id, x, y, r, Timer) {
       this.x + 10,
       this.y + 10,
       this.r / 2,
-      PeriodTime));
-    this.timertoeatme = PeriodTime;
+      periodTime));
+    this.timertoeatme = periodTime;
     this.r /= 2;
   };
   this.constrain = function constrainer() {
@@ -415,7 +414,7 @@ function Connection(socket) {
     // console.log(`${data.id} wants to split`);
     for (let i = 0; i < players.length; i += 1) {
       if (players[i].id === socket.id) {
-        if (players[i].blobs.length < MaxBlobsForEachPlayer) {
+        if (players[i].blobs.length < maxBlobsForEachPlayer) {
         // Splice
           for (let j = 0; j < players[i].blobs.length; j += 1) {
             if (players[i].blobs[j].r > minSizeToSplit) {
@@ -468,7 +467,7 @@ function foodgen() {
 function gettingOld() {
   for (let i = 0; i < players.length; i += 1) {
     for (let j = 0; j < players[i].blobs.length; j += 1) {
-      if (players[i].blobs[j].r > MinPlayerSize) {
+      if (players[i].blobs[j].r > minPlayerSize) {
         players[i].blobs[j].r -= 2;
       }
     }
@@ -562,7 +561,7 @@ function Updates() {
         foods[i].x,
         foods[i].y);
       let itsok = false;
-      if(players[j].zoom * ZoomView  > dist) {
+      if(players[j].zoom * zoomView  > dist) {
         itsok = true;
         // console.log('GOT SOMETHING '+players[j].zoom  +','+ dist );
       }
@@ -587,7 +586,7 @@ function Updates() {
         players[i].middot.x,
         players[i].middot.y);
       let itsok = false;
-      if(players[j].zoom * ZoomView  > dist) {
+      if(players[j].zoom * zoomView  > dist) {
         itsok = true;
        // console.log('GOT SOMETHING '+players[j].zoom  +','+ dist );
       }
@@ -623,6 +622,6 @@ function splitingtimeer() {
 setInterval(foodgen, timerForFoodMaker);
 setInterval(gettingOld, timerPlayerGetsOld);
 setInterval(Updates, timerPlayersUpdating);
-setInterval(splitingtimeer, PeriodTimeCounter);
+setInterval(splitingtimeer, periodTimeCounter);
 setInterval(comparisionwithweight, comparisonTimer);
 console.log(process.env.SecuredCode);
