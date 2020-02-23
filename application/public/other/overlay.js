@@ -2,18 +2,6 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
-function toggleOverlay(a) {
-  const overlay = document.getElementById('overlay');
-  const specialBox = document.getElementById('specialBox');
-  overlay.style.opacity = 0.8;
-  if (a) {
-    overlay.style.display = 'none';
-    specialBox.style.display = 'none';
-  } else {
-    overlay.style.display = 'block';
-    specialBox.style.display = 'block';
-  }
-}
 
 class Listing {
   constructor(x, y, players) {
@@ -50,6 +38,34 @@ class Menu {
     };
     this.hide = function hide() {
       this.textfeild.size(0, 0);
+    };
+  }
+}
+
+class Chatbox {
+  constructor(x, y) {
+    this.chats = [];
+    this.x = x;
+    this.y = y;
+    this.count = 10;
+    this.addchat = function addchat(chattab) {
+      this.chats.push(chattab);
+    }
+    this.show = function showtext() {
+      fill(50);
+      rect((6 * width) / 7, height / 20, 200, 400);
+      let counter = 0;
+      for (let i = this.chats.length - 1; i >= 0; i -= 1) {
+        if (counter !== 10) {
+          textAlign(LEFT);
+          textSize(10);
+          fill(100);
+          text(`${this.chats[i].nickname}`, this.x + 5, this.y + i * 20 + 5, 20, 20);
+          fill(255);
+          text(`${this.chats[i].chat}`, this.x + 5, this.y + i * 20 + 5, 20, 20);
+          counter += 1;
+        }
+      }
     };
   }
 }

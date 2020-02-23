@@ -204,6 +204,9 @@ function draw() {
   background(0);
   const list = new Listing((6 * width) / 7, height / 20, players);
   list.show();
+  const chatbox = new Chatbox((width) / 3, height / 2, players);
+  chatbox.addchat(new Chattab("haithem","the lord","Im SOOOOO GENTLEMAN"));
+  chatbox.show();
 
   translate(width / 2, height / 2);
   // search for the player in the players array
