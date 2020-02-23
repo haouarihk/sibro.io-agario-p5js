@@ -63,8 +63,8 @@ const timerForFoodMaker = 200; // how mutch to wait to make another food object
 const maxFoodSize = 300; // how big can the food be (default 300)
 const minFoodSize = 100; // how small can the food be (default 100)
 const howManyYypes = 2; // how many kinds of food (don't touch that if you haven't read the code) (default 2)
-  const fortype1toshowup = 20;
-  const fortype2toshowup = 23;
+const fortype1toshowup = 20;
+const fortype2toshowup = 23;
 //
 // Player Settings
 const startingSize = 1200; // in what size the player start with (default 1200)
@@ -176,40 +176,56 @@ function generateId() {
   });
   return 0;
 }
+/**
+ * get free random position
+ * @returns {{x, y}} return available postion(x,y)
+ */
+function getFreeRandomPosition() {
+  let collision = true;
+  let x = 0;
+  let y = 0; 
+  
+  let tries = 10000;
+  
+  while (collision && tries >0) {
+    x = Math.floor(Math.random() * worldSizeMax * 2) + worldSizeMin;
+    y = Math.floor(Math.random() * worldSizeMax * 2) + worldSizeMin;
+    if(isItAvaible(x,y)){
+      collision=false;
+    }
+    tries--;
+  }
+  if (tries === 0) {
+    console.error("World is full!");
+  }
+  return {x,y} 
+}
 
-function getPosition(ppls, foodi) {
-  const x = Math.floor(Math.random() * worldSizeMax * 2) + worldSizeMin;
-  const y = Math.floor(Math.random() * worldSizeMax * 2) + worldSizeMin;
-  let prob = 0;
-  // verifiy if there are problems in that specific location
-  foodi.forEach((food) => {
-    if (food.x === x) {
-      if (food.y === y) {
-        prob += 1;
-      }
-    }
+function isItAvaible(x,y){
+  return (!isThereAFood(x,y)&&!isThereAPlayer(x,y));
+}
+
+function isThereAFood(x,y){
+  foods.forEach((food) => {
+    if (food.x === x && food.y === y) {
+      return true;
+    } 
   });
-  for (let i = 0; i < ppls.length; i += 1) {
-    for (let j = 0; j < ppls[i].blobs.length; j += 1) {
-      if (ppls[i].blobs[j].x === x) {
-        if (ppls[i].blobs[j].y === y) {
-          prob += 1;
-        }
-      }
-      const distancefromblob = ppls[i].blobs[j].r - (calculateDis(ppls[i].blobs[j].x, ppls[i].blobs[j].y, x, y));
-      if (distancefromblob > 0) {
-          prob += 1;
-      }
-    }
-  }
-  // take action if there are problems in that specific location
-  if (prob !== 0) {
-    return getPosition(ppls, foodi);
-  }
-  if (prob === 0 || posi !== 0) {
-    return {x, y};
-  }
-  return null;
+  return false;
+}
+
+function isThereAPlayer(x,y) {
+  players.forEach((player)=>{
+    player.blobs.forEach((blob)=>{
+      const dist = blob.r - calculateDis(blob.x,blob.y, x, y);
+      if ((blob.x === x && blob.y === y) || dist > 0) {
+        return true;
+      } 
+    })
+  })
+
+  return false;
+
 }
 
 function kindGenerator() {
@@ -224,12 +240,15 @@ function kindGenerator() {
 }
 
 ///// Classes
+
+
+
 function Food() {
   this.x = 0;
   this.y = 0;
   this.type = 0;
   this.generate = function generating() {
-    const Possition = getPosition(players, foods);
+    const Possition = getFreeRandomPosition();
     this.x = Possition.x;
     this.y = Possition.y;
     this.id = generateId();
@@ -349,7 +368,7 @@ function Connection(socket) {
   // When a new player joins
   function newPlayer(playerInfo) {
     const blobs = [];
-    const position = new getPosition(playerInfo, foods);
+    const position = new getFreeRandomPosition();
     
     blobs.push(new Blob(socket.id, position.x, position.y, startingSize, 0));
 
