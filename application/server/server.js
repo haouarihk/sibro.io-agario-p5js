@@ -115,33 +115,29 @@ function getCollisionState(player1, player2, minDiff) {
 }
 
 function getIndexById(id, players) {
-  
-  for (let i = 0; i < players.length; i += 1) {
-    if (players[i].id === id) {
-      return i;
+  players.forEach((player, index) => {
+    if (player.id === id) {
+      return index;
     }
-  }
-
-
-
-  return players.indexOf();
+  });
+  return -1;
 }
 
-function calculatemid(arraydots) {
+function getCenterDot(arraydots) {
 
-  const middle = { x = 0, y : 0 };
+  const center = { x : 0, y : 0 };
   
-  let allr = 0;
+  let radiouseSum = 0;
 
   for (let i = 0; i < arraydots.length; i += 1) {
-    middle.x += arraydots[i].x * arraydots[i].r;
-    middle.y += arraydots[i].y * arraydots[i].r;
-    allr += arraydots[i].r;
+    center.x += arraydots[i].x * arraydots[i].r;
+    center.y += arraydots[i].y * arraydots[i].r;
+    radiouseSum += arraydots[i].r;
   }
 
-  middle.x /= (arraydots.length) + allr;
-  middle.y /= (arraydots.length) + allr;
-  return middle;
+  center.x /= (arraydots.length) + radiouseSum;
+  center.y /= (arraydots.length) + radiouseSum;
+  return center;
 }
 
 function Vector(velx, vely) {
@@ -173,11 +169,11 @@ function limitNumberWithinRange(num, min, max) {
 ///// Generators
 function generateId() {
   const idnew = Math.floor(Math.random() * (50000 + foodsMaxCount));
-  for (let i = 0; i < foods.length; i += 1) {
-    if (foods.id === idnew) {
+  foods.forEach((food) => {
+    if (food.id === idnew) {
       return generateId();
     } return idnew;
-  }
+  });
   return 0;
 }
 
@@ -185,14 +181,14 @@ function getPosition(ppls, foodi) {
   const x = Math.floor(Math.random() * worldSizeMax * 2) + worldSizeMin;
   const y = Math.floor(Math.random() * worldSizeMax * 2) + worldSizeMin;
   let prob = 0;
-
-  for (let i = 0; i < foodi.length; i += 1) {
-    if (foodi[i].x === x) {
-      if (foodi[i].y === y) {
+  // verifiy if there are problems in that specific location
+  foodi.forEach((food) => {
+    if (food.x === x) {
+      if (food.y === y) {
         prob += 1;
       }
     }
-  }
+  });
   for (let i = 0; i < ppls.length; i += 1) {
     for (let j = 0; j < ppls[i].blobs.length; j += 1) {
       if (ppls[i].blobs[j].x === x) {
@@ -200,22 +196,23 @@ function getPosition(ppls, foodi) {
           prob += 1;
         }
       }
-      const c = ppls[i].blobs[j].r - (calculateDis(ppls[i].blobs[j].x, ppls[i].blobs[j].y, x, y));
-      if (c < 0) {
-        // prob += 1;
+      const distancefromblob = ppls[i].blobs[j].r - (calculateDis(ppls[i].blobs[j].x, ppls[i].blobs[j].y, x, y));
+      if (distancefromblob > 0) {
+          prob += 1;
       }
     }
   }
+  // take action if there are problems in that specific location
   if (prob !== 0) {
     return getPosition(ppls, foodi);
   }
   if (prob === 0 || posi !== 0) {
-    return { xx: x, yy: y };
+    return {x, y};
   }
   return null;
 }
 
-function typegenerator() {
+function kindGenerator() {
   let types = [];
   for(let i = 0; i < fortype1toshowup; i +=1) {
     types[i] = 1;
@@ -223,7 +220,6 @@ function typegenerator() {
   for(let i = fortype1toshowup; i < fortype2toshowup; i +=1) {
     types[i] = 2;
   }
-
   return types[parseInt(Math.random() * (types.length - 1))];
 }
 
@@ -233,12 +229,12 @@ function Food() {
   this.y = 0;
   this.type = 0;
   this.generate = function generating() {
-    const saved = getPosition(players, foods);
-    this.x = saved.xx;
-    this.y = saved.yy;
+    const Possition = getPosition(players, foods);
+    this.x = Possition.x;
+    this.y = Possition.y;
     this.id = generateId();
     this.r = Math.floor(Math.random() * maxFoodSize) + minFoodSize;
-    this.type = typegenerator();
+    this.type = kindGenerator();
   };
 }
 function Blob(id, x, y, r, Timer) {
@@ -273,25 +269,23 @@ function Blob(id, x, y, r, Timer) {
           }
         }
       }
-      const middot = calculatemid(players[indexofplayer].blobs);
+      const middot = getCenterDot(players[indexofplayer].blobs);
       // calculating mouse possition
       this.vx = (mousex - (width / 2)) + (-this.x + middot.x);
       this.vy = (mousey - (height / 2)) + (-this.y + middot.y);
+
       //  calculating magnitude
       Mag = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+
       // setting the magnitude
       this.vx *= (avregePlayerSpeed / Mag);
       this.vy *= (avregePlayerSpeed / Mag);
-      //this.vx = this.vel.x;
-      //this.vy = this.vel.y;
-      //this.vel.x += this.vx;
-      //this.vel.y += this.vy;
-      //this.vel.setMag(AvregePlayerSpeed);
-    
+
       this.x += (this.vx) / this.r;
       this.y += (this.vy) / this.r;
-    }
+      console.log(players[indexofplayer].id+" hkaya "+ this.x+" hkaya "+ this.y);
 
+    }
    
   };
 
@@ -328,7 +322,7 @@ function Player(id, blobs, c, nickname) {
   this.middot = new Vector(0,0);
   // this function for saving ram
   this.calculatemidofhisblobs = function cmohb(){
-    const newmiddot = calculatemid(this.blobs);
+    const newmiddot = getCenterDot(this.blobs);
     this.middot.x = newmiddot.x;
     this.middot.y = newmiddot.y;
   }
@@ -358,7 +352,7 @@ function Connection(socket) {
     const blobs = [];
     const position = new getPosition(playerInfo, foods);
     
-    blobs.push(new Blob(socket.id, position.xx, position.yy, startingSize, 0));
+    blobs.push(new Blob(socket.id, position.x, position.y, startingSize, 0));
 
     players.push(new Player(socket.id,
       blobs,
