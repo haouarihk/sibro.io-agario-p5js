@@ -25,6 +25,7 @@ class Blob {
       //// body
       // fill blob with his color
       fill(this.c1, this.c2, this.c3); 
+      stroke(255);
       // get it pos
       var posx = this.x;
       var posy = this.y;
@@ -44,7 +45,7 @@ class Blob {
       //// text
       textFont(br); // use font br on the files
       fill(255); // fill with white
-      stroke(8); 
+      stroke(8); // coloring the stroke
       textSize(0.3 * this.r); // the size of the text
       textAlign(CENTER); // the alignment
       // showing the weight text of the blob
