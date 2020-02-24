@@ -117,12 +117,13 @@ function getCollisionState(player1, player2, minDiff) {
 }
 
 function getIndexById(id, array) {
-  array.forEach((player, i) => {
-    if (player.id === id) {
-      return i;
+  let indexofar = -1;
+  array.forEach((ar, i) => {
+    if (ar.id === id) {
+      indexofar = i;
     }
   });
-  return -1;
+  return indexofar;
 }
 
 function getCenterDot(blobs) {
@@ -300,7 +301,7 @@ class Blob {
         this.eatmyself = false;
       }
       if (this.eatmyself === true) {
-        player[indexofplayer].blobs.forEach(blob => {
+        players[indexofplayer].blobs.forEach(blob => {
           if (this !== blob) {
             const dis = getCollisionState(this, blob, -blob.r - this.r + 20);
             if (dis === collisionState.firstPlayerBigger) {
@@ -313,7 +314,7 @@ class Blob {
         });
 
       }
-      console.log('wait what ' + indexofplayer);
+      // console.log('wait what ' + indexofplayer);
       const middot = getCenterDot(players[indexofplayer].blobs);
 
       // calculating mouse possition
@@ -321,7 +322,7 @@ class Blob {
       this.vy = (mousey - (height / 2)) + (-this.y + middot.y);
 
       //  calculating magnitude
-      Mag = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+      var Mag = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
       // setting the magnitude
       this.vx *= (avregePlayerSpeed / Mag);
       this.vy *= (avregePlayerSpeed / Mag);
@@ -375,6 +376,8 @@ function Connection(socket) {
       players.splice(i, 1);
       console.log(`${socket.id} sliced in index of ${i}`);
       socket.emit('disconnectThatSoc');
+    } else {
+      console.log(`${socket.id} sliced in index of ${i}`);
     }
   });
 
@@ -389,13 +392,13 @@ function Connection(socket) {
     debugger
     const blobs = [];
     const position = new getFreeRandomPosition();
-
+    // creating the player
     blobs.push(new Blob(socket.id, position.x, position.y, startingSize, 0));
-
     players.push(new Player(socket.id,
       blobs,
       playerInfo.color,
       checkNickname(playerInfo.nickname)));
+    // sending back the info
     const settingsofplayer = {
       blobs,
       id: socket.id,
@@ -425,16 +428,16 @@ function Connection(socket) {
       // socket.emit('disconnectThatSoc');
     }
     // updating players list
-    players.forEach((player) => {
+    players.forEach((player,i) => {
       if (player.id === socket.id) {
-        player.blobs.forEach((blob) => {
-          blob.id = socket.id;
-          blob.update(uplayer.mousex,
+        players[i].blobs.forEach((blob,j) => {
+          players[i].blobs[j].id = socket.id;
+          players[i].blobs[j].update(uplayer.mousex,
             uplayer.mousey,
             uplayer.width,
             uplayer.height);
-          player.zoom = uplayer.zoomsize;
         })
+        player.zoom = uplayer.zoomsize;
       }
       // update his middle dot 
       player.middot = getCenterDot(player.blobs);
@@ -525,14 +528,12 @@ function Updates() {
     eatEatable(foods).forEach(index => foods.splice(index, 1))
     // eat player
     eatEatable(players).forEach(index => players.splice(index, 1))
-
     // Sending data to players
     players.forEach(player => {
       const fooddata = [];
       const playersdata = [];
       // making sure that the middot exists of the player 1
       if (!player.middot) {
-
         // console.error("there is something wrong and the middot p1 doesn't exist");
         return;
       }
@@ -562,9 +563,9 @@ function Updates() {
 
       });
       // updating the players
-      players.forEach(player2 => {
+      players.forEach((player2,j) => {
         // checking if middot of both players exists
-        if (!player2.middot) {
+        if (!players[j].middot) {
           // console.error("there is something wrong and the middot p2 doesn't exist");
           return;
         }

@@ -4,19 +4,20 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
-let socket;
-let player;
-let players = [];
-let foods = [];
-let zoom = 1;
-let indexofplayer = 0;
-let nickname = '';
-let username = '';
-let password = '';
-let MinSizeToSplit = 200;
-let color = [];
-let connected = false;
-let savedtextfeild = '';
+let socket; // socket.io
+let player; // this player
+let players = []; // players in the world
+let foods = []; // foods in the world
+let zoom = 1; // screen zoom
+let indexofplayer = 0; // index of this player in the players array
+let nickname = ''; // nickname of this player
+//login componet saved here//
+let username = '';///////////
+let password = '';//
+////////////////////
+let MinSizeToSplit = 200; // informations sets by the server
+let color = []; // player color
+let connected = false; // connection
 // built in p5.js function (one time before anything happen)
 function preload() {
   inputfeild = createInput();

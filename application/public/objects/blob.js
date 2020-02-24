@@ -16,37 +16,28 @@ class Blob {
     this.vy = 0;
     this.middot = createVector(1, 1);
     this.vel = createVector(1, 1);
+    this.timer =0;
   }
-    setcolor(c1, c2, c3) {
-      this.c1 = c1;
-      this.c2 = c2;
-      this.c3 = c3;
-    };
-
-    setrad(r2) {
-      this.r = r2;
-    };
-
-    preload(){
-      //br = loadFont('fonts/br.ttf');
-    }
     show(br) {
-      var timer =0;
+      
       if (this.x === null) { this.x = 0; } // if somehow x
       if (this.y === null) { this.y = 0; } // or y = null it will equal 0
       //// body
       // fill blob with his color
       fill(this.c1, this.c2, this.c3); 
+      // get it pos
+      var posx = this.x;
+      var posy = this.y;
       // using 2d noise to create that bloby feels
       beginShape(); // built in p5.js function 
-      timer += 50;
+      this.timer += 50;
       for(let i =0; i< TWO_PI;i += PI/40) {
         var ofsetx = map(cos(i),-1,1,0,10);
         var ofsety = map(sin(i),-1,1,0,10);
-        var r = map(noise(ofsetx/2  + this.x/this.r ,ofsety/2+ this.y/this.r , timer/this.r),0,1,0,this.r/10 * 0.7) + this.r;
+        var r = map(noise(ofsetx/2  + this.x/this.r ,ofsety/2+ this.y/this.r , this.timer/this.r),0,1,0,this.r/10 * 0.7) + this.r;
         var dx = r * cos(i);
         var dy = r * sin(i);
-        vertex(this.x + dx, this.y + dy);
+        vertex(posx + dx, posy + dy);
       }
       endShape(CLOSE); // ends of beginShape();
 
