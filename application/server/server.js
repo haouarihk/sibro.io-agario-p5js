@@ -152,7 +152,7 @@ function getCenterDot(blobs) {
 function updatePlayerRadious() {
   players.forEach((player, index, playersArray) => {
     if (player.blobs) {
-      playersArray[index].r = player.blobs.reduce((sum, blob) => blob.r + sum, 0)
+      player.r = player.blobs.reduce((sum, blob) => blob.r + sum, 0)
     } else {
       player.blobs = []
     }
@@ -239,7 +239,7 @@ class Point {
       this.y = Math.random();
     } else {
       this.x *= (c / Mag);
-      this.x *= (c / Mag);
+      this.y *= (c / Mag);
     }
   };
 
@@ -316,19 +316,14 @@ class Blob {
       }
       // console.log('wait what ' + indexofplayer);
       const middot = getCenterDot(players[indexofplayer].blobs);
-
-      // calculating mouse possition
-      this.vx = (mousex - (width / 2)) + (-this.x + middot.x);
-      this.vy = (mousey - (height / 2)) + (-this.y + middot.y);
-
-      //  calculating magnitude
-      var Mag = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+      var direction = new Point(
+      ( mousex- (width / 2)),
+      ( mousey- (height / 2)));
       // setting the magnitude
-      this.vx *= (avregePlayerSpeed / Mag);
-      this.vy *= (avregePlayerSpeed / Mag);
-
-      this.x += (this.vx) / this.r;
-      this.y += (this.vy) / this.r;
+      direction.setMag(avregePlayerSpeed);
+      // moving the blob
+      this.x += (direction.x) / this.r;
+      this.y += (direction.y) / this.r;
 
     }
 
@@ -372,13 +367,10 @@ function Connection(socket) {
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
     const i = getIndexById(socket.id, players);
-    if (i !== -1) {
-      players.splice(i, 1);
+      // players.splice(i, 1);
       console.log(`${socket.id} sliced in index of ${i}`);
       socket.emit('disconnectThatSoc');
-    } else {
-      console.log(`${socket.id} sliced in index of ${i}`);
-    }
+    
   });
 
   function checkNickname(nickname) {
@@ -422,17 +414,12 @@ function Connection(socket) {
 
   // update every blob's velocity
   function updateplayer(uplayer) {
-    // this function doesn't work
-    if (socket.id !== uplayer.id) {
-      // console.log(socket.id + " is not matched");
-      // socket.emit('disconnectThatSoc');
-    }
     // updating players list
     players.forEach((player,i) => {
       if (player.id === socket.id) {
         players[i].blobs.forEach((blob,j) => {
-          players[i].blobs[j].id = socket.id;
-          players[i].blobs[j].update(uplayer.mousex,
+          blob.id = socket.id;
+          blob.update(uplayer.mousex,
             uplayer.mousey,
             uplayer.width,
             uplayer.height);
@@ -465,7 +452,6 @@ function Connection(socket) {
 
   socket.on('split', splitPlayer);
  function onrecivechat(data){
-   const nickname = 
   data2 = {
     message:data.message,
     nickname:data.nickname,
@@ -500,11 +486,10 @@ function addFood() {
 
   // io.sockets.emit('updateyamies', fooddata);
 }
-
+// there is a problem with this function
 function rediuceRadiusBy(step = 2) {
   players = players.map(player => {
     player = player.blobs.map(blob => {
-
       let blobSize = blob.r - step;
       if (blobSize < minPlayerSize) {
         blobSize = minPlayerSize;
@@ -532,11 +517,6 @@ function Updates() {
     players.forEach(player => {
       const fooddata = [];
       const playersdata = [];
-      // making sure that the middot exists of the player 1
-      if (!player.middot) {
-        // console.error("there is something wrong and the middot p1 doesn't exist");
-        return;
-      }
       // Updating the foods
       foods.forEach(food => {
         // calculate the distance between this player and the food
@@ -564,11 +544,6 @@ function Updates() {
       });
       // updating the players
       players.forEach((player2,j) => {
-        // checking if middot of both players exists
-        if (!players[j].middot) {
-          // console.error("there is something wrong and the middot p2 doesn't exist");
-          return;
-        }
         // calculate the distance between this player and the other player
         let dist = calculateDis(
           player.middot.x,
@@ -620,7 +595,7 @@ function eatEatable(Objects) {
       Objects.forEach((food, j) => {
         const state = getCollisionState(blob, food, 0);
         if (state === collisionState.firstPlayerBigger) {
-          blob.r += food.r * 0.8;
+          blob.r += 2 * food.r /(blob.r);
           objectIndexesToRemove.push(j);
         }
       })
@@ -633,10 +608,6 @@ function eatEatable(Objects) {
 // timer when it gets back together
 function splitingtimeer() {
   players.forEach(player => {
-    if (!player.blobs) {
-      // console.log("there is something wrong with getting within spliting function blob doesn't exist line 625")
-      return;
-    }
     player.blobs.forEach(blob => {
       blob.timertoeatme -= 1;
     });
@@ -644,7 +615,7 @@ function splitingtimeer() {
 }
 ///// Timers
 setInterval(addFood, timerForFoodMaker);
-setInterval(rediuceRadiusBy, timerPlayerGetsOld);
+// setInterval(rediuceRadiusBy, timerPlayerGetsOld);
 setInterval(Updates, timerPlayersUpdating);
 setInterval(splitingtimeer, periodTimeCounter);
 setInterval(comparisionwithweight, comparisonTimer);
