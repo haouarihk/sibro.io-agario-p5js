@@ -2,19 +2,45 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
-function toggleOverlay(a) {
-  const overlay = document.getElementById('overlay');
-  const specialBox = document.getElementById('specialBox');
-  overlay.style.opacity = 0.8;
-  if (a) {
-    overlay.style.display = 'none';
-    specialBox.style.display = 'none';
-  } else {
-    overlay.style.display = 'block';
-    specialBox.style.display = 'block';
-  }
-}
 
+
+class Chatbox {
+  constructor(x, y, chatlist) {
+    this.chatlist = chatlist;
+    this.x = x;
+    this.y = y;
+    this.count = 10;
+
+  }
+
+  show() {
+    fill(40);
+    rect(this.x, this.y, 400, 190);
+    let counter = 0;
+    this.chatlist.forEach((chatline, index) => {
+      if (counter !== 8) 
+      {
+        chatline.show(index, this.x, this.y);
+        counter += 1;
+      } else {
+        chatline.show(index, this.x, this.y);
+        this.chatlist.splice(0,1);
+        counter -= 1;
+      }
+    });
+    if (showinput) {
+      inputfeild.show();
+      inputfeild.position(this.x, this.y + 190);
+    } else {
+      inputfeild.hide();
+      inputfeild.value('');
+    }
+  };
+  setChat(chat) {
+    this.chatlist = chat;
+  }
+
+}
 class Listing {
   constructor(x, y, players) {
     this.players = players;
@@ -23,7 +49,7 @@ class Listing {
     this.count = 10;
     this.show = function showtext() {
       fill(50);
-      rect((6 * width) / 7, height / 20, 200, 400);
+      rect(this.x, this.y, 200, 400);
       let counter = 0;
       for (let i = players.length - 1; i >= 0; i -= 1) {
         if (counter !== 10) {

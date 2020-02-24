@@ -81,6 +81,7 @@ const zoomView = 8; // how much can the player see the world (default 8)
 const worldSize = 50000; // how big the world can be
 const worldSizeMin = -worldSize;
 const worldSizeMax = worldSize;
+
 //
 const io = sockets(server);
 console.log('server is running');
@@ -465,9 +466,7 @@ function Connection(socket) {
     if (playerIndex !== -1) {
       if (players[playerIndex].blobs.length < maxBlobsForEachPlayer) {
         // Splice
-
         players[playerIndex].blobs.forEach((blob) => {
-
           if (blob.r > minSizeToSplit) {
 
             blob.split();
@@ -478,7 +477,20 @@ function Connection(socket) {
   }
 
   socket.on('split', splitPlayer);
+ function onrecivechat(data){
+  data2 = {
+    message:data.message,
+    id:socket.id
+  };
+  if(data.to === 'all') {
+    io.emit('recivechat', data2);
+    console.log(data2.id+'sending to all '+data.message);
+  } else {
+    io.to(data.to).emit('recivechat', data2);
 
+  }
+ }
+ socket.on('chatup', onrecivechat);
 }
 
 // When someone connect

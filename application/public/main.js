@@ -16,8 +16,10 @@ let password = '';
 let MinSizeToSplit = 200;
 let color = [];
 let connected = false;
+let savedtextfeild = '';
+
 function preload() {
- br = loadFont('fonts/br2.ttf');
+  br = loadFont('fonts/br2.ttf');
 }
 // Login
 function updatepeeps(pips) {
@@ -26,7 +28,7 @@ function updatepeeps(pips) {
   for (let i = 0; i < pips.length; i += 1) {
     const blobs = [];
     for (let j = 0; j < pips[i].blobs.length; j += 1) {
-      if(pips[i].isitok){
+      if (pips[i].isitok) {
         blobs.push(new Blob(pips[i].nickname,
           pips[i].blobs[j].x,
           pips[i].blobs[j].y,
@@ -36,7 +38,7 @@ function updatepeeps(pips) {
       }
     }
     players[i] = new Player(pips[i].id, pips[i].nickname);
-    if(pips[i].isitok){
+    if (pips[i].isitok) {
       players[i].blobs = blobs;
     }
     if (socket.id === pips[i].id) {
@@ -45,12 +47,13 @@ function updatepeeps(pips) {
     }
   }
 }
+
 function updateyamies(yam) {
   foods = [];
   for (let i = 0; i < yam.length; i += 1) {
-    if(yam[i].isitok) {
-    foods[i] = new Food(yam.type, yam[i].x, yam[i].y, yam[i].r, yam[i].id);
-    foods[i].type = yam.type;
+    if (yam[i].isitok) {
+      foods[i] = new Food(yam.type, yam[i].x, yam[i].y, yam[i].r, yam[i].id);
+      foods[i].type = yam.type;
     }
   }
 }
@@ -67,6 +70,10 @@ function warfeilddata(data) {
     imspectating();
   }
 }
+function reciveTextChat(data){
+  const datanickname = players[searchindexwithid(data.id, players)].nickname;
+  chatlist.push(new Chatline(data.message, datanickname, [255, 255, 0]));
+}
 function login() {
   socket = io();
   nickname = document.getElementById('nickname').value;
@@ -77,9 +84,13 @@ function login() {
   socket.on('connect', () => {
     player.id = socket.id;
     player.blobs = blobs;
-    
-    const id =player.id;
-    const data = {color,id,nickname};
+
+    const id = player.id;
+    const data = {
+      color,
+      id,
+      nickname
+    };
 
     socket.emit('ready', data);
     socket.on('set!', (settings) => {
@@ -92,6 +103,7 @@ function login() {
       socket.on('updatepipis', updatepeeps);
       socket.on('updateyamies', updateyamies);
       socket.on('warfeilddata', warfeilddata);
+      socket.on('recivechat', reciveTextChat);
     });
   });
   socket.on('disconnectThatSoc', () => {
@@ -102,6 +114,7 @@ function login() {
     console.log('disconnection');
   });
 }
+
 function login2() {
   username = document.getElementById('Username').value;
   password = document.getElementById('Password').value;
@@ -110,39 +123,62 @@ function login2() {
     id: socket.id,
     user: username,
     pass: password,
-  }; socket.emit('login', data);
+  };
+  socket.emit('login', data);
 }
 // controls
 let pos = 200;
+
 function mouseWheel(event) {
   // to zoom in and out
   pos += event.delta;
   pos = constrain(pos, 1, 5000);
 }
-function keyPressed() {
-  if (!connected) { return; }
-  if (key === ' ') {
-    for (let j = 0; j < player.blobs.length; j += 1) {
+let showinput = false;
 
-      if (player.blobs[j].r > MinSizeToSplit) {
-        socket.emit('split');
-      }
+function keyPressed() {
+  if (!connected) {
+    return;
+  }
+  if (!heistyping) {
+    if (key === ' ') {
+      socket.emit('split');
     }
-    // console.log('SPACEBAR DETECTED');
-    // we need it to tell the server that
-    // it got pressed
+    if (key === 't') {
+      console.log("inputshowed" + showinput);
+      showinput = !showinput;
+    }
   }
   if (keyCode === ESCAPE) {
     socket.disconnect();
     connected = false;
   }
+  if (keyCode === 13) {
+    showinput = false;
+    if (inputfeild.value().length > 0) {
+      // chatlist.push(new Chatline(inputfeild.value(), nickname, [255, 255, 0]));
+      data = {
+        to:'all',
+        message: inputfeild.value()
+      };
+      socket.emit('chatup',data);
+      console.log(inputfeild.value()+ nickname)
+    }
+  }
+
 }
+// console.log('SPACEBAR DETECTED');
+// we need it to tell the server that
+// it got pressed
 
-// updates
 
 
+
+let inputfeild; // for the textfeild of the chatbox
 // setup
 function setup() {
+  inputfeild = createInput();
+  inputfeild.hide();
   connected = false;
   // socket = io();
   // socket.disconnect();
@@ -151,7 +187,9 @@ function setup() {
   };
   // When press play in the html
   document.getElementById('play').onclick = function onclickplay() {
-    if (connected) { socket.disconnect(); }
+    if (connected) {
+      socket.disconnect();
+    }
     login();
   };
   // login();
@@ -169,6 +207,7 @@ function searchindexwithid(id, Players) {
   }
   return false;
 }
+
 function getCenterDot(blobs) {
 
   const center = createVector(0, 0);
@@ -191,27 +230,42 @@ function getCenterDot(blobs) {
   // console.error("There is something wrong with getting the center blob is not defined getCenterDot()");
   return new Point(0, 0);
 }
+let heistyping = false;
 
+function detectwetherheistyping() {
+  if (inputfeild.value() !== savedtextfeild) {
+    savedtextfeild = inputfeild.value();
+    heistyping = true;
+  } else {
+    heistyping = false;
+  }
+}
+let chatbox;
+let chatlist = [];
 function draw() {
-  createCanvas(windowWidth, windowHeight - 22);
+  detectwetherheistyping();
+  createCanvas(windowWidth, windowHeight);
   // const menu = new Menu(width / 4, height / 4);
   if (!connected) {
     // background(0);
     // menu.show();
-    document.getElementById("game").style.visibility = "hidden"; 
-    document.getElementById("Login").style.visibility = "visible"; 
-    if(document.getElementById('nickname').value.length > 10) {
-      document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0,9);
+    document.getElementById("game").style.visibility = "hidden";
+    document.getElementById("Login").style.visibility = "visible";
+    if (document.getElementById('nickname').value.length > 10) {
+      document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0, 9);
     }
     return;
   }
-  document.getElementById("Login").style.visibility = "hidden"; 
+
+  document.getElementById("Login").style.visibility = "hidden";
   document.getElementById("game").style.visibility = "visible";
   // menu.hide();
   background(0);
-  const list = new Listing((6 * width) / 7, height / 20, players);
+  const list = new Listing((6 * width) / 7, height/30, players);
+  chatbox = new Chatbox((width) / 300, 5 * height / 7, []);
   list.show();
-
+  chatbox.setChat(chatlist);
+  chatbox.show();
   translate(width / 2, height / 2);
   // search for the player in the players array
   // to find his own index and store it on indexofplayer
@@ -229,14 +283,14 @@ function draw() {
   player.midpoint = middot;
 
   for (let index = 0; index < foods.length; index += 1) {
-    if(foods[index]) {
+    if (foods[index]) {
       foods[index].show();
     }
   }
   stroke(255);
   strokeWeight(20);
   for (let index = 0; index < players.length; index += 1) {
-    if(players[index]) {
+    if (players[index]) {
       players[index].show(br);
     }
   }
@@ -247,10 +301,11 @@ function draw() {
     mousex: mouseX,
     mousey: mouseY,
     // id: socket.id,
-    zoomsize:parseInt(zoom),
+    zoomsize: parseInt(zoom),
     width,
     height,
     c: [player.c1, player.c2, player.c3],
   };
   socket.emit('updateplayer', data);
+
 }
