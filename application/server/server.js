@@ -117,12 +117,14 @@ function getCollisionState(player1, player2, minDiff) {
 
 function getIndexById(id, players) {
   players.forEach((player, index) => {
+
     if (player.id) {
       if (player.id === id) {
+
         return index;
       }
     } else {
-      return getIndexById(id, players);
+      return -1;
     }
   });
   return -1;
@@ -147,7 +149,7 @@ function getCenterDot(blobs) {
     // g =
     return center;
   }
-  console.error("There is something wrong with getting the center blob is not defined getCenterDot()");
+  // console.error("There is something wrong with getting the center blob is not defined getCenterDot()");
   return new Point(0, 0);
 }
 
@@ -321,14 +323,15 @@ class Blob {
               // this blob will eat another blob
               this.r += blob.r;
               players[indexofplayer].blobs.splice(i, 1);
+              console.log("this has lunched")
             }
           }
         });
 
       }
-
+      console.log('wait what ' + indexofplayer);
       const middot = getCenterDot(players[indexofplayer].blobs);
-      console.log(middot);
+
       // calculating mouse possition
       this.vx = (mousex - (width / 2)) + (-this.x + middot.x);
       this.vy = (mousey - (height / 2)) + (-this.y + middot.y);
@@ -360,7 +363,6 @@ class Blob {
       }
     }
   };
-
   constrain() {
     // stop it from going outside of the world
     this.x = limitNumberWithinRange(this.x, worldSizeMin, worldSizeMax);
@@ -387,7 +389,7 @@ function Connection(socket) {
     socket.emit('disconnectThatSoc');
     const i = getIndexById(socket.id, players);
     if (i !== -1) {
-      players.splice(i, 1);
+      // players.splice(i, 1);
       console.log(`${socket.id} sliced in index of ${i}`);
     }
   });
@@ -409,9 +411,9 @@ function Connection(socket) {
       blobs,
       playerInfo.color,
       checkNickname(playerInfo.nickname)));
-
     const settingsofplayer = {
       blobs,
+      id: socket.id,
       minSizeToSplit,
     };
 
@@ -440,7 +442,6 @@ function Connection(socket) {
     // updating players list
     players.forEach((player) => {
       if (player.id === socket.id) {
-
         player.blobs.forEach((blob) => {
           blob.id = socket.id;
           blob.update(uplayer.mousex,
@@ -449,9 +450,9 @@ function Connection(socket) {
             uplayer.height);
           player.zoom = uplayer.zoomsize;
         })
-        // update his middle dot 
-
-      } 
+      }
+      // update his middle dot 
+      player.middot = getCenterDot(player.blobs);
     })
 
   }
@@ -459,17 +460,21 @@ function Connection(socket) {
 
   // When a player split
   function splitPlayer() {
-    const playerIndex = getIndexById(socket.id, players)
-    if (players[playerIndex].blobs.length < maxBlobsForEachPlayer) {
-      // Splice
-      console.log('player ' + socket.id + ' is spliting');
-      players[playerIndex].blobs.forEach((blob) => {
-        if (blob.r > minSizeToSplit) {
-          blob.split();
-        }
-      })
-    }
 
+    const playerIndex = getIndexById(socket.id, players)
+    if (playerIndex !== -1) {
+      if (players[playerIndex].blobs.length < maxBlobsForEachPlayer) {
+        // Splice
+
+        players[playerIndex].blobs.forEach((blob) => {
+
+          if (blob.r > minSizeToSplit) {
+
+            blob.split();
+          }
+        })
+      }
+    }
   }
 
   socket.on('split', splitPlayer);
@@ -528,7 +533,8 @@ function Updates() {
       const playersdata = [];
       // making sure that the middot exists of the player 1
       if (!player.middot) {
-        console.error("there is something wrong and the middot p1 doesn't exist");
+
+        // console.error("there is something wrong and the middot p1 doesn't exist");
         return;
       }
       // Updating the foods
@@ -560,7 +566,7 @@ function Updates() {
       players.forEach(player2 => {
         // checking if middot of both players exists
         if (!player2.middot) {
-          console.error("there is something wrong and the middot p2 doesn't exist");
+          // console.error("there is something wrong and the middot p2 doesn't exist");
           return;
         }
         // calculate the distance between this player and the other player
@@ -628,7 +634,7 @@ function eatEatable(Objects) {
 function splitingtimeer() {
   players.forEach(player => {
     if (!player.blobs) {
-      console.log("there is something wrong with getting within spliting function blob doesn't exist line 625")
+      // console.log("there is something wrong with getting within spliting function blob doesn't exist line 625")
       return;
     }
     player.blobs.forEach(blob => {

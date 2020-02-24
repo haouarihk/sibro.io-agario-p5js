@@ -86,7 +86,7 @@ function login() {
       console.log(`YOOO ${socket.id}`);
       player.id = settings.id;
       player.blobs = blobs;
-      MinSizeToSplit = settings.minisizetosplit;
+      MinSizeToSplit = settings.minSizeToSplit;
       console.log(socket.id);
       connected = true;
       socket.on('updatepipis', updatepeeps);
@@ -123,10 +123,9 @@ function keyPressed() {
   if (!connected) { return; }
   if (key === ' ') {
     for (let j = 0; j < player.blobs.length; j += 1) {
+
       if (player.blobs[j].r > MinSizeToSplit) {
-        data = { // id: socket.id
-        };
-        socket.emit('split', data);
+        socket.emit('split');
       }
     }
     // console.log('SPACEBAR DETECTED');
@@ -170,19 +169,27 @@ function searchindexwithid(id, Players) {
   }
   return false;
 }
-function calculatemid(arraydots) {
-  this.Mid = function mido() { this.x = 0; this.y = 0; };
-  const middle = new this.Mid();
-  let allr = 0;
-  for (let i = 0; i < arraydots.length; i += 1) {
-    middle.x += arraydots[i].x * arraydots[i].r;
-    middle.y += arraydots[i].y * arraydots[i].r;
-    allr += arraydots[i].r;
-  }
+function getCenterDot(blobs) {
 
-  middle.x /= (arraydots.length) + allr;
-  middle.y /= (arraydots.length) + allr;
-  return middle;
+  const center = createVector(0, 0);
+  let radiouseSum = 0;
+  // the form of this equation is:
+  // g1 = sum((a * Ma) + (b * Mb) + ...) i=>length
+  // r = sum(Ma + Mb + ...) i => length
+  if (blobs) {
+    blobs.forEach(blob => {
+      center.x += blob.x * blob.r;
+      center.y += blob.y * blob.r;
+      radiouseSum += blob.r;
+    });
+    // g = g1 / (length + r)
+    center.x /= (blobs.length) + radiouseSum;
+    center.y /= (blobs.length) + radiouseSum;
+    // g =
+    return center;
+  }
+  // console.error("There is something wrong with getting the center blob is not defined getCenterDot()");
+  return new Point(0, 0);
 }
 
 function draw() {
@@ -217,7 +224,7 @@ function draw() {
   zoom = lerp(zoom, newzoom, 0.2);
   scale(120 / (zoom));
 
-  const middot = calculatemid(player.blobs);
+  const middot = getCenterDot(player.blobs);
   translate(-middot.x, -middot.y);
   player.midpoint = middot;
 
