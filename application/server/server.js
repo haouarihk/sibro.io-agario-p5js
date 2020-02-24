@@ -116,16 +116,10 @@ function getCollisionState(player1, player2, minDiff) {
   return collisionState.noCollision;
 }
 
-function getIndexById(id, players) {
-  players.forEach((player, index) => {
-
-    if (player.id) {
-      if (player.id === id) {
-
-        return index;
-      }
-    } else {
-      return -1;
+function getIndexById(id, array) {
+  array.forEach((player, i) => {
+    if (player.id === id) {
+      return i;
     }
   });
   return -1;
@@ -175,19 +169,7 @@ function comparisionwithweight() {
   // it doesn't work yet
   players.sort((player1, player2) => player2.r - player1.r);
 }
-
-///// Generators
-function generateId() {
-  const idnew = Math.floor(Math.random() * (50000 + foodsMaxCount));
-  foods.forEach((food) => {
-    if (food.id === idnew) {
-      return generateId();
-    }
-    return idnew;
-  });
-  return 0;
-}
-
+//// Generators
 /**
  * get free random position
  * @returns {{x, y}} return available postion(x,y)
@@ -308,6 +290,7 @@ class Blob {
     this.eatmyself = false;
     this.vel = new Point(0, 0);
   }
+  // this function for updating the location
   update(mousex, mousey, width, height) {
     const indexofplayer = getIndexById(this.id, players);
     if (indexofplayer !== -1) {
@@ -387,11 +370,11 @@ function Connection(socket) {
   console.log(`new connection:${socket.id}`);
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
-    socket.emit('disconnectThatSoc');
     const i = getIndexById(socket.id, players);
     if (i !== -1) {
-      // players.splice(i, 1);
+      players.splice(i, 1);
       console.log(`${socket.id} sliced in index of ${i}`);
+      socket.emit('disconnectThatSoc');
     }
   });
 
@@ -403,6 +386,7 @@ function Connection(socket) {
   }
   // When a new player joins
   function newPlayer(playerInfo) {
+    debugger
     const blobs = [];
     const position = new getFreeRandomPosition();
 
@@ -478,14 +462,17 @@ function Connection(socket) {
 
   socket.on('split', splitPlayer);
  function onrecivechat(data){
+   const nickname = 
   data2 = {
     message:data.message,
+    nickname:data.nickname,
     id:socket.id
   };
   if(data.to === 'all') {
     io.emit('recivechat', data2);
-    console.log(data2.id+'sending to all '+data.message);
+    console.log(data2.id+'sending to all: '+data.message);
   } else {
+    io.to(socket.id).emit('recivechat', data2);
     io.to(data.to).emit('recivechat', data2);
 
   }

@@ -17,51 +17,61 @@ let MinSizeToSplit = 200;
 let color = [];
 let connected = false;
 let savedtextfeild = '';
-
+// built in p5.js function (one time before anything happen)
 function preload() {
+  inputfeild = createInput();
+  inputfeild.hide();
   br = loadFont('fonts/br2.ttf');
 }
-// Login
+// this function updates the players list
 function updatepeeps(pips) {
   players = [];
 
-  for (let i = 0; i < pips.length; i += 1) {
+  pips.forEach((pip, i) => {
     const blobs = [];
-    for (let j = 0; j < pips[i].blobs.length; j += 1) {
-      if (pips[i].isitok) {
-        blobs.push(new Blob(pips[i].nickname,
-          pips[i].blobs[j].x,
-          pips[i].blobs[j].y,
-          pips[i].blobs[j].r,
-          pips[i].c));
-
-      }
+    // this for taking all the blobs from pip and store it in this variable
+    if (pip.isitok) {
+      pip.blobs.forEach(blob => {
+        blobs.push(new Blob(pip.nickname,
+          blob.x,
+          blob.y,
+          blob.r,
+          pip.c));
+      });
     }
-    players[i] = new Player(pips[i].id, pips[i].nickname);
-    if (pips[i].isitok) {
+    // this function for updaing/creating player in the players list
+    // with the same index
+    players[i] = new Player(pip.id, pip.nickname);
+    players[i].isitshown = pip.isitok;
+    // this askes if the player is within my range
+    if (pip.isitok) {
       players[i].blobs = blobs;
     }
-    if (socket.id === pips[i].id) {
+    // this asks wether this player is me
+    if (socket.id === pip.id) {
       player = players[i];
+      player.blobs = players[i].blobs;
       indexofplayer = i;
     }
-  }
-}
+  });
 
-function updateyamies(yam) {
+}
+// this function updates the foods list
+function updateyamies(yams) {
   foods = [];
-  for (let i = 0; i < yam.length; i += 1) {
-    if (yam[i].isitok) {
-      foods[i] = new Food(yam.type, yam[i].x, yam[i].y, yam[i].r, yam[i].id);
+  yams.forEach((yam, i) => {
+    // show the food if its in range
+    if (yam.isitok) {
+      foods[i] = new Food(yam.type, yam.x, yam.y, yam.r, yam.id);
       foods[i].type = yam.type;
     }
-  }
+  });
 }
-// spectating
+// this function would activate when the player is not playing but in
 function imspectating() {
 
 }
-// not using that function 
+// not using that function , this function to let the player know when he get eaten
 function warfeilddata(data) {
   if (data.aterid === player.id) {
     console.log('You KILLED HIM');
@@ -70,146 +80,179 @@ function warfeilddata(data) {
     imspectating();
   }
 }
-function reciveTextChat(data){
-  const datanickname = players[searchindexwithid(data.id, players)].nickname;
+// this function for reciving texts
+function reciveTextChat(data) {
+  const datanickname = data.nickname;
   chatlist.push(new Chatline(data.message, datanickname, [255, 255, 0]));
 }
+// this function called when the player about to join
 function login() {
+  // for login
   socket = io();
+  // for seting the nickname from html input feild
   nickname = document.getElementById('nickname').value;
-  const blobs = [];
+  // random color for the player
   color = [random(50, 200), random(50, 200), random(50, 200)];
   player = new Player(socket.id, 'Guest');
-  player.blobs = blobs;
+  // when the player is connected
   socket.on('connect', () => {
     player.id = socket.id;
-    player.blobs = blobs;
-
+    player.blobs = [];
     const id = player.id;
+    // the player sends to the server that he is connected/ready
     const data = {
       color,
       id,
       nickname
     };
-
     socket.emit('ready', data);
+    // reciving from the server the new settings to start
     socket.on('set!', (settings) => {
       console.log(`YOOO ${socket.id}`);
       player.id = settings.id;
-      player.blobs = blobs;
+      player.blobs = settings.blobs;
       MinSizeToSplit = settings.minSizeToSplit;
       console.log(socket.id);
       connected = true;
+      // listening for thoes when he is connected
       socket.on('updatepipis', updatepeeps);
       socket.on('updateyamies', updateyamies);
       socket.on('warfeilddata', warfeilddata);
       socket.on('recivechat', reciveTextChat);
+      // this for an instant kick for the player
+      socket.on('disconnectThatSoc', () => {
+        player = null;
+        players = [];
+        socket.disconnect();
+        connected = false;
+        console.log('disconnection');
+      });
     });
   });
-  socket.on('disconnectThatSoc', () => {
-    player = null;
-    players = [];
-    socket.disconnect();
-    connected = false;
-    console.log('disconnection');
-  });
-}
 
+}
+// this function for login with an account , not used yet
 function login2() {
+  // taking username and password from html input feild
   username = document.getElementById('Username').value;
   password = document.getElementById('Password').value;
-
+  // sending that data to the server to verify that is correct
   const data = {
     id: socket.id,
     user: username,
     pass: password,
   };
   socket.emit('login', data);
+  // revciving the log from the server
+  socket.on('loging', (a) => {
+    console.log(a);
+  })
 }
-// controls
-let pos = 200;
+
+let posWheel = 200;
 
 function mouseWheel(event) {
   // to zoom in and out
-  pos += event.delta;
-  pos = constrain(pos, 1, 5000);
+  posWheel += event.delta;
+  posWheel = constrain(posWheel, 1, 5000);
 }
+// the chat
+// this for wether he is playing or typing
 let showinput = false;
-
-function keyPressed() {
+// this is a built in function in p5.js
+function keyTyped() {
+  // if he is not in the game, don't bother
   if (!connected) {
     return;
   }
-  if (!heistyping) {
+  if (heistyping) {
+    // typing ....
+    inputfeild.value(inputfeild.value() + key);
+  } else {
+    // if he is not typing, then he is playing
     if (key === ' ') {
+      // the split key (Spacebar)
       socket.emit('split');
     }
     if (key === 't') {
-      console.log("inputshowed" + showinput);
-      showinput = !showinput;
+      // to start typing (t)
+      inputfeild.value('');
+      heistyping = true;
     }
   }
+}
+// this is a built in function in p5.js
+function keyPressed() {
+  // if he is not in the game, don't bother
+  if (!connected) {
+    return;
+  }
+  // exit game
   if (keyCode === ESCAPE) {
+    // escape from the game (ESCAPE)
     socket.disconnect();
     connected = false;
   }
-  if (keyCode === 13) {
-    showinput = false;
-    if (inputfeild.value().length > 0) {
-      // chatlist.push(new Chatline(inputfeild.value(), nickname, [255, 255, 0]));
-      data = {
-        to:'all',
-        message: inputfeild.value()
-      };
-      socket.emit('chatup',data);
-      console.log(inputfeild.value()+ nickname)
+  // type
+  if (heistyping) {
+    if (keyCode === ENTER) {
+      // trigering if he want to type
+      heistyping = !heistyping;
+      // if he typed something
+      if (inputfeild.value().length > 0) {
+        // send what he has typed
+        data = {
+          // to: is to who he want to send the message
+          // all mean to everyone
+          to: 'all',
+          nickname: player.nickname,
+          message: inputfeild.value()
+        };
+        socket.emit('chatup', data);
+      }
+      // clean afterwords
+      inputfeild.value('');
     }
+  }
+  // delete
+  if (keyCode === BACKSPACE) {
+    // if he wants to delete letters (BACKSPACE)
+    inputfeild.value(inputfeild.value().substring(0, inputfeild.value().length - 1));
   }
 
 }
-// console.log('SPACEBAR DETECTED');
-// we need it to tell the server that
-// it got pressed
 
 
-
-
-let inputfeild; // for the textfeild of the chatbox
-// setup
+// this is a built in function in p5.js (one time function)
 function setup() {
-  inputfeild = createInput();
-  inputfeild.hide();
+  // start to make sure that he is disconnected
   connected = false;
-  // socket = io();
-  // socket.disconnect();
-  this.connecttotheserver = function connetingtoserver() {
-    socket = io();
-  };
   // When press play in the html
   document.getElementById('play').onclick = function onclickplay() {
+    // if he is connected then disconnect him
     if (connected) {
       socket.disconnect();
     }
+    // join the game
     login();
   };
-  // login();
+  // when pressing the login button instead
   document.getElementById('login').onclick = function onclickplay() {
     login2();
   };
 }
 
-// functions
-function searchindexwithid(id, Players) {
-  for (let i = 0; i < Players.length; i += 1) {
-    if (Players[i].id === id) {
+function getIndexById(id, array) {
+  array.forEach((player, i) => {
+    if (player.id === id) {
       return i;
+      console.log(i);
     }
-  }
-  return false;
+  });
+  return -1;
 }
-
+// ge the center dot
 function getCenterDot(blobs) {
-
   const center = createVector(0, 0);
   let radiouseSum = 0;
   // the form of this equation is:
@@ -230,8 +273,17 @@ function getCenterDot(blobs) {
   // console.error("There is something wrong with getting the center blob is not defined getCenterDot()");
   return new Point(0, 0);
 }
-let heistyping = false;
 
+/////////////////////////
+/// chat stuff //////////
+/////////////////////////
+let inputfeild;        // // for the textfeild of the chatbox
+let heistyping = false;//
+let chatbox;           //
+let chatlist = [];     //
+/////////////////////////
+
+// not used function for detecting if he is typing or not
 function detectwetherheistyping() {
   if (inputfeild.value() !== savedtextfeild) {
     savedtextfeild = inputfeild.value();
@@ -240,72 +292,83 @@ function detectwetherheistyping() {
     heistyping = false;
   }
 }
-let chatbox;
-let chatlist = [];
-function draw() {
-  detectwetherheistyping();
-  createCanvas(windowWidth, windowHeight);
-  // const menu = new Menu(width / 4, height / 4);
-  if (!connected) {
-    // background(0);
-    // menu.show();
-    document.getElementById("game").style.visibility = "hidden";
-    document.getElementById("Login").style.visibility = "visible";
-    if (document.getElementById('nickname').value.length > 10) {
-      document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0, 9);
-    }
-    return;
-  }
 
+function showMenu() {
+  // hide game
+  document.getElementById("game").style.visibility = "hidden";
+  // show menu
+  document.getElementById("Login").style.visibility = "visible";
+  // if nickname box is larger than 10 contrain it
+  if (document.getElementById('nickname').value.length > 10) {
+    document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0, 9);
+  }
+}
+
+function showGame() {
+  // hiding the lobby
   document.getElementById("Login").style.visibility = "hidden";
+  // showing the game
   document.getElementById("game").style.visibility = "visible";
-  // menu.hide();
+  // background color (built in p5.js function)
   background(0);
-  const list = new Listing((6 * width) / 7, height/30, players);
+  // Making top 10 list 
+  const list = new Listing((6 * width) / 7, height / 30, players);
+  // Making chatbox 
   chatbox = new Chatbox((width) / 300, 5 * height / 7, []);
+  // Showing them
   list.show();
-  chatbox.setChat(chatlist);
   chatbox.show();
+  // Setting chatbox list chat
+  chatbox.setChat(chatlist);
+  // Translating point of view from the edge of the screen(0,0) 
+  // to the middle of the screen(width/2,height/2) to become (0,0)
+  // built in p5.js function.
   translate(width / 2, height / 2);
-  // search for the player in the players array
-  // to find his own index and store it on indexofplayer
-  const il = searchindexwithid(socket.id, players);
-  if (il !== false) {
-    indexofplayer = il;
-  }
   // zooming accoring to the mouse wheel
-  const newzoom = pos;
+  const newzoom = posWheel;
   zoom = lerp(zoom, newzoom, 0.2);
+  // this is a built in p5.js function to scale screen
   scale(120 / (zoom));
-
+  // calculating the middle point
   const middot = getCenterDot(player.blobs);
+  // translating according to this player location
   translate(-middot.x, -middot.y);
-  player.midpoint = middot;
-
-  for (let index = 0; index < foods.length; index += 1) {
-    if (foods[index]) {
-      foods[index].show();
+  // show all the foods in the array
+  foods.forEach(food => {
+    if (food) {
+      food.show();
     }
-  }
+  });
+  // built in p5.js function 
   stroke(255);
   strokeWeight(20);
-  for (let index = 0; index < players.length; index += 1) {
-    if (players[index]) {
-      players[index].show(br);
+  // show all the players in the array
+  players.forEach(player => {
+    if (player) {
+      player.show(br);
     }
-  }
-
-  player.update();
-
+  });
+  // mouseX, mouseY is built in p5.js functions
   const data = {
     mousex: mouseX,
     mousey: mouseY,
-    // id: socket.id,
     zoomsize: parseInt(zoom),
     width,
     height,
     c: [player.c1, player.c2, player.c3],
   };
   socket.emit('updateplayer', data);
+}
+// built in function from p5.js (loop function)
+function draw() {
+  createCanvas(windowWidth, windowHeight);
+  // if he is on the lobby
+  if (!connected) {
+    // show the menu
+    showMenu();
+    return;
+  }
+  // if he is playing
+  showGame();
 
 }
