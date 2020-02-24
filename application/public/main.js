@@ -277,7 +277,7 @@ function getCenterDot(blobs) {
 /////////////////////////
 /// chat stuff //////////
 /////////////////////////
-let inputfeild;        // // for the textfeild of the chatbox
+let inputfeild;      //// for the textfeild of the chatbox
 let heistyping = false;//
 let chatbox;           //
 let chatlist = [];     //
