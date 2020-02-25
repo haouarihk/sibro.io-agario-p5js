@@ -250,12 +250,12 @@ class Room {
     room.players = [];
     room.foods = [];
     // Server
-    room.comparisonTimer = 100; // how much to refresh the Top 10 players list
+    room.comparisonTimer = 500; // how much to refresh the Top 10 players list
     //
     // Food settings
     room.foodsMaxCount = foodsQuantity || 500; // how manny foods (default 500)
     room.howManyEvrytime = 200; // how much everytime (default 200)
-    room.timerForFoodMaker = 200; // how mutch to wait to make another food object
+    room.timerForFoodMaker = 200; // how mutch to wait to make another food object (default 200)
     room.maxFoodSize = 300; // how big can the food be (default 300)
     room.minFoodSize = 100; // how small can the food be (default 100)
     //
@@ -273,7 +273,7 @@ class Room {
     room.zoomView = 8; // how much can the player see the world (default 8)
     //
     // World Settings
-    room.worldSize = worldsize || 50000; // how big the world can be
+    room.worldSize = worldsize || 50000; // how big the world can be (default 50000)
     room.worldSizeMin = -room.worldSize;
     room.worldSizeMax = room.worldSize;
 
