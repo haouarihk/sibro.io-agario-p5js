@@ -1,19 +1,12 @@
-class Example {
-    constructor(i){
-        this.value=i;
+class Room{
+    constructor(){
+        var room = this;
+        room.players = [];
+        room.update = function (){
+            console.log(room.players.length);
+        }
     }
-
-    incr(){
-        this.value +=10;
-    }
-
+    
 }
-
-let arr=[]
-for (let index = 0; index <10; index++) {
-    arr.push(new Example(index))
-}
-
-arr.forEach(e=>e.value+=10)
-
-console.log(arr)
+let room = new Room();
+setInterval(room.update, 200);
