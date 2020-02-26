@@ -28,17 +28,17 @@ function calculateDis(x1, y1, x2, y2) {
   return distance;
 }
 
-function getCollisionState(player1, player2, minDiff) {
-  const distance = calculateDis(player1.x, player1.y, player2.x, player2.y);
+function getCollisionState(obj1, obj2, minDiff) {
+  const distance = calculateDis(obj1.x, obj1.y, obj2.x, obj2.y);
 
-  if (distance <= player1.r) {
-    if (player1.r > player2.r - minDiff) {
+  if (distance <= obj1.r) {
+    if (obj1.r > obj2.r - minDiff) {
       return collisionState.firstPlayerBigger;
     }
-    if (player1.r === player2.r - minDiff) {
+    if (obj1.r === obj2.r - minDiff) {
       return collisionState.sameSize;
     }
-    if (player1.r < player2.r - minDiff) {
+    if (obj1.r < obj2.r - minDiff) {
       return collisionState.secondPlayerBigger;
     }
   }
@@ -210,10 +210,6 @@ class Room {
     this.worldSizeMin = -this.worldSize;
     this.worldSizeMax = this.worldSize;
   }
-  startListening() {
-
-  }
-
   updatePlayerRadious() {
     this.players.forEach((player, index, playersArray) => {
       if (player.blobs) {
@@ -223,8 +219,6 @@ class Room {
       }
     })
   }
-
-
   comparisionwithweight() {
     if (this.players.length > 1) {
       this.players.sort((player1, player2) => player2.r - player1.r);
@@ -261,7 +255,6 @@ class Room {
   isItAvaible(x, y) {
     return (!this.isThereAFood(x, y) && !this.isThereAPlayer(x, y));
   }
-
   isThereAFood(x, y) {
     this.foods.forEach((food) => {
       if (food.x === x && food.y === y) {
@@ -270,7 +263,6 @@ class Room {
     });
     return false;
   }
-
   isThereAPlayer(x, y) {
     this.players.forEach((player) => {
       player.blobs.forEach((blob) => {
@@ -301,16 +293,16 @@ class Room {
         if (blobSize < this.minPlayerSize) {
           blobSize = this.minPlayerSize;
         }
-        debugger
+        
         blob.r = blobSize;
         return {
           blob
         }
       })
-      debugger
+      
       return player
     })
-    debugger
+    
   }
   // updating/sending info of everything is hppening within and to the players
 
@@ -318,7 +310,7 @@ class Room {
    * eat smaller objects and increase the raduis of the players
    * @param {*} Objects other smaller players or food
    */
-  eatEatable(Objects) {
+  eatEatable(Objects,alive) {
 
     let objectIndexesToRemove = [];
 
@@ -326,13 +318,23 @@ class Room {
       player.blobs.forEach((blob) => {
         // constrain possition of blobs
         this.constrainblob(blob);
-
+        debugger
         // eat food event
         Objects.forEach((food, j) => {
-          const state = getCollisionState(blob, food, 0);
-          if (state === collisionState.firstPlayerBigger) {
-            blob.r += 2 * food.r / (blob.r);
-            objectIndexesToRemove.push(j);
+          if(alive) {
+            food.blobs.forEach((yam, k)=>{
+              const state = getCollisionState(blob, yam, 0);
+              if (state === collisionState.firstPlayerBigger) {
+                blob.r += 100 * yam.r / (blob.r);
+                objectIndexesToRemove.push({index:k,id:food.id});
+              }
+            });
+           } else {
+            const state = getCollisionState(blob, food, 0);
+            if (state === collisionState.firstPlayerBigger) {
+              blob.r += 100 * food.r / (blob.r);
+              objectIndexesToRemove.push({index:j,id:0});
+            }
           }
         })
       })
@@ -340,7 +342,6 @@ class Room {
 
     return objectIndexesToRemove;
   }
-
   // timer when it gets back together
   splitingtimeer() {
     this.players.forEach(player => {
@@ -355,9 +356,16 @@ class Room {
       this.updatePlayerRadious();
       // eat events:
       // eat food
-      this.eatEatable(this.foods).forEach(index => this.foods.splice(index, 1))
+      this.eatEatable(this.foods).forEach(dat => this.foods.splice(dat.index, 1))
       // eat player
-      this.eatEatable(this.players).forEach(index => this.players.splice(index, 1))
+      let a =this.eatEatable(this.players,true)
+      a.forEach((dat) =>{ 
+        let index = dat.index;
+        let playerid = dat.id;
+        let indexofme = getIndexById(playerid,this.players);
+        console.log(playerid+','+index)
+        this.players[indexofme].blobs.splice(index, 1)
+      })
       // Sending data to players
       this.players.forEach(player => {
         const fooddata = [];
@@ -430,7 +438,6 @@ class Room {
       // on disconnect
       socket.on('disconnect', () => {
         console.log(`${socket.id} disconnected`);
-        debugger
         const i = getIndexById(socket.id, this.players);
         this.players.splice(i, 1);
         console.log(`${socket.id} sliced in index of ${i}`);
@@ -467,7 +474,6 @@ class Room {
       });
       // on player sends his data
       socket.on('updateplayer', (uplayer) => {
-        debugger
         // updating players list
         this.players.forEach((player) => {
           if (player.id === socket.id) {
@@ -529,7 +535,6 @@ class Room {
 
   }
   updateBlob(blob,mousex, mousey, width, height) {
-    debugger
     if (blob.indexofplayer !== -1) {
       if (blob.timertoeatme <= 0) {
         blob.eatmyself = true;
