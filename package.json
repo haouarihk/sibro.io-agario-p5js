@@ -22,14 +22,10 @@
   },
   "homepage": "https://github.com/wolfpat01/sibro.io-agario-p5js#readme",
   "dependencies": {
-    "brain": "^1.0.0",
-    "brain.js": "^2.0.0-alpha.12",
-    "chrome-remote-interface": "^0.28.1",
     "express": "^4.17.1",
     "node": "^13.8.0",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
-    "uniqid": "^5.2.0",
-    "webgl": "0.0.7"
+    "uniqid": "^5.2.0"
   }
 }
