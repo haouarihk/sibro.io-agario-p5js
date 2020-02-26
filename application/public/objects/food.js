@@ -2,7 +2,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 class Food {
-  constructor(type, x, y, r, id) {
+  constructor(type,x,y, r, id) {
     this.id = id;
     this.x = x;
     this.y = y;
@@ -10,7 +10,8 @@ class Food {
     // type 1 is the eat to split type usually bigger than the avrege size
     this.type = type;
     this.r = r;
-    this.show = function showing() {
+  }
+    show() {
       switch (1) {
         case 1:
           fill(0, 250, 0);
@@ -22,5 +23,5 @@ class Food {
           break;
         }
       };
-    }
+    
   }
