@@ -23,6 +23,7 @@ class Chatbox {
         // lower the counter for more to come
         counter -= 1;
       } else {
+        
         // show the chatline
         chatline.show(index, this.x, this.y);
         // continue

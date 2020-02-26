@@ -316,11 +316,11 @@ function showGame() {
   const list = new Listing((6 * width) / 7, height / 30, players);
   // Making chatbox 
   chatbox = new Chatbox((width) / 300, 5 * height / 7, []);
+  // Setting chatbox list chat
+  chatbox.setChat(chatlist);
   // Showing them
   list.show();
   chatbox.show();
-  // Setting chatbox list chat
-  chatbox.setChat(chatlist);
   // Translating point of view from the edge of the screen(0,0) 
   // to the middle of the screen(width/2,height/2) to become (0,0)
   // built in p5.js function.
