@@ -4,7 +4,7 @@
   "description": "the io game",
   "main": ".eslintrc.js",
   "scripts": {
-    "test": "node --inspect-brk application/server/server.js",
+    "testi": "node --inspect-brk application/server/server.js",
     "start": "node application/server/server.js"
   },
   "repository": {
@@ -25,9 +25,9 @@
     "brain": "^1.0.0",
     "brain.js": "^2.0.0-alpha.12",
     "chrome-remote-interface": "^0.28.1",
-    "express": "*",
+    "express": "^4.17.1",
     "node": "^13.8.0",
-    "socket.io": "*",
+    "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
     "uniqid": "^5.2.0",
     "webgl": "0.0.7"
