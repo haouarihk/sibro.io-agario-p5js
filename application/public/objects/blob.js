@@ -50,7 +50,7 @@ class Blob {
       textAlign(CENTER); // the alignment
       // showing the weight text of the blob
       text([parseInt(this.r)], this.x - 2, this.y + [parseInt(this.r)] / 2);
-      fill(255,0,0); // fill color
+      fill(255); // fill color
       stroke(0);
       strokeWeight(10);
       textSize(0.3 * this.r);

@@ -12,8 +12,8 @@ let zoom = 1; // screen zoom
 let indexofplayer = 0; // index of this player in the players array
 let nickname = ''; // nickname of this player
 //login componet saved here//
-let username = '';///////////
-let password = '';//
+let username = ''; ///////////
+let password = ''; //
 ////////////////////
 let MinSizeToSplit = 200; // informations sets by the server
 let color = []; // player color
@@ -160,45 +160,55 @@ function mouseWheel(event) {
 // the chat
 // this for wether he is playing or typing
 let showinput = false;
+let typedodo = 0;
+// 0 means play
+// 1 means type inside the box
+// 2 means type outside the box
 // this is a built in function in p5.js
 function keyTyped() {
   // if he is not in the game, don't bother
   if (!connected) {
     return;
   }
-  if (heistyping) {
+  if (typedodo === 2) {
     // typing ....
     inputfeild.value(inputfeild.value() + key);
+  }
+}
+
+function contains(ax, ay, aw, x, y) {
+  return (x > ax && x < ax + aw && y > ay && y < ay + 36);
+}
+
+function mousePressed() {
+  let x = (width) / 300 + 10
+  let y = 5 * height / 7 + 150
+  let w = 380;
+  console.log(x + "," + y + "," + w + "," + mouseX + "," + mouseY)
+  if (contains(x, y, w, mouseX, mouseY)) {
+    console.log("YOOOOOO")
+    typedodo = 1;
   } else {
-    // if he is not typing, then he is playing
-    if (key === ' ') {
-      // the split key (Spacebar)
-      socket.emit('split');
-    }
-    if (key === 't') {
-      // to start typing (t)
-      inputfeild.value('');
-      heistyping = true;
-    }
+    typedodo = 0;
   }
 }
 // this is a built in function in p5.js
 function keyPressed() {
+
   // if he is not in the game, don't bother
   if (!connected) {
     return;
   }
-  // exit game
-  if (keyCode === ESCAPE) {
-    // escape from the game (ESCAPE)
-    socket.disconnect();
-    connected = false;
-  }
-  // type
-  if (heistyping) {
-    if (keyCode === ENTER) {
+  if (typedodo === 2) {
+    // exit chat
+    if (keyCode === ESCAPE) {
+      // escape from the chatbox
+      typedodo = 0;
+    }
+    // type
+    if (keyIsDown(ENTER)) {
       // trigering if he want to type
-      heistyping = !heistyping;
+      typedodo=0;
       // if he typed something
       if (inputfeild.value().length > 0) {
         // send what he has typed
@@ -214,15 +224,59 @@ function keyPressed() {
       // clean afterwords
       inputfeild.value('');
     }
-  }
-  // delete
-  if (keyCode === BACKSPACE) {
-    // if he wants to delete letters (BACKSPACE)
-    inputfeild.value(inputfeild.value().substring(0, inputfeild.value().length - 1));
-  }
+    // delete
+    if (keyIsDown(BACKSPACE)) {
+      // if he wants to delete letters (BACKSPACE)
+      inputfeild.value(inputfeild.value().substring(0, inputfeild.value().length - 1));
+    }
+  } else
+  if (typedodo === 0) {
+    // exit game
+    if (keyIsDown(ESCAPE)) {
+      // escape from the game (ESCAPE)
+      socket.disconnect();
+      connected = false;
+    }
+    // playing
+    // if he is not typing, then he is playing
+    if (key===' ') {
+      // the split key (Spacebar)
+      socket.emit('split');
+    }
+    if (key === 't'||keyIsDown(ENTER)) {
+      // to start typing (t)
+      inputfeild.value('');
+      typedodo = 2;
+    }
+  } else
+  if (typedodo === 1) {
+    // exit chat
+    if (keyCode === ESCAPE) {
+      inputfeild.hide();
+      // escape from the chatbox
+      typedodo = 0;
+    }
+    if (keyCode === ENTER) {
+      // trigering if he want to type
+      typedodo=0;
+      // if he typed something
+      if (inputfeild.value().length > 0) {
+        // send what he has typed
+        data = {
+          // to: is to who he want to send the message
+          // all mean to everyone
+          to: 'all',
+          nickname: player.nickname,
+          message: inputfeild.value()
+        };
+        socket.emit('chatup', data);
+      }
+      // clean afterwords
+      inputfeild.value('');
+    }
 
+  }
 }
-
 
 // this is a built in function in p5.js (one time function)
 function setup() {
@@ -278,10 +332,10 @@ function getCenterDot(blobs) {
 /////////////////////////
 /// chat stuff //////////
 /////////////////////////
-let inputfeild;      //// for the textfeild of the chatbox
-let heistyping = false;//
-let chatbox;           //
-let chatlist = [];     //
+let inputfeild; //// for the textfeild of the chatbox
+let heistyping = false; //
+let chatbox; //
+let chatlist = []; //
 /////////////////////////
 
 // not used function for detecting if he is typing or not

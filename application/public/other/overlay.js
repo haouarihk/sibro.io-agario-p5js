@@ -34,8 +34,12 @@ class Chatbox {
     if (connected) {
       // show text input feild
       inputfeild.show();
-      inputfeild.position(this.x, this.y + 150);
-      inputfeild.size(400);
+      fill(0,0,0,0)
+      if(typedodo !== 0){
+      rect(this.x+10, this.y+ 150, 380, 16);
+      }
+      inputfeild.position(this.x+10, this.y + 150);
+      inputfeild.size(380);
     } else {
       // hide text input feild
       inputfeild.hide();
