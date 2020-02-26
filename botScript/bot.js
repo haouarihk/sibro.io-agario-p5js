@@ -166,7 +166,6 @@ class Bot {
         const mouseY = movea[parseInt(Math.random() * 2 + 2)];
 
         if (this.comparisionwiththeclosest()=== false) {
-            console.log("state zero")
             return {
                 x: mouseX,
                 y: mouseY
@@ -185,7 +184,6 @@ class Bot {
 
             this.direction = new Point();
             this.direction.vector(this.player.blobs[0].x, this.player.blobs[0].y, newfoods[0].x, newfoods[0].y);
-            // console.log("state one")
             return this.direction;
         }
         return this.stateZero(); //activate state 0

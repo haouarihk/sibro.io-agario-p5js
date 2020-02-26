@@ -5,6 +5,8 @@
 /* eslint-disable spaced-comment */
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
+// bot implementation
+require('child_process').fork('botScript/bot.js');
 const objppl = [{
     un: 'gx',
     pw: '123456789',
