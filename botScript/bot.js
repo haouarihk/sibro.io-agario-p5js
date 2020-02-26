@@ -1,6 +1,6 @@
-const botcount =20;
+const botcount =6;
 const io = require('socket.io-client');
-let poszoom = 300;
+let poszoom = 10;
 let nickname = "[bot]Bob";
 let player;
 let players = [];
@@ -19,64 +19,64 @@ const collisionState = {
 }
 class Point {
     constructor(velx, vely) {
-        bot.x = velx;
-        bot.y = vely;
+        this.x = velx;
+        this.y = vely;
     }
     setMag(c) {
-        const Mag = Math.sqrt(bot.x * bot.x + bot.y * bot.y);
-        if (bot.x === 0 && bot.y === 0) {
-            bot.x = Math.random();
-            bot.y = Math.random();
+        const Mag = Math.sqrt(this.x * this.x + this.y * this.y);
+        if (this.x === 0 && this.y === 0) {
+            this.x = Math.random();
+            this.y = Math.random();
         } else {
-            bot.x *= (c / Mag);
-            bot.y *= (c / Mag);
+            this.x *= (c / Mag);
+            this.y *= (c / Mag);
         }
     };
 
     vector(x1, y1, x2, y2) {
-        bot.x = x2 - x1;
-        bot.y = y2 - y1;
+        this.x = x2 - x1;
+        this.y = y2 - y1;
     };
 }
 class Blob {
     constructor(nickname, x, y, r, c) {
-        bot.nickname = nickname;
-        bot.x = x;
-        bot.y = y;
-        bot.r = r;
-        bot.c = c;
-        bot.isitshown = false;
+        this.nickname = nickname;
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.c = c;
+        this.isitshown = false;
     }
 }
 class Player {
     constructor(id, nickname) {
-        bot.id = id;
-        bot.nickname = nickname;
-        bot.blobs = [];
+        this.id = id;
+        this.nickname = nickname;
+        this.blobs = [];
     }
 
 }
 class Food {
     constructor(type, x, y, r, id) {
-        bot.type = type;
-        bot.x = x;
-        bot.y = y;
-        bot.r = r;
-        bot.id = id;
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.id = id;
     }
 }
 class Bot {
-    constructor() {
+    constructor(index) {
         let bot = this;
-        bot.poszoom = 300;
-        bot.nickname = "[bot]Bob";
-        bot.player;
-        bot.players = [];
-        bot.foods = [];
-        bot.indexofplayer = 0;
-        bot.color = [200, 200, 200];
-        bot.socket = io('http://localhost:5000');
-        bot.direct = {
+        this.poszoom = 300;
+        this.nickname = "[bot]Bob"+index;
+        this.player;
+        this.players = [];
+        this.foods = [];
+        this.indexofplayer = 0;
+        this.color = [200, 200, 200];
+        this.socket = io('http://localhost:5000');
+        this.direct = {
             x: 0,
             y: 0
         };
@@ -86,19 +86,21 @@ class Bot {
         // sending data
         setInterval(() => {
             const data = {
-                mousex: bot.direct.x,
-                mousey: bot.direct.y,
-                zoomsize: bot.poszoom,
+                mousex: this.direct.x,
+                mousey: this.direct.y,
+                zoomsize: this.poszoom,
                 width: 600,
                 height: 800,
-                c: bot.color,
+                c: this.color,
             };
-            bot.socket.emit('updateplayer', data);
-        }, 24)
+            this.socket.emit('updateplayer', data);
+        }, 50)
     }
     updatepeeps(pips) {
-        bot.players = [];
-
+        this.players = [];
+        if(!this.player.blobs) {
+            this.ready();
+        }
         pips.forEach((pip, i) => {
             const blobs = [];
             // this for taking all the blobs from pip and store it in this variable
@@ -113,78 +115,80 @@ class Bot {
             }
             // this function for updaing/creating player in the players list
             // with the same index
-            bot.players[i] = new Player(pip.id, pip.nickname);
-            bot.players[i].isitshown = pip.isitok;
+            this.players[i] = new Player(pip.id, pip.nickname);
+            this.players[i].isitshown = pip.isitok;
             // this askes if the player is within my range
             if (pip.isitok) {
-                bot.players[i].blobs = blobs;
+                this.players[i].blobs = blobs;
             }
             // this asks wether this player is me
-            if (bot.socket.id === pip.id) {
-                bot.player = bot.players[i];
-                bot.indexofplayer = i;
+            if (this.socket.id === pip.id) {
+                this.player = this.players[i];
+                this.indexofplayer = i;
             }
         });
 
     }
 
     updateyamies(yams) {
-        bot.foods = [];
+        this.foods = [];
         yams.forEach((yam, i) => {
             // show the food if its in range
             if (yam.isitok) {
-                bot.foods[i] = new Food(yam.type, yam.x, yam.y, yam.r, yam.id);
-                bot.foods[i].type = yam.type;
+                this.foods[i] = new Food(yam.type, yam.x, yam.y, yam.r, yam.id);
+                this.foods[i].type = yam.type;
             }
         });
     }
     ready() {
-        bot.player = new Player(bot.socket.id, bot.nickname);
-        bot.player.blobs = new Blob();
+        this.player = new Player(this.socket.id, this.nickname);
+        this.player.blobs = new Blob();
         // the player sends to the server that he is connected/ready
         const data = {
             color,
-            id: bot.socket.id,
+            id: this.socket.id,
             nickname
         };
-        bot.socket.emit('ready', data);
-        bot.socket.on('updatepipis', bot.updatepeeps);
-        bot.socket.on('updateyamies', bot.updateyamies);
+        this.socket.emit('ready', data);
+        this.socket.on('updatepipis', (data)=>{this.updatepeeps(data)});
+        this.socket.on('updateyamies', (data)=>{this.updateyamies(data)});
     }
     think() {
         // thinking
         setInterval(() => {
-            const a = bot.stateZero();
-            bot.direct = a;
-        }, 1000);
+            const a = this.stateZero();
+            this.direct = a;
+        }, 4000);
     }
     stateZero() {
 
         const mouseX = movea[parseInt(Math.random() * 2 + 0)];
         const mouseY = movea[parseInt(Math.random() * 2 + 2)];
-        if (!bot.comparisionwiththeclosest()) {
+
+        if (this.comparisionwiththeclosest()=== false) {
+            console.log("state zero")
             return {
                 x: mouseX,
                 y: mouseY
             };
-            console.log("state zero")
+            
         } else {
-            return bot.stateOne();
+            return this.stateOne();
         }
     }
     stateOne() {
 
-        if (bot.foods.length > 0) {
+        if (this.foods.length > 0) {
             // find the closest food
-            bot.comparisionwiththeclosest();
+            let newfoods=this.comparisionwiththeclosest();
             // go to the food and eat it
 
-            bot.direction = new Point();
-            bot.direction.vector(bot.player.blobs[0].x, bot.player.blobs[0].y, bot.foods[0].x + 1000, bot.foods[0].y + 800);
-            console.log("state one")
-            return bot.direction;
+            this.direction = new Point();
+            this.direction.vector(this.player.blobs[0].x, this.player.blobs[0].y, newfoods[0].x, newfoods[0].y);
+            // console.log("state one")
+            return this.direction;
         }
-        return bot.stateZero(); //activate state 0
+        return this.stateZero(); //activate state 0
     }
     sendmessage(message) {
 
@@ -193,22 +197,22 @@ class Bot {
             // to: is to who he want to send the message
             // all mean to everyone
             to: 'all',
-            nickname: bot.player.nickname,
+            nickname: this.player.nickname,
             message
         };
-        bot.socket.emit('chatup', data);
+        this.socket.emit('chatup', data);
     }
 
     comparisionwiththeclosest() {
-        if (bot.foods.length > 0) {
+        if (this.foods.length > 0) {
             debugger
-            bot.foods.sort((food1, food2) => {
+            this.foods.sort((food1, food2) => {
                 debugger
-                let dis1 = calculateDis(bot.player.blobs[0].x, bot.player.blobs[0].y, food1.x, food1.y);
-                let dis2 = calculateDis(bot.player.blobs[0].x, bot.player.blobs[0].y, food2.x, food2.y);
-                return dis2 - dis1;
+                let dis1 = calculateDis(this.player.blobs[0].x, this.player.blobs[0].y, food1.x, food1.y);
+                let dis2 = calculateDis(this.player.blobs[0].x, this.player.blobs[0].y, food2.x, food2.y);
+                return dis1 - dis2
             });
-            return true;
+            return this.foods;
         }
         return false;
     }
@@ -261,7 +265,9 @@ function map(value, minvalue, maxvalue, newminvalue, newmaxvalue) {
     return newvalue;
 }
 
-for(let i = 0;i<botcount;i++) {
-    let bot = new Bot();
+for(let i = 0;i< botcount ;i++) {
+    let bot = new Bot(i);
     bot.ready(); 
+    bot.think();
+    bot.senddata();
 }
