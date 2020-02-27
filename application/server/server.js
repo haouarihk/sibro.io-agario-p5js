@@ -125,7 +125,7 @@ class Food {
     this.type = food.getRandomType(kindProbs) + 1;
 
   }
-  setRad(min,max){
+  setRad(min, max) {
     this.r = Math.floor(Math.random() * max) + min;
   }
   setPos(pos) {
@@ -178,7 +178,7 @@ class Player {
 }
 class Room {
 
-  constructor(index,playersQuantity, foodsQuantity, worldsize) {
+  constructor(index, playersQuantity, foodsQuantity, worldsize) {
     this.players = [];
     this.foods = [];
     this.roomindex = index;
@@ -190,13 +190,13 @@ class Room {
     this.howManyEvrytime = 200; // how much everytime (default 200)
     this.timerForFoodMaker = 500; // how mutch to wait to make another food object (default 200)
     this.maxFoodSize = 300; // how big can the food be (default 300)
-    this.minFoodSize = 100; // how small can the food be (default 100)
+    this.minFoodSize = 300; // how small can the food be (default 100)
     //
     // Player Settings
     this.howManyPlayersInThisRoom = playersQuantity || 24;
     this.startingSize = 1200; // in what size the player start with (default 1200)
     this.timerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down (default 5000)
-    this.timerPlayersUpdating = 50; // how mutch to wait till the server sends player info (default 24)
+    this.timerPlayersUpdating = 24; // how mutch to wait till the server sends player info (default 24)
     this.avregePlayerSpeed = 60000; // how mutch speed can the player have (default 60000)
     this.minSizeToSplit = 400; // the minimume size for the player to split (default 400)
     this.maxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have (default 8)
@@ -206,7 +206,7 @@ class Room {
     this.zoomView = 8; // how much can the player see the world (default 8)
     //
     // World Settings
-    this.worldSize = worldsize || 50000; // how big the world can be (default 50000)
+    this.worldSize = worldsize || 100000; // how big the world can be (default 50000)
     this.worldSizeMin = -this.worldSize;
     this.worldSizeMax = this.worldSize;
   }
@@ -275,14 +275,26 @@ class Room {
     return false;
   }
   addFood() {
+    const fooddata = [];
     for (let i = 0; i < this.howManyEvrytime; i++) {
       if (this.foods.length < this.foodsMaxCount) {
         let food = new Food();
         food.setPos(this.getFreeRandomPosition());
-        food.setRad(this.minFoodSize,this.maxFoodSize);
+        food.setRad(this.minFoodSize, this.maxFoodSize);
         this.foods.push(food);
+        fooddata.push({
+          id: food.id,
+          x: food.x,
+          y: food.y,
+          r: food.r,
+          type: food.type,
+        });
       }
+
     }
+
+    // sending data about the food
+    io.emit('updateyamies', fooddata);
     // io.sockets.emit('updateyamies', fooddata);
   }
   // there is a problem with this.function
@@ -293,16 +305,16 @@ class Room {
         if (blobSize < this.minPlayerSize) {
           blobSize = this.minPlayerSize;
         }
-        
+
         blob.r = blobSize;
         return {
           blob
         }
       })
-      
+
       return player
     })
-    
+
   }
   // updating/sending info of everything is hppening within and to the players
 
@@ -310,7 +322,7 @@ class Room {
    * eat smaller objects and increase the raduis of the players
    * @param {*} Objects other smaller players or food
    */
-  eatEatable(Objects,alive) {
+  eatEatable(Objects, alive) {
 
     let objectIndexesToRemove = [];
 
@@ -321,19 +333,25 @@ class Room {
         debugger
         // eat food event
         Objects.forEach((food, j) => {
-          if(alive) {
-            food.blobs.forEach((yam, k)=>{
+          if (alive) {
+            food.blobs.forEach((yam, k) => {
               const state = getCollisionState(blob, yam, 0);
               if (state === collisionState.firstPlayerBigger) {
-                blob.r += 100 * yam.r / (blob.r);
-                objectIndexesToRemove.push({index:k,id:food.id});
+                blob.r += 2 * yam.r / 3;
+                objectIndexesToRemove.push({
+                  index: k,
+                  id: food.id
+                });
               }
             });
-           } else {
+          } else {
             const state = getCollisionState(blob, food, 0);
             if (state === collisionState.firstPlayerBigger) {
-              blob.r += 100 * food.r / (blob.r);
-              objectIndexesToRemove.push({index:j,id:0});
+              blob.r += 2 * food.r / 3;
+              objectIndexesToRemove.push({
+                index: j,
+                id: 0
+              });
             }
           }
         })
@@ -350,51 +368,35 @@ class Room {
       });
     });
   }
+  // updating/sending/Events the current data
   Updates() {
     if (this.players.length > 0) {
       // updating his radiouse bassed on his blobs
       this.updatePlayerRadious();
-      // eat events:
+      /////////// eat events:
       // eat food
-      this.eatEatable(this.foods).forEach(dat => this.foods.splice(dat.index, 1))
-      // eat player
-      let a =this.eatEatable(this.players,true)
-      a.forEach((dat) =>{ 
-        let index = dat.index;
-        let playerid = dat.id;
-        let indexofme = getIndexById(playerid,this.players);
-        console.log(playerid+','+index)
-        this.players[indexofme].blobs.splice(index, 1)
+      this.eatEatable(this.foods).forEach(dat => {
+        if (dat.index) {
+          let fooddata = this.foods[dat.index].id;
+          io.sockets.emit('foodeatenEvent', fooddata);
+          this.foods.splice(dat.index, 1);
+        }
       })
-      // Sending data to players
+      // eat player
+      let a = this.eatEatable(this.players, true)
+      a.forEach((dat) => {
+        if (dat.index) {
+          let index = dat.index;
+          let playerid = dat.id;
+          let indexofme = getIndexById(playerid, this.players);
+          console.log(playerid + ',' + index)
+          this.players[indexofme].blobs.splice(index, 1)
+        }
+      })
+      /////////// Sending data to players
       this.players.forEach(player => {
-        const fooddata = [];
+
         const playersdata = [];
-        // Updating the foods
-        this.foods.forEach(food => {
-          // calculate the distance between this.player and the food
-          let dist = calculateDis(
-            player.middot.x,
-            player.middot.y,
-            food.x,
-            food.y);
-          //check if its viewd by the player, else don't bother 
-          let itsok = false;
-          if (player.zoom * this.zoomView > dist) {
-            itsok = true;
-          }
-
-          // push the data
-          fooddata.push({
-            isitok: itsok,
-            id: (itsok) ? food.id : false,
-            x: (itsok) ? food.x : false,
-            y: (itsok) ? food.y : false,
-            r: (itsok) ? food.r : false,
-            type: (itsok) ? food.type : false,
-          });
-
-        });
         // updating the players
         this.players.forEach(player2 => {
           // calculate the distance between this.player and the other player
@@ -423,16 +425,15 @@ class Room {
           });
         });
         // sending the data that colected above to the specific player that needs it
-        // sending data about the food
-        io.to(player.id).emit('updateyamies', fooddata);
+
         // sending data about the other players (within his range of view)
         io.to(player.id).emit('updatepipis', playersdata);
       });
     }
-    //
   }
+  // connection reciver
   runtime() {
-    console.log('room '+this.roomindex+' is running');
+    console.log('room ' + this.roomindex + ' is running');
     io.sockets.on('connection', (socket) => {
       console.log(`new connection:${socket.id}`);
       // on disconnect
@@ -458,6 +459,7 @@ class Room {
         const settingsofplayer = {
           blobs,
           id: socket.id,
+          foods: this.foods,
           minSizeToSplit: this.minSizeToSplit,
         };
 
@@ -483,7 +485,7 @@ class Room {
             player.blobs.forEach(blob => {
               blob.id = socket.id;
               blob.indexofplayer = getIndexById(blob.id, this.players);
-              this.updateBlob(blob,uplayer.mousex,
+              this.updateBlob(blob, uplayer.mousex,
                 uplayer.mousey,
                 uplayer.width,
                 uplayer.height);
@@ -497,10 +499,9 @@ class Room {
       });
 
       // When a player split
-      function splitPlayer() {
-      }
+      function splitPlayer() {}
 
-      socket.on('split', ()=>{
+      socket.on('split', () => {
         const playerIndex = getIndexById(socket.id, this.players)
         if (playerIndex !== -1) {
           if (this.players[playerIndex].blobs.length < this.maxBlobsForEachPlayer) {
@@ -534,7 +535,8 @@ class Room {
     ///// Timers
 
   }
-  updateBlob(blob,mousex, mousey, width, height) {
+  // blob functions 
+  updateBlob(blob, mousex, mousey, width, height) {
     if (blob.indexofplayer !== -1) {
       if (blob.timertoeatme <= 0) {
         blob.eatmyself = true;
@@ -568,10 +570,10 @@ class Room {
 
     }
   }
-  constrainblob(blob){
-      // stop it from going outside of the world
-      blob.x = limitNumberWithinRange(blob.x, this.worldSizeMin, this.worldSizeMax);
-      blob.y = limitNumberWithinRange(blob.y, this.worldSizeMin, this.worldSizeMax);
+  constrainblob(blob) {
+    // stop it from going outside of the world
+    blob.x = limitNumberWithinRange(blob.x, this.worldSizeMin, this.worldSizeMax);
+    blob.y = limitNumberWithinRange(blob.y, this.worldSizeMin, this.worldSizeMax);
   }
   split(blob) {
     let playerindex = getIndexById(blob.id, this.players);
@@ -582,8 +584,8 @@ class Room {
           blob.y + 10,
           blob.r / 2,
           this.periodTime));
-          blob.timertoeatme = this.periodTime;
-          blob.r /= 2;
+        blob.timertoeatme = this.periodTime;
+        blob.r /= 2;
       }
     }
   };

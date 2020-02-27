@@ -10,11 +10,12 @@ class Food {
     // type 1 is the eat to split type usually bigger than the avrege size
     this.type = type;
     this.r = r;
+    this.c ;
   }
     show() {
       switch (1) {
         case 1:
-          fill(0, 250, 0);
+          fill(this.c||0, 250, 0);
           ellipse(this.x, this.y, this.r, this.r);
           break;
         case 2:

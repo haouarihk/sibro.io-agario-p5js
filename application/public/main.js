@@ -8,6 +8,7 @@ let socket; // socket.io
 let player; // this player
 let players = []; // players in the world
 let foods = []; // foods in the world
+let lines = [];
 let zoom = 1; // screen zoom
 let indexofplayer = 0; // index of this player in the players array
 let nickname = ''; // nickname of this player
@@ -26,10 +27,8 @@ function preload() {
 }
 // this function updates the players list
 function updatepeeps(pips) {
-  players = [];
-
   pips.forEach((pip, i) => {
-    const blobs = [];
+    let blobs = [];
     // this for taking all the blobs from pip and store it in this variable
     if (pip.isitok) {
       pip.blobs.forEach(blob => {
@@ -40,13 +39,26 @@ function updatepeeps(pips) {
           pip.c));
       });
     }
+
     // this function for updaing/creating player in the players list
     // with the same index
     players[i] = new Player(pip.id, pip.nickname);
     players[i].isitshown = pip.isitok;
+
     // this askes if the player is within my range
     if (pip.isitok) {
-      players[i].blobs = blobs;
+      blobs.forEach((blob, k) => {
+        let oldr =blob.r;
+        if(players[i].blobs[k]){
+          oldr=players[i].blobs[k].r;
+        }
+        players[i].blobs[k] = blob;
+        players[i].blobs[k].r = oldr;
+        if (players[i].blobs[k]) {
+          players[i].blobs[k].setrad(blob.r);
+        }
+      })
+
     }
     // this asks wether this player is me
     if (socket.id === pip.id) {
@@ -59,12 +71,10 @@ function updatepeeps(pips) {
 }
 // this function updates the foods list
 function updateyamies(yams) {
-  foods = [];
-  yams.forEach((yam, i) => {
+  yams.forEach(yam => {
     // show the food if its in range
     if (yam.isitok) {
-      foods[i] = new Food(yam.type, yam.x, yam.y, yam.r, yam.id);
-      foods[i].type = yam.type;
+      foods.push(new Food(yam.type, yam.x, yam.y, yam.r, yam.id));
     }
   });
 }
@@ -85,6 +95,14 @@ function warfeilddata(data) {
 function reciveTextChat(data) {
   const datanickname = data.nickname;
   chatlist.push(new Chatline(data.message, datanickname, [255, 255, 0]));
+}
+// this function slice food when it get eaten
+function killthisfoodwiththatid(fooddata) {
+  let index = getIndexById(fooddata, foods);
+
+  if (index !== -1) {
+    foods.splice(index, 1);
+  }
 }
 // this function called when the player about to join
 function login() {
@@ -111,6 +129,9 @@ function login() {
     socket.on('set!', (settings) => {
       console.log(`YOOO ${socket.id}`);
       player.id = settings.id;
+      settings.foods.forEach(food => {
+        foods.push(new Food(food.type, food.x, food.y, food.r, food.id))
+      });
       player.blobs = settings.blobs;
       MinSizeToSplit = settings.minSizeToSplit;
       console.log(socket.id);
@@ -120,6 +141,7 @@ function login() {
       socket.on('updateyamies', updateyamies);
       socket.on('warfeilddata', warfeilddata);
       socket.on('recivechat', reciveTextChat);
+      socket.on('foodeatenEvent', killthisfoodwiththatid);
       // this for an instant kick for the player
       socket.on('disconnectThatSoc', () => {
         player = null;
@@ -208,7 +230,7 @@ function keyPressed() {
     // type
     if (keyIsDown(ENTER)) {
       // trigering if he want to type
-      typedodo=0;
+      typedodo = 0;
       // if he typed something
       if (inputfeild.value().length > 0) {
         // send what he has typed
@@ -239,11 +261,11 @@ function keyPressed() {
     }
     // playing
     // if he is not typing, then he is playing
-    if (key===' ') {
+    if (key === ' ') {
       // the split key (Spacebar)
       socket.emit('split');
     }
-    if (key === 't'||keyIsDown(ENTER)) {
+    if (key === 't' || keyIsDown(ENTER)) {
       // to start typing (t)
       inputfeild.value('');
       typedodo = 2;
@@ -258,7 +280,7 @@ function keyPressed() {
     }
     if (keyCode === ENTER) {
       // trigering if he want to type
-      typedodo=0;
+      typedodo = 0;
       // if he typed something
       if (inputfeild.value().length > 0) {
         // send what he has typed
@@ -298,13 +320,13 @@ function setup() {
 }
 
 function getIndexById(id, array) {
-  array.forEach((player, i) => {
-    if (player.id === id) {
-      return i;
-      console.log(i);
+  let indexofar = -1;
+  array.forEach((ar, i) => {
+    if (ar.id === id) {
+      indexofar = i;
     }
   });
-  return -1;
+  return indexofar;
 }
 // ge the center dot
 function getCenterDot(blobs) {
@@ -394,6 +416,10 @@ function showGame() {
       food.show();
     }
   });
+  // show all the lines
+  lines.forEach(line => {
+    line.show();
+  })
   // built in p5.js function 
   stroke(255);
   strokeWeight(20);

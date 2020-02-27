@@ -14,12 +14,13 @@ class Blob {
     this.c3 = c[2];
     this.vx = 0;
     this.vy = 0;
+    this.addr = 0;
     this.middot = createVector(1, 1);
     this.vel = createVector(1, 1);
     this.timer =0;
   }
     show(br) {
-      
+      this.r = lerp(this.r,this.addr,0.00002)
       if (this.x === null) { this.x = 0; } // if somehow x
       if (this.y === null) { this.y = 0; } // or y = null it will equal 0
       //// body
@@ -57,5 +58,11 @@ class Blob {
       textAlign(CENTER);
       // show the nickname of the blob/player
       text(this.nickname, this.x - 2, this.y);
+
+
+
     };  
+    setrad(add){
+      this.addr = add;
+    }
 }
