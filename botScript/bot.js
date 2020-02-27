@@ -1,4 +1,4 @@
-const botcount =10;
+const botcount = 10;
 const io = require('socket.io-client');
 let poszoom = 10;
 let nickname = "[bot]Bob";
@@ -69,18 +69,17 @@ class Bot {
     constructor(index) {
         let bot = this;
         this.poszoom = 300;
-        this.nickname = "[bot]Bob"+index;
+        this.nickname = "[bot]Bob" + index;
         this.player;
         this.players = [];
         this.foods = [];
         this.indexofplayer = 0;
         this.color = [200, 200, 200];
-        this.socket = io('http://localhost:5000');
         this.direct = {
             x: 0,
             y: 0
         };
-        
+
     }
     senddata() {
         // sending data
@@ -98,7 +97,7 @@ class Bot {
     }
     updatepeeps(pips) {
         this.players = [];
-        if(!this.player.blobs) {
+        if (!this.player.blobs) {
             this.ready();
         }
         pips.forEach((pip, i) => {
@@ -141,6 +140,7 @@ class Bot {
         });
     }
     ready() {
+        this.socket = io('http://localhost:5000');
         this.player = new Player(this.socket.id, this.nickname);
         this.player.blobs = new Blob();
         // the player sends to the server that he is connected/ready
@@ -150,11 +150,23 @@ class Bot {
             nickname
         };
         this.socket.emit('ready', data);
-        this.socket.on('updatepipis', (data)=>{this.updatepeeps(data)});
-        this.socket.on('updateyamies', (data)=>{this.updateyamies(data)});
+        this.socket.on('updatepipis', (data) => {
+            this.updatepeeps(data)
+        });
+        this.socket.on('updateyamies', (data) => {
+            this.updateyamies(data)
+        });
     }
     think() {
         // thinking
+        if (this.player) {
+            if (this.player.blobs.length === 0) {
+                this.socket.disconnect();
+                this.ready();
+                console.log("reconnecting")
+                return;
+            }
+        }
         setInterval(() => {
             const a = this.stateZero();
             this.direct = a;
@@ -165,12 +177,12 @@ class Bot {
         const mouseX = movea[parseInt(Math.random() * 2 + 0)];
         const mouseY = movea[parseInt(Math.random() * 2 + 2)];
 
-        if (this.comparisionwiththeclosest()=== false) {
+        if (this.comparisionwiththeclosest() === false) {
             return {
                 x: mouseX,
                 y: mouseY
             };
-            
+
         } else {
             return this.stateOne();
         }
@@ -179,7 +191,7 @@ class Bot {
 
         if (this.foods.length > 0) {
             // find the closest food
-            let newfoods=this.comparisionwiththeclosest();
+            let newfoods = this.comparisionwiththeclosest();
             // go to the food and eat it
 
             this.direction = new Point();
@@ -215,6 +227,7 @@ class Bot {
         return false;
     }
 }
+
 function calculateDis(x1, y1, x2, y2) {
     const xx = (x1 - x2) * (x1 - x2);
     const yy = (y1 - y2) * (y1 - y2);
@@ -263,9 +276,9 @@ function map(value, minvalue, maxvalue, newminvalue, newmaxvalue) {
     return newvalue;
 }
 
-for(let i = 0;i< botcount ;i++) {
+for (let i = 0; i < botcount; i++) {
     let bot = new Bot(i);
-    bot.ready(); 
+    bot.ready();
     bot.think();
     bot.senddata();
 }

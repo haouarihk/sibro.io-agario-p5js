@@ -48,9 +48,9 @@ function updatepeeps(pips) {
     // this askes if the player is within my range
     if (pip.isitok) {
       blobs.forEach((blob, k) => {
-        let oldr =blob.r;
-        if(players[i].blobs[k]){
-          oldr=players[i].blobs[k].r;
+        let oldr = blob.r;
+        if (players[i].blobs[k]) {
+          oldr = players[i].blobs[k].r;
         }
         players[i].blobs[k] = blob;
         players[i].blobs[k].r = oldr;
@@ -106,7 +106,12 @@ function killthisfoodwiththatid(fooddata) {
 }
 // this function called when the player about to join
 function login() {
+
+
   // for login
+  if (connected) {
+    socket.disconnect()
+  }
   socket = io();
   // for seting the nickname from html input feild
   nickname = document.getElementById('nickname').value;
@@ -129,6 +134,7 @@ function login() {
     socket.on('set!', (settings) => {
       console.log(`YOOO ${socket.id}`);
       player.id = settings.id;
+      foods = [];
       settings.foods.forEach(food => {
         foods.push(new Food(food.type, food.x, food.y, food.r, food.id))
       });
@@ -151,6 +157,7 @@ function login() {
         console.log('disconnection');
       });
     });
+
   });
 
 }
@@ -177,7 +184,7 @@ let posWheel = 200;
 function mouseWheel(event) {
   // to zoom in and out
   posWheel += event.delta;
-  posWheel = constrain(posWheel, 1, 5000);
+  posWheel = constrain(posWheel, 1, 9000);
 }
 // the chat
 // this for wether he is playing or typing
@@ -329,21 +336,21 @@ function getIndexById(id, array) {
   return indexofar;
 }
 // ge the center dot
-function getCenterDot(blobs) {
-  const center = createVector(0, 0);
-  let radiouseSum = 0;
+function getCenterDot(blobs) {  
   // the form of this equation is:
   // g1 = sum((a * Ma) + (b * Mb) + ...) i=>length
   // r = sum(Ma + Mb + ...) i => length
   if (blobs) {
+    const center = createVector(0, 0);
+    let radiouseSum = 0;
     blobs.forEach(blob => {
-      center.x += blob.x * blob.r;
-      center.y += blob.y * blob.r;
-      radiouseSum += blob.r;
+      center.x += (blob.x);
+      center.y += (blob.y);
+      //radiouseSum += blob.r;
     });
     // g = g1 / (length + r)
-    center.x /= (blobs.length) + radiouseSum;
-    center.y /= (blobs.length) + radiouseSum;
+    center.x /= (blobs.length);
+    center.y /= (blobs.length);
     // g =
     return center;
   }
@@ -380,6 +387,7 @@ function showMenu() {
     document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0, 9);
   }
 }
+let newbe = 0;
 
 function showGame() {
   // hiding the lobby
@@ -403,9 +411,14 @@ function showGame() {
   translate(width / 2, height / 2);
   // zooming accoring to the mouse wheel
   const newzoom = posWheel;
-  zoom = lerp(zoom, newzoom, 0.2);
+  zoom = lerp(zoom, newzoom, 1);
   // this is a built in p5.js function to scale screen
-  scale(120 / (zoom));
+  let sumr = 0;
+  player.blobs.forEach(blob => {
+    sumr += blob.r;
+  });
+  newbe = lerp(newbe, player.blobs.length * 120 / (sumr + zoom - 100), 0.2)
+  scale(newbe);
   // calculating the middle point
   const middot = getCenterDot(player.blobs);
   // translating according to this player location
@@ -424,11 +437,12 @@ function showGame() {
   stroke(255);
   strokeWeight(20);
   // show all the players in the array
-  players.forEach(player => {
-    if (player) {
-      player.show(br);
+  for(let i = players.length-1;i>=0;i--){
+    if (players[i]) {
+      players[i].show(br);
     }
-  });
+  }
+ 
   // mouseX, mouseY is built in p5.js functions
   const data = {
     mousex: mouseX,

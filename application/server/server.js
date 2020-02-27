@@ -187,26 +187,26 @@ class Room {
     //
     // Food settings
     this.foodsMaxCount = foodsQuantity || 500; // how manny foods (default 500)
-    this.howManyEvrytime = 200; // how much everytime (default 200)
-    this.timerForFoodMaker = 500; // how mutch to wait to make another food object (default 200)
+    this.howManyEvrytime = 500; // how much everytime (default 200)
+    this.timerForFoodMaker = 200; // how mutch to wait to make another food object (default 200)
     this.maxFoodSize = 300; // how big can the food be (default 300)
-    this.minFoodSize = 300; // how small can the food be (default 100)
+    this.minFoodSize = 250; // how small can the food be (default 100)
     //
     // Player Settings
     this.howManyPlayersInThisRoom = playersQuantity || 24;
-    this.startingSize = 1200; // in what size the player start with (default 1200)
+    this.avregePlayerSpeed = 200000; // how mutch speed can the player have (default 60000)
+    this.startingSize = 400; // in what size the player start with (default 1200)
     this.timerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down (default 5000)
     this.timerPlayersUpdating = 24; // how mutch to wait till the server sends player info (default 24)
-    this.avregePlayerSpeed = 60000; // how mutch speed can the player have (default 60000)
-    this.minSizeToSplit = 400; // the minimume size for the player to split (default 400)
+    this.minSizeToSplit = 650; // the minimume size for the player to split (default 400)
     this.maxBlobsForEachPlayer = 8; // the maximume number of blobs can the player have (default 8)
-    this.minPlayerSize = 200; // the minimume size that can the player be (default 200)
+    this.minPlayerSize = 410; // the minimume size that can the player be (default 200)
     this.periodTime = 3; // how mutch to end the split (default 3)
     this.periodTimeCounter = 300; // how mutch to end the split 2 (default 300)
     this.zoomView = 8; // how much can the player see the world (default 8)
     //
     // World Settings
-    this.worldSize = worldsize || 100000; // how big the world can be (default 50000)
+    this.worldSize = worldsize || 80000; // how big the world can be (default 50000)
     this.worldSizeMin = -this.worldSize;
     this.worldSizeMax = this.worldSize;
   }
@@ -337,7 +337,7 @@ class Room {
             food.blobs.forEach((yam, k) => {
               const state = getCollisionState(blob, yam, 0);
               if (state === collisionState.firstPlayerBigger) {
-                blob.r += 2 * yam.r / 3;
+                blob.r += 100 * yam.r / blob.r;
                 objectIndexesToRemove.push({
                   index: k,
                   id: food.id
@@ -347,7 +347,7 @@ class Room {
           } else {
             const state = getCollisionState(blob, food, 0);
             if (state === collisionState.firstPlayerBigger) {
-              blob.r += 2 * food.r / 3;
+              blob.r += 100 * food.r / blob.r;
               objectIndexesToRemove.push({
                 index: j,
                 id: 0
@@ -376,7 +376,7 @@ class Room {
       /////////// eat events:
       // eat food
       this.eatEatable(this.foods).forEach(dat => {
-        if (dat.index) {
+        if (this.foods[dat.index]) {
           let fooddata = this.foods[dat.index].id;
           io.sockets.emit('foodeatenEvent', fooddata);
           this.foods.splice(dat.index, 1);
@@ -385,12 +385,14 @@ class Room {
       // eat player
       let a = this.eatEatable(this.players, true)
       a.forEach((dat) => {
-        if (dat.index) {
+        if (this.players[dat.index]) {
           let index = dat.index;
           let playerid = dat.id;
           let indexofme = getIndexById(playerid, this.players);
-          console.log(playerid + ',' + index)
-          this.players[indexofme].blobs.splice(index, 1)
+          if (indexofme !== -1) {
+            console.log(playerid + ',' + index)
+            this.players[indexofme].blobs.splice(index, 1)
+          }
         }
       })
       /////////// Sending data to players

@@ -34,8 +34,8 @@ class Blob {
       beginShape(); // built in p5.js function 
       this.timer += 50;
       for(let i =0; i< TWO_PI;i += PI/40) {
-        var ofsetx = map(cos(i),-1,1,0,10);
-        var ofsety = map(sin(i),-1,1,0,10);
+        var ofsetx = map(cos(i),-1,1,0,222);
+        var ofsety = map(sin(i),-1,1,0,222);
         var r = map(noise(ofsetx/2  + this.x/this.r ,ofsety/2+ this.y/this.r , this.timer/this.r),0,1,0,this.r/10 * 0.7) + this.r;
         var dx = r * cos(i);
         var dy = r * sin(i);

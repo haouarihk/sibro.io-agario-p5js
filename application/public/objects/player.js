@@ -8,6 +8,7 @@ class Player {
     this.id = id;
     this.isitshown = false;
     this.blobs = [];
+    this.r =0;
   }
   // show blobs
   show(br) {
