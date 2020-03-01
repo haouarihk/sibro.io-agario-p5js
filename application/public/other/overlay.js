@@ -78,7 +78,7 @@ class Leveltab {
       }
       console.log(latency)
       if(keyIsPressed && key == buttons[i]){
-        if(latency > 2){
+        if(latency > 5){
           latency = 0;
         if (filter !== 50) {
           fill(40 + 200);
