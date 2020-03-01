@@ -1,9 +1,11 @@
-//import { text } from "express";
-
 /* eslint-disable linebreak-style */
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
+
+
+
+
 class Chatbox {
   constructor(x, y, chatlist) {
     this.chatlist = chatlist;
@@ -25,7 +27,7 @@ class Chatbox {
         // lower the counter for more to come
         counter -= 1;
       } else {
-        
+
         // show the chatline
         chatline.show(index, this.x, this.y);
         // continue
@@ -36,11 +38,11 @@ class Chatbox {
     if (connected) {
       // show text input feild
       inputfeild.show();
-      fill(0,0,0,0)
-      if(typedodo !== 0){
-      rect(this.x+10, this.y+ 150, 380, 16);
+      fill(0, 0, 0, 0)
+      if (typedodo !== 0) {
+        rect(this.x + 10, this.y + 150, 380, 16);
       }
-      inputfeild.position(this.x+10, this.y + 150);
+      inputfeild.position(this.x + 10, this.y + 150);
       inputfeild.size(380);
     } else {
       // hide text input feild
@@ -54,18 +56,57 @@ class Chatbox {
 
 }
 class Leveltab {
-  constructor(x, y, lvl) {
+  constructor(x, y) {
     this.x = x;
     this.y = y;
     this.count = 9;
+    this.playerlvl = 0;
+    this.latency = 0
   }
 
   show() {
-    fill(40);
-    rect(this.x, this.y, 200, 50);
+    let filter = 0;
+ 
+    fill(70);
+    rect(this.x, this.y + 10, 200, 200);
+    this.latency ++;
+
+    for (let i = 0; i < powerups.length; i += 1) {
+      if (player.lvl < powerupscost[i]) {
+        filter = 50;
+      } else{
+        filter = 0;
+      }
+      if (contains(this.x, this.y + i * 55 + 50, 200, mouseX, mouseY, 20)) {
+        if (mouseIsPressed) {
+          if(this.latency>1){
+            
+          }else{
+            this.latency = 0;
+          if (filter !== 50) {
+            fill(40 + 200);
+            socket.emit("buyItem", i);
+          } else {
+            fill(200,10,10);
+          }
+        }
+        } else {
+          fill(40 + 50);
+        }
+      
+      } else {
+        fill(40 - filter);
+      }
+      rect(this.x, this.y + i * 55 + 50, 200, 50);
+      fill(255 - filter)
+      text(powerups[i], this.x, this.y + i * 55 + 70)
+      text(powerupscost[i], this.x + 140, this.y + i * 55 + 70)
+
+    }
+
     fill(255)
-    text("LEVEL " + playerlvl,this.x,this.y)
-  
+    text("Coins " + this.playerlvl, this.x, this.y)
+
   }
 
 }
@@ -85,7 +126,7 @@ class Listing {
         fill(255);
         textAlign(LEFT);
         textSize(20);
-        text(((i + 1<10)?(i + 1+" "):(i + 1+""))+") "+player.nickname, this.x + 5, this.y + i * 20 + 30);
+        text(((i + 1 < 10) ? (i + 1 + " ") : (i + 1 + "")) + ") " + player.nickname, this.x + 5, this.y + i * 20 + 30);
         counter += 1;
       }
     });

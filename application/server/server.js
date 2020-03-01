@@ -158,7 +158,7 @@ class Point {
     this.x = x2 - x1;
     this.y = y2 - y1;
   };
-  getMag(){
+  getMag() {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
 }
@@ -231,8 +231,8 @@ class Blob {
   }
   updatevel() {
     if (this.vel) {
-      this.x += this.vel.x;
-      this.y += this.vel.y;
+      this.x += this.vel.x/this.r;
+      this.y += this.vel.y/this.r;
     }
   }
   airresistants(res = 0.1) {
@@ -243,8 +243,8 @@ class Blob {
   }
   CastSpeed(speed) {
     if (this.vel) {
-      if(this.vel.getMag() > speed){
-      this.vel.setMag(speed);
+      if (this.vel.getMag() > speed) {
+        this.vel.setMag(speed);
       }
     }
   }
@@ -273,17 +273,19 @@ class Room {
     this.roomindex = index;
     // Server
     this.comparisonTimer = 500; // how much to refresh the Top 10 players list
+    this.powerups = ["Change color","Jump","Speed +10", "Save mass"]
+    this.powerupscost = [20,1000,2000, 4000]
     //
     // Food settings
-    this.foodsMaxCount = foodsQuantity || 2000; // how manny foods (default 500)
-    this.howManyEvrytime = 20; // how much everytime (default 200)
-    this.timerForFoodMaker = 200; // how mutch to wait to make another food object (default 200)
-    this.maxFoodSize = 300; // how big can the food be (default 300)
-    this.minFoodSize = 250; // how small can the food be (default 100)
+    this.foodsMaxCount = foodsQuantity || 500; // how manny foods (default 500)
+    this.howManyEvrytime = 50; // how much everytime (default 200)
+    this.timerForFoodMaker = 900; // how mutch to wait to make another food object (default 200)
+    this.maxFoodSize = 600; // how big can the food be (default 300)
+    this.minFoodSize = 400; // how small can the food be (default 100)
     //
     // Player Settings
-    this.howManyPlayersInThisRoom = playersQuantity || 24;
-    this.avregePlayerSpeed = 200; // how mutch speed can the player have (default 60000)
+    this.howManyPlayersInThisRoom = playersQuantity || 35;
+    this.avregePlayerSpeed = 50000; // how mutch speed can the player have (default 60000)
     this.startingSize = 400; // in what size the player start with (default 1200)
     this.timerPlayerGetsOld = 5000; // how mutch to wait till his mass gose down (default 5000)
     this.timerPlayersUpdating = 60; // how mutch to wait till the server sends player info (default 24)
@@ -299,6 +301,7 @@ class Room {
     this.worldSize = worldsize || 80000; // how big the world can be (default 50000)
     this.worldSizeMin = -this.worldSize;
     this.worldSizeMax = this.worldSize;
+    let latency = 0;
   }
   updatePlayerRadious() {
     this.players.forEach((player, index, playersArray) => {
@@ -487,6 +490,8 @@ class Room {
   }
   // updating/sending/Events the current data
   Updates() {
+
+
     if (this.players.length > 0) {
       // updating his radiouse bassed on his blobs
       this.updatePlayerRadious();
@@ -561,6 +566,7 @@ class Room {
     }
   }
   // connection reciver
+  
   runtime() {
     console.log('room ' + this.roomindex + ' is running');
     io.sockets.on('connection', (socket) => {
@@ -590,6 +596,8 @@ class Room {
           id: socket.id,
           foods: this.foods,
           minSizeToSplit: this.minSizeToSplit,
+          powerups: this.powerups,
+          powerupscost: this.powerupscost
         };
         socket.emit('set!', settingsofplayer);
 
@@ -626,13 +634,25 @@ class Room {
         })
       });
 
-      // When a player split
+      // When a player level up!
       socket.on('lvlup', () => {
         const playerIndex = getIndexById(socket.id, this.players)
         let r = this.players[playerIndex].r;
         if (r > this.minSizeToSplit) {
-          this.players[playerIndex].r -= 2000;
+          this.players[playerIndex].blobs[0].r -= 2000;
           this.players[playerIndex].lvl += 2000;
+          console.log("LEVELUP!")
+        }
+      });
+      // When a player buy something
+      socket.on('buyItem', (item) => {
+        const playerIndex = getIndexById(socket.id, this.players)
+        if (playerIndex !== -1) {
+          const player = this.players[playerIndex];
+          if (player.lvl >= this.powerupscost[item]) {
+            this.players[playerIndex].lvl -= this.powerupscost[item];
+            this.Buy(item,playerIndex)
+          }
         }
       });
       // When a player split
@@ -759,6 +779,20 @@ class Room {
     let playerindex = getIndexById(blob.id, this.players);
     blob.eatmyself = (blob.timertoeatme <= 0);
     if (blob.eatmyself) {
+
+    }
+  }
+  Buy(item,index) {
+    switch (item) {
+      case 0: // case speed
+      this.players[index].c = [Math.random()*200+50,Math.random()*200+50,Math.random()*200+50];
+        break;
+      case 1: // case jump
+
+        break;
+      case 2: // case colorchange
+
+        break;
 
     }
   }

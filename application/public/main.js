@@ -23,11 +23,15 @@ let MinSizeToSplit = 200; // informations sets by the server
 let color = []; // player color
 let connected = false; // connection
 // built in p5.js function (one time before anything happen)
+let powerups = []
+let powerupscost = []
+let logo ;
 function preload() {
   inputfeild = createInput();
   inputfeild.hide();
   br = loadFont('fonts/br2.ttf');
   bg = loadImage('a3.jpg');
+  logo = loadImage('logo.png');
 }
 // this function updates the players list
 function updatepeeps(pips) {
@@ -72,6 +76,7 @@ function updatepeeps(pips) {
     if (socket.id === pip.id) {
       player = players[i];
       player.blobs = players[i].blobs;
+      player.lvl = players[i].lvl
       indexofplayer = i;
     }
   });
@@ -81,9 +86,7 @@ function updatepeeps(pips) {
 function updateyamies(yams) {
   yams.forEach(yam => {
     // show the food if its in range
-    if (yam.isitok) {
       foods.push(new Food(yam.type, yam.x, yam.y, yam.r, yam.id));
-    }
   });
 }
 // this function updates the Snacks list
@@ -153,6 +156,8 @@ function login() {
     socket.on('set!', (settings) => {
       player.id = settings.id;
       foods = [];
+      powerups = settings.powerups;
+      powerupscost =settings.powerupscost;
       settings.foods.forEach(food => {
         foods.push(new Food(food.type, food.x, food.y, food.r, food.id))
       });
@@ -222,8 +227,8 @@ function keyTyped() {
   }
 }
 
-function contains(ax, ay, aw, x, y) {
-  return (x > ax && x < ax + aw && y > ay && y < ay + 36);
+function contains(ax, ay, aw, x, y,bw) {
+  return (x > ax && x < ax + aw && y > ay && y < ay+bw + 36);
 }
 
 function mousePressed() {
@@ -388,6 +393,7 @@ let chatlist = []; ///////
 
 function showMenu() {
   changeFocus(view.viewMenu)
+image(logo,width/2-150,7*height/700,300,300)
   // if nickname box is larger than 10 contrain it
   if (document.getElementById('nickname').value.length > 10) {
     document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0, 9);
@@ -420,7 +426,6 @@ function draw() {
 }
 
 function playerSettingsUpdater() {
-
 }
 
 function Updater() {
@@ -442,20 +447,22 @@ function Updater() {
   socket.emit('updateplayer', data);
 
 }
-
+let list,ranking;
 function overlayshower() {
-  const list = new Listing((6 * width) / 7, height / 30, players);
+  list = new Listing((6 * width) / 7, height / 30, players);
   // Making chatbox 
   chatbox = new Chatbox((width) / 300, 5 * height / 7, []);
   // making the ranktab
-  const ranking = new Leveltab((width) / 200, height / 20, 0);
+  ranking = new Leveltab((width) / 200, height / 20, 0);
   // Setting chatbox list chat
   chatbox.setChat(chatlist);
   // Showing them
   image(bg, 0, 0, width, height);
   list.show();
   chatbox.show();
+  ranking.playerlvl = player.lvl;
   ranking.show();
+
 }
 
 function changeFocus(foc) {
