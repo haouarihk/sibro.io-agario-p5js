@@ -17,6 +17,15 @@ const collisionState = {
     secondPlayerBigger: 2,
     noCollision: 3
 }
+function getIndexById(id, array) {
+    let indexofar = -1;
+    array.forEach((ar, i) => {
+      if (ar.id === id) {
+        indexofar = i;
+      }
+    });
+    return indexofar;
+  }
 class Point {
     constructor(velx, vely) {
         this.x = velx;
@@ -130,13 +139,9 @@ class Bot {
     }
 
     updateyamies(yams) {
-        this.foods = [];
-        yams.forEach((yam, i) => {
+        yams.forEach(yam=> {
             // show the food if its in range
-            if (yam.isitok) {
-                this.foods[i] = new Food(yam.type, yam.x, yam.y, yam.r, yam.id);
-                this.foods[i].type = yam.type;
-            }
+                this.foods.push(new Food(yam.type, yam.x, yam.y, yam.r, yam.id));
         });
     }
     ready() {
@@ -150,13 +155,42 @@ class Bot {
             nickname
         };
         this.socket.emit('ready', data);
-        this.socket.on('updatepipis', (data) => {
-            this.updatepeeps(data)
-        });
-        this.socket.on('updateyamies', (data) => {
-            this.updateyamies(data)
-        });
+        this.socket.on('set!', (settings) => {
+            this.player.id = settings.id;
+            this.foods = [];
+            settings.foods.forEach(food => {
+              this.foods.push(new Food(food.type, food.x, food.y, food.r, food.id))
+            });
+            this.player.blobs = settings.blobs;
+            // listening for thoes when he is connected
+            this.socket.on('updatePlayersData', (data) => {
+                this.updatepeeps(data)
+            });
+            this.socket.on('updateyamies', (data) => {
+                this.updateyamies(data)
+            });
+            //this.socket.on('warfeilddata', warfeilddata);
+            //socket.on('recivechat', reciveTextChat);
+            //socket.on('updateSnacks',updateSnacks);
+            this.socket.on('foodeatenEvent',()=> {
+                this.killthisfoodwiththatid();});
+            // this for an instant kick for the player
+            this.socket.on('disconnectThatSoc', () => {
+              this.player = null;
+              this.players = [];
+              this.socket.disconnect();
+              console.log('disconnection');
+            });
+          });
+
     }
+    killthisfoodwiththatid(fooddata) {
+        let index = getIndexById(fooddata, this.foods);
+      
+        if (index !== -1) {
+          this.foods.splice(index, 1);
+        }
+      }
     think() {
         // thinking
         if (this.player) {
@@ -170,7 +204,7 @@ class Bot {
         setInterval(() => {
             const a = this.stateZero();
             this.direct = a;
-        }, 4000);
+        }, 2000);
     }
     stateZero() {
 
@@ -215,15 +249,14 @@ class Bot {
 
     comparisionwiththeclosest() {
         if (this.foods.length > 0) {
-            debugger
+            if(this.player.blobs[0]){
             this.foods.sort((food1, food2) => {
-                debugger
                 let dis1 = calculateDis(this.player.blobs[0].x, this.player.blobs[0].y, food1.x, food1.y);
                 let dis2 = calculateDis(this.player.blobs[0].x, this.player.blobs[0].y, food2.x, food2.y);
                 return dis1 - dis2
             });
             return this.foods;
-        }
+        }}
         return false;
     }
 }

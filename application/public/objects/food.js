@@ -15,7 +15,7 @@ class Food {
     show() {
       switch (1) {
         case 1:
-          fill(this.c||0, 250, 0);
+          fill(255);
           ellipse(this.x, this.y, this.r, this.r);
           break;
         case 2:

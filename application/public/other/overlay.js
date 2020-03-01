@@ -1,3 +1,5 @@
+//import { text } from "express";
+
 /* eslint-disable linebreak-style */
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-undef */
@@ -48,6 +50,22 @@ class Chatbox {
   };
   setChat(chat) {
     this.chatlist = chat;
+  }
+
+}
+class Leveltab {
+  constructor(x, y, lvl) {
+    this.x = x;
+    this.y = y;
+    this.count = 9;
+  }
+
+  show() {
+    fill(40);
+    rect(this.x, this.y, 200, 50);
+    fill(255)
+    text("LEVEL " + playerlvl,this.x,this.y)
+  
   }
 
 }

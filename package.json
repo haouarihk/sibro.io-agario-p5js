@@ -4,7 +4,7 @@
   "description": "the io game",
   "main": ".eslintrc.js",
   "scripts": {
-    "testi": "node --inspect-brk application/server/server.js",
+    "test": "node --inspect-brk application/server/server.js",
     "start": "node application/server/server.js"
   },
   "repository": {
