@@ -25,7 +25,9 @@ let connected = false; // connection
 // built in p5.js function (one time before anything happen)
 let powerups = []
 let powerupscost = []
-let logo ;
+let buttons = []
+let logo;
+
 function preload() {
   inputfeild = createInput();
   inputfeild.hide();
@@ -86,7 +88,7 @@ function updatepeeps(pips) {
 function updateyamies(yams) {
   yams.forEach(yam => {
     // show the food if its in range
-      foods.push(new Food(yam.type, yam.x, yam.y, yam.r, yam.id));
+    foods.push(new Food(yam.type, yam.x, yam.y, yam.r, yam.id));
   });
 }
 // this function updates the Snacks list
@@ -157,7 +159,8 @@ function login() {
       player.id = settings.id;
       foods = [];
       powerups = settings.powerups;
-      powerupscost =settings.powerupscost;
+      powerupscost = settings.powerupscost;
+      buttons = settings.buttons;
       settings.foods.forEach(food => {
         foods.push(new Food(food.type, food.x, food.y, food.r, food.id))
       });
@@ -227,8 +230,8 @@ function keyTyped() {
   }
 }
 
-function contains(ax, ay, aw, x, y,bw) {
-  return (x > ax && x < ax + aw && y > ay && y < ay+bw + 36);
+function contains(ax, ay, aw, x, y, bw) {
+  return (x > ax && x < ax + aw && y > ay && y < ay + bw + 36);
 }
 
 function mousePressed() {
@@ -243,7 +246,7 @@ function mousePressed() {
 }
 // this is a built in function in p5.js
 function keyPressed() {
-
+console.log(keyCode);
   // if he is not in the game, don't bother
   if (!connected) {
     return;
@@ -393,7 +396,7 @@ let chatlist = []; ///////
 
 function showMenu() {
   changeFocus(view.viewMenu)
-image(logo,width/2-150,7*height/700,300,300)
+  image(logo, width / 2 - 150, 7 * height / 700, 300, 300)
   // if nickname box is larger than 10 contrain it
   if (document.getElementById('nickname').value.length > 10) {
     document.getElementById('nickname').value = document.getElementById('nickname').value.substring(0, 9);
@@ -422,11 +425,9 @@ function draw() {
   }
   // if he is playing
   showGame();
-
 }
 
-function playerSettingsUpdater() {
-}
+function playerSettingsUpdater() {}
 
 function Updater() {
 
@@ -447,7 +448,8 @@ function Updater() {
   socket.emit('updateplayer', data);
 
 }
-let list,ranking;
+let list, ranking;
+
 function overlayshower() {
   list = new Listing((6 * width) / 7, height / 30, players);
   // Making chatbox 
@@ -496,12 +498,14 @@ function zoomer() {
   newbe = lerp(newbe, player.blobs.length * 120 / (sumr + zoom - 100), 0.2)
   scale(newbe);
 }
-
+let middotx2=0,middoty2=0;
 function shower() {
   translate(width / 2, height / 2);
   zoomer();
   const middot = getCenterDot(player.blobs);
-  translate(-middot.x, -middot.y);
+  middotx2 = lerp(middotx2,-middot.x,0.6)
+  middoty2 = lerp(middoty2,-middot.y,0.6)
+  translate(middotx2, middoty2);
   // show all the foods in the array
   foods.forEach(food => {
     if (food) {
@@ -516,15 +520,15 @@ function shower() {
   stroke(255);
   strokeWeight(20);
   // show all the players in the array
-  for(let i = players.length-1; i>=0;i--){
-      players[i].show(br);
-    }
-      
+  for (let i = players.length - 1; i >= 0; i--) {
+    players[i].show(br);
+  }
+
 }
 
 
 function Getsum(blobs) {
-  let sumr=0;
+  let sumr = 0;
   blobs.forEach(blob => {
     sumr += blob.r;
   });

@@ -223,6 +223,7 @@ class Blob {
     this.eatmyself = false;
     this.vel = new Point(0, 0)
     this.indexofplayer = -1;
+    this.direction;
   }
   setVel(vel) {
     this.vel.x += vel.x
@@ -258,7 +259,7 @@ class Player {
     this.zoom = 1;
     this.nickname = nickname;
     this.middot = new Point(0, 0);
-    this.lvl = 0;
+    this.lvl = 1000;
   }
   setLvl(newlvl) {
     this.lvl = newlvl;
@@ -275,6 +276,7 @@ class Room {
     this.comparisonTimer = 500; // how much to refresh the Top 10 players list
     this.powerups = ["Change color","Jump","Speed +10", "Save mass"]
     this.powerupscost = [20,1000,2000, 4000]
+    this.buttons = ['a','s','d','f']
     //
     // Food settings
     this.foodsMaxCount = foodsQuantity || 500; // how manny foods (default 500)
@@ -296,6 +298,7 @@ class Room {
     this.periodTimeCounter = 500; // how mutch to end the split 2 (default 300)
     this.zoomView = 200; // how much can the player see the world (default 8)
     this.feeder = 50 // how much the feeding takes from you
+    this.howMuchTolvlUp = 1000;
     //
     // World Settings
     this.worldSize = worldsize || 80000; // how big the world can be (default 50000)
@@ -597,7 +600,8 @@ class Room {
           foods: this.foods,
           minSizeToSplit: this.minSizeToSplit,
           powerups: this.powerups,
-          powerupscost: this.powerupscost
+          powerupscost: this.powerupscost,
+          buttons: this.buttons
         };
         socket.emit('set!', settingsofplayer);
 
@@ -638,9 +642,9 @@ class Room {
       socket.on('lvlup', () => {
         const playerIndex = getIndexById(socket.id, this.players)
         let r = this.players[playerIndex].r;
-        if (r > this.minSizeToSplit) {
-          this.players[playerIndex].blobs[0].r -= 2000;
-          this.players[playerIndex].lvl += 2000;
+        if (r > this.howMuchTolvlUp) {
+          this.players[playerIndex].blobs[0].r -= this.howMuchTolvlUp;
+          this.players[playerIndex].lvl += this.howMuchTolvlUp;
           console.log("LEVELUP!")
         }
       });
@@ -731,12 +735,12 @@ class Room {
       // console.log('wait what ' + indexofplayer);
       const middot = getCenterDot(this.players[blob.indexofplayer].blobs);
       let mousepoint = new Point(mousex, mousey);
-      var direction = getDirection(new Point(width / 2, height / 2), mousepoint, new Point(Math.random, Math.random));
-      direction.setMag(this.avregePlayerSpeed);
+      blob.direction = getDirection(new Point(width / 2, height / 2), mousepoint, new Point(Math.random, Math.random));
+      blob.direction.setMag(this.avregePlayerSpeed);
       // setting the magnitude
       // moving the blob
 
-      blob.setVel(new Point(direction.x, direction.y))
+      blob.setVel(new Point(blob.direction.x, blob.direction.y))
 
 
     }
@@ -788,7 +792,11 @@ class Room {
       this.players[index].c = [Math.random()*200+50,Math.random()*200+50,Math.random()*200+50];
         break;
       case 1: // case jump
-
+      this.players[index].blobs[0].direction.setMag(20000);
+      // setting the magnitude
+      // moving the blob
+      this.players[index].blobs[0].x +=this.players[index].blobs[0].direction.x*1
+      this.players[index].blobs[0].y +=this.players[index].blobs[0].direction.y*1
         break;
       case 2: // case colorchange
 

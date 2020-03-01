@@ -5,7 +5,7 @@
 
 
 
-
+let latency = 0
 class Chatbox {
   constructor(x, y, chatlist) {
     this.chatlist = chatlist;
@@ -61,7 +61,6 @@ class Leveltab {
     this.y = y;
     this.count = 9;
     this.playerlvl = 0;
-    this.latency = 0
   }
 
   show() {
@@ -69,7 +68,7 @@ class Leveltab {
  
     fill(70);
     rect(this.x, this.y + 10, 200, 200);
-    this.latency ++;
+    latency ++;
 
     for (let i = 0; i < powerups.length; i += 1) {
       if (player.lvl < powerupscost[i]) {
@@ -77,12 +76,24 @@ class Leveltab {
       } else{
         filter = 0;
       }
+      console.log(latency)
+      if(keyIsPressed && key == buttons[i]){
+        if(latency > 2){
+          latency = 0;
+        if (filter !== 50) {
+          fill(40 + 200);
+          socket.emit("buyItem", i);
+        } else {
+          fill(200,10,10);
+        }
+      }
+
+      }
       if (contains(this.x, this.y + i * 55 + 50, 200, mouseX, mouseY, 20)) {
         if (mouseIsPressed) {
           if(this.latency>1){
             
           }else{
-            this.latency = 0;
           if (filter !== 50) {
             fill(40 + 200);
             socket.emit("buyItem", i);
