@@ -26,6 +26,7 @@ let connected = false; // connection
 let powerups = []
 let powerupscost = []
 let buttons = []
+let timestospeedup = 8;
 let logo;
 
 function preload() {
@@ -161,6 +162,7 @@ function login() {
       powerups = settings.powerups;
       powerupscost = settings.powerupscost;
       buttons = settings.buttons;
+      timestospeedup = settings.timestospeedup;
       settings.foods.forEach(food => {
         foods.push(new Food(food.type, food.x, food.y, food.r, food.id))
       });
@@ -246,7 +248,6 @@ function mousePressed() {
 }
 // this is a built in function in p5.js
 function keyPressed() {
-console.log(keyCode);
   // if he is not in the game, don't bother
   if (!connected) {
     return;

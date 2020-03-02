@@ -67,16 +67,19 @@ class Leveltab {
     let filter = 0;
  
     fill(70);
-    rect(this.x, this.y + 10, 200, 200);
+    rect(this.x, this.y + 10, 250, powerups.length*50 +55);
     latency ++;
 
     for (let i = 0; i < powerups.length; i += 1) {
+      if(timestospeedup<=0 && i === 2 ){
+        console.log(timestospeedup)
+      }else{
+        timestospeedup--;
       if (player.lvl < powerupscost[i]) {
         filter = 50;
       } else{
         filter = 0;
       }
-      console.log(latency)
       if(keyIsPressed && key == buttons[i]){
         if(latency > 5){
           latency = 0;
@@ -89,11 +92,10 @@ class Leveltab {
       }
 
       }
-      if (contains(this.x, this.y + i * 55 + 50, 200, mouseX, mouseY, 20)) {
+      if (contains(this.x, this.y + i * 55 + 50, 250, mouseX, mouseY, 20)) {
         if (mouseIsPressed) {
-          if(this.latency>1){
-            
-          }else{
+          if(latency > 5){
+            latency = 0;
           if (filter !== 50) {
             fill(40 + 200);
             socket.emit("buyItem", i);
@@ -108,17 +110,18 @@ class Leveltab {
       } else {
         fill(40 - filter);
       }
-      rect(this.x, this.y + i * 55 + 50, 200, 50);
+      rect(this.x, this.y + i * 55 + 50, 250, 50);
       fill(255 - filter)
-      text(powerups[i], this.x, this.y + i * 55 + 70)
-      text(powerupscost[i], this.x + 140, this.y + i * 55 + 70)
+      textSize(16)
+      text(powerups[i], this.x+10, this.y + i * 55 + 70)
+      text(powerupscost[i], this.x + 160, this.y + i * 55 + 70)
 
     }
 
     fill(255)
     text("Coins " + this.playerlvl, this.x, this.y)
 
-  }
+  }}
 
 }
 class Listing {
