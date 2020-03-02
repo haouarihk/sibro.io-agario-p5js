@@ -1,4 +1,4 @@
-const botcount =10;
+const botcount = 1;
 const io = require('socket.io-client');
 let poszoom = 10;
 let nickname = "[bot]Bob";
@@ -17,6 +17,15 @@ const collisionState = {
     secondPlayerBigger: 2,
     noCollision: 3
 }
+function getIndexById(id, array) {
+    let indexofar = -1;
+    array.forEach((ar, i) => {
+      if (ar.id === id) {
+        indexofar = i;
+      }
+    });
+    return indexofar;
+  }
 class Point {
     constructor(velx, vely) {
         this.x = velx;
@@ -69,18 +78,17 @@ class Bot {
     constructor(index) {
         let bot = this;
         this.poszoom = 300;
-        this.nickname = "[bot]Bob"+index;
+        this.nickname = "[bot]Bob" + index;
         this.player;
         this.players = [];
         this.foods = [];
         this.indexofplayer = 0;
         this.color = [200, 200, 200];
-        this.socket = io('http://localhost:5000');
         this.direct = {
             x: 0,
             y: 0
         };
-        
+
     }
     senddata() {
         // sending data
@@ -98,7 +106,7 @@ class Bot {
     }
     updatepeeps(pips) {
         this.players = [];
-        if(!this.player.blobs) {
+        if (!this.player.blobs) {
             this.ready();
         }
         pips.forEach((pip, i) => {
@@ -131,16 +139,13 @@ class Bot {
     }
 
     updateyamies(yams) {
-        this.foods = [];
-        yams.forEach((yam, i) => {
+        yams.forEach(yam=> {
             // show the food if its in range
-            if (yam.isitok) {
-                this.foods[i] = new Food(yam.type, yam.x, yam.y, yam.r, yam.id);
-                this.foods[i].type = yam.type;
-            }
+                this.foods.push(new Food(yam.type, yam.x, yam.y, yam.r, yam.id));
         });
     }
     ready() {
+        this.socket = io('http://localhost:5000');
         this.player = new Player(this.socket.id, this.nickname);
         this.player.blobs = new Blob();
         // the player sends to the server that he is connected/ready
@@ -150,27 +155,68 @@ class Bot {
             nickname
         };
         this.socket.emit('ready', data);
-        this.socket.on('updatepipis', (data)=>{this.updatepeeps(data)});
-        this.socket.on('updateyamies', (data)=>{this.updateyamies(data)});
+        this.socket.on('set!', (settings) => {
+            this.player.id = settings.id;
+            this.foods = [];
+            settings.foods.forEach(food => {
+              this.foods.push(new Food(food.type, food.x, food.y, food.r, food.id))
+            });
+            this.player.blobs = settings.blobs;
+            // listening for thoes when he is connected
+            this.socket.on('updatePlayersData', (data) => {
+                this.updatepeeps(data)
+            });
+            this.socket.on('updateyamies', (data) => {
+                this.updateyamies(data)
+            });
+            //this.socket.on('warfeilddata', warfeilddata);
+            //socket.on('recivechat', reciveTextChat);
+            //socket.on('updateSnacks',updateSnacks);
+            this.socket.on('foodeatenEvent',()=> {
+                this.killthisfoodwiththatid();});
+            // this for an instant kick for the player
+            this.socket.on('disconnectThatSoc', () => {
+              this.player = null;
+              this.players = [];
+              this.socket.disconnect();
+              console.log('disconnection');
+            });
+          });
+
     }
+    killthisfoodwiththatid(fooddata) {
+        let index = getIndexById(fooddata, this.foods);
+      
+        if (index !== -1) {
+          this.foods.splice(index, 1);
+        }
+      }
     think() {
         // thinking
+        if (this.player) {
+            if (this.player.blobs.length === 0) {
+                this.socket.disconnect();
+                this.ready();
+                console.log("reconnecting")
+                return;
+            }
+        }
         setInterval(() => {
             const a = this.stateZero();
             this.direct = a;
-        }, 4000);
+        }, 2000);
     }
     stateZero() {
 
         const mouseX = movea[parseInt(Math.random() * 2 + 0)];
         const mouseY = movea[parseInt(Math.random() * 2 + 2)];
 
-        if (this.comparisionwiththeclosest()=== false) {
+        if (this.comparisionwiththeclosest() === false) {
             return {
                 x: mouseX,
                 y: mouseY
             };
-            
+
         } else {
             return this.stateOne();
         }
@@ -179,7 +225,7 @@ class Bot {
 
         if (this.foods.length > 0) {
             // find the closest food
-            let newfoods=this.comparisionwiththeclosest();
+            let newfoods = this.comparisionwiththeclosest();
             // go to the food and eat it
 
             this.direction = new Point();
@@ -203,18 +249,18 @@ class Bot {
 
     comparisionwiththeclosest() {
         if (this.foods.length > 0) {
-            debugger
+            if(this.player.blobs[0]){
             this.foods.sort((food1, food2) => {
-                debugger
                 let dis1 = calculateDis(this.player.blobs[0].x, this.player.blobs[0].y, food1.x, food1.y);
                 let dis2 = calculateDis(this.player.blobs[0].x, this.player.blobs[0].y, food2.x, food2.y);
                 return dis1 - dis2
             });
             return this.foods;
-        }
+        }}
         return false;
     }
 }
+
 function calculateDis(x1, y1, x2, y2) {
     const xx = (x1 - x2) * (x1 - x2);
     const yy = (y1 - y2) * (y1 - y2);
@@ -263,9 +309,9 @@ function map(value, minvalue, maxvalue, newminvalue, newmaxvalue) {
     return newvalue;
 }
 
-for(let i = 0;i< botcount ;i++) {
+for (let i = 0; i < botcount; i++) {
     let bot = new Bot(i);
-    bot.ready(); 
+    bot.ready();
     bot.think();
     bot.senddata();
 }
