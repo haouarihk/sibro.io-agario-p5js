@@ -278,7 +278,7 @@ class Room {
     this.comparisonTimer = 500; // how much to refresh the Top 10 players list
     this.powerups = ["Change color", "Jump", "gain 3000 mass"]
     this.powerupscost = [20, 2000,6000]
-    this.buttons = ['a', 's', 'd', 'f']
+    this.buttons = ['a', 's', 'd']
     //
     // Food settings
     this.foodsMaxCount = foodsQuantity || 500; // how manny foods (default 500)
@@ -802,14 +802,14 @@ class Room {
         this.players[index].blobs[0].y += this.players[index].blobs[0].direction.y * 1
       }
         break;
-      case 2: // case speed ++
+      case 3: // case speed ++
       if(this.players[index].blobs[0]){
       if(this.players[index].blobs[0].timestoseedup<=0){
         this.players[index].blobs[0].timestoseedup--;
         this.players[index].blobs[0].avregePlayerSpeed += (this.players[index].blobs[0].avregePlayerSpeed * 0.2)
       }}
         break;
-      case 3: // case gain 3000 mass
+      case 2: // case gain 3000 mass
       if(this.players[index].blobs[0]){
         this.players[index].blobs[0].r += 3000;
       }
