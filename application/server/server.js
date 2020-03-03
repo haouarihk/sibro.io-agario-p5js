@@ -224,7 +224,8 @@ class Blob {
     this.vel = new Point(0, 0)
     this.indexofplayer = -1;
     this.direction;
-    this.avregePlayerSpeed = 50
+    this.avregePlayerSpeed = 300
+    this.addspeed = 0;
   }
   setVel(vel) {
     this.vel.x += vel.x
@@ -260,7 +261,7 @@ class Player {
     this.zoom = 1;
     this.nickname = nickname;
     this.middot = new Point(0, 0);
-    this.lvl = 1000;
+    this.lvl = 0;
     this.timestoseedup = 10
   }
   setLvl(newlvl) {
@@ -276,9 +277,9 @@ class Room {
     this.roomindex = index;
     // Server
     this.comparisonTimer = 500; // how much to refresh the Top 10 players list
-    this.powerups = ["Change color", "Jump", "gain 3000 mass"]
-    this.powerupscost = [20, 2000,6000]
-    this.buttons = ['a', 's', 'd']
+    this.powerups = ["Change color", "Speedup", "Jump", "gain 3000 mass"]
+    this.powerupscost = [20, 100, 2000, 6000]
+    this.buttons = ['a', 's','d', 'f']
     //
     // Food settings
     this.foodsMaxCount = foodsQuantity || 500; // how manny foods (default 500)
@@ -409,10 +410,10 @@ class Room {
     // io.sockets.emit('updateyamies', fooddata);
   }
   // this function should rediouse the r of the player's blobs by 2 everytime
-  rediuceRadiusBy(step = 0.1) {
+  rediuceRadiusBy(step = 0.005) {
     this.players = this.players.map(player => {
       player.blobs = player.blobs.map(blob => {
-        let blobSize = blob.r - step;
+        let blobSize = blob.r - (blob.r*step);
         if (blobSize < this.minPlayerSize) {
           blobSize = this.minPlayerSize;
         }
@@ -496,12 +497,10 @@ class Room {
   }
   // updating/sending/Events the current data
   Updates() {
-
-
     if (this.players.length > 0) {
       // updating his radiouse bassed on his blobs
       this.updatePlayerRadious();
-      this.rediuceRadiusBy()
+
       this.snacks.forEach((snack) => {
         snack.updatingVel();
       })
@@ -670,7 +669,7 @@ class Room {
           // Splice
           this.players[playerIndex].blobs.forEach((blob) => {
             if (blob.r > this.minSizeToSplit) {
-              this.feed(blob);
+              //this.feed(blob);
             }
           })
         }
@@ -695,14 +694,17 @@ class Room {
       socket.on('chatup', onrecivechat);
     });
     ///// Timers
+    setInterval(() => {
+      this.rediuceRadiusBy();
+    }, 500);
 
   }
   // blob functions 
   updateBlob(blob, mousex, mousey, width, height) {
     let indexofplayer = getIndexById(blob.id, this.players)
     blob.updatevel();
-    blob.CastSpeed(blob.avregePlayerSpeed)
-    //blob.airresistants();
+    //blob.CastSpeed(blob.speed)
+    blob.airresistants();
     if (indexofplayer !== -1) {
       if (blob.timertoeatme <= 0) {
         blob.eatmyself = true;
@@ -740,13 +742,12 @@ class Room {
       const middot = getCenterDot(this.players[blob.indexofplayer].blobs);
       let mousepoint = new Point(mousex, mousey);
       blob.direction = getDirection(new Point(width / 2, height / 2), mousepoint, new Point(Math.random, Math.random));
-      blob.direction.setMag(blob.avregePlayerSpeed);
+      blob.direction.setMag(blob.avregePlayerSpeed+blob.addspeed);
       // setting the magnitude
       // moving the blob
-
       blob.setVel(new Point(blob.direction.x, blob.direction.y))
-
-
+      blob.addspeed = 0;
+ 
     }
   }
   constrainblob(blob) {
@@ -795,21 +796,20 @@ class Room {
       case 0: // case change color
         this.players[index].c = [Math.random() * 200 + 50, Math.random() * 200 + 50, Math.random() * 200 + 50];
         break;
-      case 1: // case jump
+        case 1: // case speed ++
+        if(this.players[index].blobs[0]){
+          this.players[index].blobs[0].addspeed += 1500
+        }
+          break;
+      case 2: // case jump
       if(this.players[index].blobs[0]){
         this.players[index].blobs[0].direction.setMag(20000);
         this.players[index].blobs[0].x += this.players[index].blobs[0].direction.x * 1
         this.players[index].blobs[0].y += this.players[index].blobs[0].direction.y * 1
       }
         break;
-      case 3: // case speed ++
-      if(this.players[index].blobs[0]){
-      if(this.players[index].blobs[0].timestoseedup<=0){
-        this.players[index].blobs[0].timestoseedup--;
-        this.players[index].blobs[0].avregePlayerSpeed += (this.players[index].blobs[0].avregePlayerSpeed * 0.2)
-      }}
-        break;
-      case 2: // case gain 3000 mass
+
+      case 3: // case gain 3000 mass
       if(this.players[index].blobs[0]){
         this.players[index].blobs[0].r += 3000;
       }
