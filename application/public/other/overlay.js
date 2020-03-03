@@ -4,7 +4,7 @@
 /* eslint-disable no-unused-vars */
 
 
-
+let colorshown=[];
 let latency = 0
 class Chatbox {
   constructor(x, y, chatlist) {
@@ -67,7 +67,7 @@ class Leveltab {
     let filter = 0;
  
     fill(70);
-    rect(this.x, this.y + 10, 250, powerups.length*50 +55);
+    rect(this.x, this.y + 10, 300, powerups.length*50 +55);
     latency ++;
 
     for (let i = 0; i < powerups.length; i += 1) {
@@ -97,29 +97,50 @@ class Leveltab {
           if(latency > 5){
             latency = 0;
           if (filter !== 50) {
-            fill(40 + 200);
+            colorshown[0] = 240
+            colorshown[1] = 240
+            colorshown[2] = 240
             socket.emit("buyItem", i);
           } else {
-            fill(200,10,10);
+            colorshown[0] = 200
+            colorshown[1] = 10
+            colorshown[2] = 10
           }
         }
         } else {
-          fill(40 + 50);
+          colorshown[0] = 90
+          colorshown[1] = 90
+          colorshown[2] = 90
         }
       
       } else {
         fill(40 - filter);
       }
-      rect(this.x, this.y + i * 55 + 50, 250, 50);
+      fill(colorshown[0],colorshown[1],colorshown[2])
+      rect(this.x, this.y + i * 55 + 50, 300, 50);
+      fill(colorshown[0]+50,colorshown[1]+50,colorshown[2]+50)
+      rect(this.x, this.y + i * 55 + 50, 50, 50);
+      fill(255 - filter)
+      text(buttons[i], this.x+20, this.y + i * 55 + 80)
       fill(255 - filter)
       textSize(16)
-      text(powerups[i], this.x+10, this.y + i * 55 + 70)
-      text(powerupscost[i], this.x + 160, this.y + i * 55 + 70)
-
+      text(powerups[i], this.x+70, this.y + i * 55 + 80)
+      text(powerupscost[i], this.x + 250 , this.y + i * 55 + 80)
+      colorshown[0] = 0
+      colorshown[1] = 0
+      colorshown[2] = 0
     }
+    fill(255)
+    text("Buy Powers :", this.x+55, this.y+35)
+    fill(255)
+    text("Diamond :", this.x, this.y-50)
+    fill(255,0,255)
+    text(0, this.x + 80, this.y-50)
 
     fill(255)
-    text("Coins " + this.playerlvl, this.x, this.y)
+    text("Coins :", this.x, this.y-20)
+    fill(255,255,0)
+    text(this.playerlvl, this.x + 60, this.y-20)
 
   }}
 

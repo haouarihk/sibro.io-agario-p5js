@@ -456,7 +456,7 @@ function overlayshower() {
   // Making chatbox 
   chatbox = new Chatbox((width) / 300, 5 * height / 7, []);
   // making the ranktab
-  ranking = new Leveltab((width) / 200, height / 20, 0);
+  ranking = new Leveltab((width) / 200, height / 10 , 0);
   // Setting chatbox list chat
   chatbox.setChat(chatlist);
   // Showing them
@@ -504,8 +504,8 @@ function shower() {
   translate(width / 2, height / 2);
   zoomer();
   const middot = getCenterDot(player.blobs);
-  middotx2 = lerp(middotx2,-middot.x,0.6)
-  middoty2 = lerp(middoty2,-middot.y,0.6)
+  middotx2 = lerp(middotx2,-middot.x,0.9)
+  middoty2 = lerp(middoty2,-middot.y,0.9)
   translate(middotx2, middoty2);
   // show all the foods in the array
   foods.forEach(food => {
