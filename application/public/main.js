@@ -219,7 +219,7 @@ let typedodo = 0;
 // 0 means play
 // 1 means type inside the box
 // 2 means type outside the box
-
+let realvalueofinputfield = ''
 // this is a built in function in p5.js
 function keyTyped() {
   // if he is not in the game, don't bother
@@ -228,10 +228,36 @@ function keyTyped() {
   }
   if (typedodo === 2) {
     // typing ....
-    inputfeild.value(inputfeild.value() + key);
+    if (key === "$") {
+      let ef = inputfeild.value().split(" ");
+        realvalueofinputfield = ef[0]
+        let ide = searchwithnickname(ef[1],players)
+        console.log(ide+','+ef[1])
+        inputfeild.value(realvalueofinputfield +' $'+ide);
+
+
+ 
+      }
+      
+     else {
+      inputfeild.value(inputfeild.value() + key);
+    }
   }
 }
-
+function searchwithnickname(input,list) {
+  var  filter, a, txtValue;
+  filter = input.toUpperCase();
+  for (i = 0; i < list.length; i++) {
+      a = list[i]
+      txtValue = a.nickname ;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        return list[i].id 
+        //list[i].style.display = "";
+      } else {
+         // list[i].style.display = "none";
+      }
+  }
+}
 function contains(ax, ay, aw, x, y, bw) {
   return (x > ax && x < ax + aw && y > ay && y < ay + bw + 36);
 }
@@ -314,8 +340,6 @@ function keyPressed() {
       typedodo = 0;
     }
     if (keyCode === ENTER) {
-      // trigering if he want to type
-      typedodo = 0;
       // if he typed something
       if (inputfeild.value().length > 0) {
         // send what he has typed
@@ -330,6 +354,8 @@ function keyPressed() {
       }
       // clean afterwords
       inputfeild.value('');
+      // trigering if he want to type
+      typedodo = 0;
     }
 
   }
@@ -456,7 +482,7 @@ function overlayshower() {
   // Making chatbox 
   chatbox = new Chatbox((width) / 300, 5 * height / 7, []);
   // making the ranktab
-  ranking = new Leveltab((width) / 200, height / 10 , 0);
+  ranking = new Leveltab((width) / 200, height / 10, 0);
   // Setting chatbox list chat
   chatbox.setChat(chatlist);
   // Showing them
@@ -499,13 +525,15 @@ function zoomer() {
   newbe = lerp(newbe, player.blobs.length * 120 / (sumr + zoom - 100), 0.2)
   scale(newbe);
 }
-let middotx2=0,middoty2=0;
+let middotx2 = 0,
+  middoty2 = 0;
+
 function shower() {
   translate(width / 2, height / 2);
   zoomer();
   const middot = getCenterDot(player.blobs);
-  middotx2 = lerp(middotx2,-middot.x,0.9)
-  middoty2 = lerp(middoty2,-middot.y,0.9)
+  middotx2 = lerp(middotx2, -middot.x, 0.9)
+  middoty2 = lerp(middoty2, -middot.y, 0.9)
   translate(middotx2, middoty2);
   // show all the foods in the array
   foods.forEach(food => {

@@ -96,6 +96,18 @@ function getIndexById(id, array) {
   return indexofar;
 }
 
+function getIDByNickname(nickname, array) {
+  let indexofar = -1;
+  if (array) {
+    array.forEach((ar, i) => {
+      if (ar.nickname === nickname) {
+        indexofar = ar.nickname;
+      }
+    });
+  }
+  return indexofar;
+}
+
 function getCenterDot(blobs) {
 
   const center = new Point(0, 0);
@@ -132,7 +144,29 @@ function checkNickname(nickname) {
   }
   return nickname;
 }
+
+function getcontent(string) {
+  let stringcontent = new stringContent();
+  let splited = string.split(" ");
+  stringContent.string1 = splited[0];
+  stringContent.string2 = splited[1];
+  let s3 = "";
+  splited.splice(0, 2);
+  splited.forEach(slice => {
+    s3 += slice + ' ';
+  });
+  stringContent.string3 = s3;
+  return stringContent;
+}
+
 ///// Classes
+class stringContent {
+  constructor() {
+    this.string1 = '';
+    this.string2 = '';
+    this.string3 = '';
+  }
+}
 class Point {
   constructor(velx, vely) {
     this.x = velx;
@@ -279,7 +313,7 @@ class Room {
     this.comparisonTimer = 500; // how much to refresh the Top 10 players list
     this.powerups = ["Change color", "Speedup", "Jump", "gain 3000 mass"]
     this.powerupscost = [20, 100, 2000, 6000]
-    this.buttons = ['a', 's','d', 'f']
+    this.buttons = ['a', 's', 'd', 'f']
     //
     // Food settings
     this.foodsMaxCount = foodsQuantity || 500; // how manny foods (default 500)
@@ -413,7 +447,7 @@ class Room {
   rediuceRadiusBy(step = 0.005) {
     this.players = this.players.map(player => {
       player.blobs = player.blobs.map(blob => {
-        let blobSize = blob.r - (blob.r*step);
+        let blobSize = blob.r - (blob.r * step);
         if (blobSize < this.minPlayerSize) {
           blobSize = this.minPlayerSize;
         }
@@ -445,7 +479,7 @@ class Room {
             food.blobs.forEach((yam, k) => {
               const state = getCollisionState(blob, yam, 0);
               if (state === collisionState.firstPlayerBigger) {
-                player.lvl += parseInt(food.lvl*0.8);
+                player.lvl += parseInt(food.lvl * 0.8);
                 objectIndexesToRemove.push({
                   index: k,
                   id: food.id
@@ -604,7 +638,7 @@ class Room {
           powerups: this.powerups,
           powerupscost: this.powerupscost,
           buttons: this.buttons,
-          timesforspeedingup:this.timestoseedup
+          timesforspeedingup: this.timestoseedup
         };
         socket.emit('set!', settingsofplayer);
 
@@ -676,29 +710,57 @@ class Room {
       });
 
 
-      function onrecivechat(data) {
-        let data2 = {
-          message: data.message,
-          nickname: data.nickname,
-          id: socket.id
-        };
-        if (data.to === 'all') {
-          io.emit('recivechat', data2);
-          console.log(data2.id + 'sending to all: ' + data.message);
-        } else {
-          io.to(socket.id).emit('recivechat', data2);
-          io.to(data.to).emit('recivechat', data2);
 
+      socket.on('chatup', (data) => {
+        const normalCommads = ['/m', '/g']
+        const adminCommands = ['/k'];
+        let spacedString = getcontent(data.message);
+        console.log(spacedString)
+        if (data.message[0] === "/") {
+          if (spacedString.string1 === adminCommands[0]) {
+            console.log("admin1")
+          } else
+          if (spacedString.string1 === normalCommads[0]) {
+            this.someoneDo(0, socket.id, spacedString.string2, spacedString.string3)
+          } else
+          if (spacedString.string1 === normalCommads[1]) {
+            this.someoneDo(1, socket.id, spacedString.string2, spacedString.string3)
+          } else {
+            // wrong command
+            let data2 = {
+              message: "wrong command",
+              nickname: "Server",
+              id: socket.id
+            };
+            io.to(socket.id).emit('recivechat', data2);
+          }
+        } else {
+          let data2 = {
+            message: data.message,
+            nickname: data.nickname,
+            id: socket.id
+          };
+          if (data.to === 'all') {
+            io.emit('recivechat', data2);
+            console.log(data2.id + 'sending to all: ' + data.message);
+          } else {
+            io.to(socket.id).emit('recivechat', data2);
+            io.to(data.to).emit('recivechat', data2);
+
+          }
         }
-      }
-      socket.on('chatup', onrecivechat);
+
+      });
     });
+
     ///// Timers
     setInterval(() => {
       this.rediuceRadiusBy();
     }, 500);
 
   }
+
+
   // blob functions 
   updateBlob(blob, mousex, mousey, width, height) {
     let indexofplayer = getIndexById(blob.id, this.players)
@@ -742,12 +804,63 @@ class Room {
       const middot = getCenterDot(this.players[blob.indexofplayer].blobs);
       let mousepoint = new Point(mousex, mousey);
       blob.direction = getDirection(new Point(width / 2, height / 2), mousepoint, new Point(Math.random, Math.random));
-      blob.direction.setMag(blob.avregePlayerSpeed+blob.addspeed);
+      blob.direction.setMag(blob.avregePlayerSpeed + blob.addspeed);
       // setting the magnitude
       // moving the blob
       blob.setVel(new Point(blob.direction.x, blob.direction.y))
       blob.addspeed = 0;
- 
+
+    }
+  }
+  adminDO(type, id, string2, string3) {
+
+  }
+
+  someoneDo(type, id, string2, string3) {
+    switch (type) {
+      case 0:
+        console.log("nor0")
+        let data = {
+          message: string3,
+          nickname: "pm from " + this.players[getIndexById(id, this.players)].nickname + " ",
+          id: id,
+          type: "reciver"
+        };
+        this.players.forEach((player) => {
+          if (string2 == "$"+player.id) {
+            io.to(player.id).emit('recivechat', data);
+            data.type = "sender";
+            data.nickname = "server "
+            data.message = "pm the message has been sended to " + player.nickname
+            io.to(id).emit('recivechat', data);
+          } else {
+            console.log("not that one" + string2 + player.id)
+          }
+        })
+
+        break;
+
+      case 1:
+        console.log("nor0")
+        let data = {
+          message: string3,
+          nickname: "pm from " + this.players[getIndexById(id, this.players)].nickname + " ",
+          id: id,
+          type: "reciver"
+        };
+        this.players.forEach((player) => {
+          if (string2 == "$"+player.id) {
+            io.to(player.id).emit('recivechat', data);
+            data.type = "sender";
+            data.nickname = "server "
+            data.message = "pm the message has been sended to " + player.nickname
+            io.to(id).emit('recivechat', data);
+          } else {
+            console.log("not that one" + string2 + player.id)
+          }
+        })
+
+        break;
     }
   }
   constrainblob(blob) {
@@ -796,23 +909,23 @@ class Room {
       case 0: // case change color
         this.players[index].c = [Math.random() * 200 + 50, Math.random() * 200 + 50, Math.random() * 200 + 50];
         break;
-        case 1: // case speed ++
-        if(this.players[index].blobs[0]){
+      case 1: // case speed ++
+        if (this.players[index].blobs[0]) {
           this.players[index].blobs[0].addspeed += 1500
         }
-          break;
+        break;
       case 2: // case jump
-      if(this.players[index].blobs[0]){
-        this.players[index].blobs[0].direction.setMag(20000);
-        this.players[index].blobs[0].x += this.players[index].blobs[0].direction.x * 1
-        this.players[index].blobs[0].y += this.players[index].blobs[0].direction.y * 1
-      }
+        if (this.players[index].blobs[0]) {
+          this.players[index].blobs[0].direction.setMag(20000);
+          this.players[index].blobs[0].x += this.players[index].blobs[0].direction.x * 1
+          this.players[index].blobs[0].y += this.players[index].blobs[0].direction.y * 1
+        }
         break;
 
       case 3: // case gain 3000 mass
-      if(this.players[index].blobs[0]){
-        this.players[index].blobs[0].r += 3000;
-      }
+        if (this.players[index].blobs[0]) {
+          this.players[index].blobs[0].r += 3000;
+        }
         break;
 
     }
