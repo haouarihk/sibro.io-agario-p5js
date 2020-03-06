@@ -841,22 +841,30 @@ class Room {
         break;
 
       case 1:
-        console.log("nor0")
-        let data = {
-          message: string3,
-          nickname: "pm from " + this.players[getIndexById(id, this.players)].nickname + " ",
+        console.log("nor1")
+        let data2 = {
+          message: "got "+string3+" from " + this.players[getIndexById(id, this.players)].nickname ,
+          nickname: "server " ,
           id: id,
           type: "reciver"
         };
         this.players.forEach((player) => {
           if (string2 == "$"+player.id) {
-            io.to(player.id).emit('recivechat', data);
-            data.type = "sender";
-            data.nickname = "server "
-            data.message = "pm the message has been sended to " + player.nickname
-            io.to(id).emit('recivechat', data);
-          } else {
-            console.log("not that one" + string2 + player.id)
+            console.log(parseInt(string3))
+            if(this.players[getIndexById(id, this.players)].lvl >=parseInt(string3)){
+              this.players[getIndexById(id, this.players)].lvl-=parseInt(string3);
+              player.lvl +=parseInt(string3);
+            io.to(player.id).emit('recivechat', data2);
+            data2.type = "sender";
+            data2.nickname = "server "
+            data2.message = "you've' gaven "+string3+" to " + player.nickname
+            io.to(id).emit('recivechat', data2);
+            } else{
+              data2.type = "sender";
+              data2.nickname = "server "
+              data2.message = "you don't have enough coins"
+              io.to(id).emit('recivechat', data2);
+            }
           }
         })
 
