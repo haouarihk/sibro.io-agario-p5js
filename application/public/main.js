@@ -35,6 +35,7 @@ function preload() {
   br = loadFont('fonts/br2.ttf');
   bg = loadImage('a3.jpg');
   logo = loadImage('logo.png');
+
 }
 // this function updates the players list
 function updatepeeps(pips) {
@@ -191,20 +192,36 @@ function login() {
 }
 // this function for login with an account , not used yet
 function login2() {
+  socket= io();
   // taking username and password from html input feild
   username = document.getElementById('Username').value;
   password = document.getElementById('Password').value;
   // sending that data to the server to verify that is correct
   const data = {
-    id: socket.id,
     user: username,
     pass: password,
   };
   socket.emit('login', data);
   // revciving the log from the server
-  socket.on('loging', (a) => {})
+  socket.on('loging', (a) => {
+    console.log("logining");
+    if(a === true) {
+      console.log("login succefuly");
+      document.getElementById("Logina").style.display = "none";  
+      document.getElementById("Loginb").style.display = "inline";  
+      document.getElementById("uname").innerHTML =username;
+    } else {
+      console.log("login fail");
+    }
+  })
+  document.getElementById("Password").value='';
 }
-
+function logout(){
+  document.getElementById("Loginb").style.display = "none";  
+  document.getElementById("Logina").style.display = "inline"; 
+  username = ''
+  password = ''
+}
 
 
 function mouseWheel(event) {
@@ -234,9 +251,6 @@ function keyTyped() {
         let ide = searchwithnickname(ef[1],players)
         console.log(ide+','+ef[1])
         inputfeild.value(realvalueofinputfield +' $'+ide);
-
-
- 
       }
       
      else {
@@ -294,6 +308,8 @@ function keyPressed() {
         data = {
           // to: is to who he want to send the message
           // all mean to everyone
+          username,
+          password,
           to: 'all',
           nickname: player.nickname,
           message: inputfeild.value()

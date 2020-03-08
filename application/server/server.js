@@ -646,9 +646,11 @@ class Room {
       // on player login
       socket.on('login', (logindata) => {
         objppl.forEach(data => {
+          let corri = false
           if (logindata.user === data.un && logindata.pass === data.pw) {
-            adminsID.push(logindata.id);
+            corri= true
           }
+          socket.emit("loging",corri);
         });
       });
       // on player sends his data

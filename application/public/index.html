@@ -5,30 +5,40 @@
 <link href="css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="other/jquery.js"></script>
 <script src="other/bootstrap.js"></script>
+<!DOCTYPE html>
 <!------ Include the above in your HEAD tag ---------->
 <div id="game"></div>
-    <script src="main.js"></script>
-    <script src="other/overlay.js"></script>
-    <script src="objects/chatline.js"></script>
-    <script src="objects/Line.js"></script>
-    <script src="objects/blob.js"></script>
-    <script src="objects/player.js"></script>
-    <script src="objects/food.js"></script>
-   
+
+<script src="other/overlay.js"></script>
+<script src="objects/chatline.js"></script>
+<script src="objects/Line.js"></script>
+<script src="objects/blob.js"></script>
+<script src="objects/player.js"></script>
+<script src="objects/food.js"></script>
+
 <div class="Login" id="Login">
-    <br/>   <br/>   <br/>   <br/>   <br/>   <br/>   <br/>   <br/>   <br/>   
-    <br/> <br/> <br/> <br/> 
-    <input type="text" name="u" placeholder="Nickname" id = "nickname" />
+    <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br />
+    <br /> <br /> <br /> <br />
+    <input type="text" name="u" placeholder="Nickname" id="nickname" />
     <button id="play" type="submit" class="btn btn-primary btn-block btn-large">Play</button>
-    <br/> 
-    <hr size="6" width="100%"  color="white">
-    <h1>Login</h1>
-    <form method="post">
-    	<input id = "Username" type="text" name="u" placeholder="Username" required="required" />
-        <input id = "Password"  type="password" name="p" placeholder="Password" required="required" />
-        <button id="login" type="submit" class="btn btn-primary btn-block btn-large">Login</button>
-    </form>
-    
+    <br />
+    <hr size="6" width="100%" color="white">
+    <div class="Logina" id="Logina">
+        <h1>Login</h1>
+        <form method="POST">
+            <input id="Username" type="username" name="u" placeholder="Username" />
+            <input id="Password" type="password" name="p" placeholder="Password" />
+            <button id="login" type="button" class="btn btn-primary btn-block btn-large">Login</button>
+
+        </form>
+    </div>
+    <div class="Loginb" id="Loginb">
+        <label for="uname"></label>
+        <h2 name="uname">you are in</h1>
+            <h2 name="uname" id="uname">username</h1>
+                <button id="logout" type="button" class="btn btn-primary btn-block btn-large" onclick="logout()">logout</button>
+    </div>
     <br>
-   
+
 </div>
+<script src="main.js"></script>
