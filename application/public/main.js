@@ -192,7 +192,7 @@ function login() {
 }
 // this function for login with an account , not used yet
 function login2() {
-  socket= io();
+  socket = io();
   // taking username and password from html input feild
   username = document.getElementById('Username').value;
   password = document.getElementById('Password').value;
@@ -205,20 +205,21 @@ function login2() {
   // revciving the log from the server
   socket.on('loging', (a) => {
     console.log("logining");
-    if(a === true) {
+    if (a === true) {
       console.log("login succefuly");
-      document.getElementById("Logina").style.display = "none";  
-      document.getElementById("Loginb").style.display = "inline";  
-      document.getElementById("uname").innerHTML =username;
+      document.getElementById("Logina").style.display = "none";
+      document.getElementById("Loginb").style.display = "inline";
+      document.getElementById("uname").innerHTML = username;
     } else {
       console.log("login fail");
     }
   })
-  document.getElementById("Password").value='';
+  document.getElementById("Password").value = '';
 }
-function logout(){
-  document.getElementById("Loginb").style.display = "none";  
-  document.getElementById("Logina").style.display = "inline"; 
+
+function logout() {
+  document.getElementById("Loginb").style.display = "none";
+  document.getElementById("Logina").style.display = "inline";
   username = ''
   password = ''
 }
@@ -239,39 +240,43 @@ let typedodo = 0;
 let realvalueofinputfield = ''
 // this is a built in function in p5.js
 function keyTyped() {
+  pp.changelocation(mouseX, mouseY);
   // if he is not in the game, don't bother
   if (!connected) {
     return;
   }
   if (typedodo === 2) {
     // typing ....
-    if (key === "$") {
-      let ef = inputfeild.value().split(" ");
-        realvalueofinputfield = ef[0]
-        let ide = searchwithnickname(ef[1],players)
-        console.log(ide+','+ef[1])
-        inputfeild.value(realvalueofinputfield +' $'+ide);
-      }
-      
-     else {
-      inputfeild.value(inputfeild.value() + key);
-    }
+    inputfeild.value(inputfeild.value() + key);
+
+
   }
 }
-function searchwithnickname(input,list) {
-  var  filter, a, txtValue;
-  filter = input.toUpperCase();
+
+function searchwithnickname(input, list) {
+  var filter, a, txtValue;
+  let listend = []
+
+
   for (i = 0; i < list.length; i++) {
+    if (input) {
+      filter = input.toUpperCase();
       a = list[i]
-      txtValue = a.nickname ;
+      txtValue = a.nickname;
       if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        return list[i].id 
+        listend.push(list[i].id);
         //list[i].style.display = "";
       } else {
-         // list[i].style.display = "none";
+        // list[i].style.display = "none";
       }
+    } else {
+      listend.push(list[i].id)
+    }
+
   }
+  return listend;
 }
+
 function contains(ax, ay, aw, x, y, bw) {
   return (x > ax && x < ax + aw && y > ay && y < ay + bw + 36);
 }
@@ -375,6 +380,8 @@ function keyPressed() {
     }
 
   }
+  pp.update(key);
+  console.log(key)
 }
 
 // this is a built in function in p5.js (one time function)
@@ -394,9 +401,11 @@ function setup() {
   document.getElementById('login').onclick = function onclickplay() {
     login2();
   };
+  pp = new playersPicker((width) / 300, 5 * height / 7, 100);
 }
 
 function getIndexById(id, array) {
+  if(!array){console.log("you forget again to implement the players list")}
   let indexofar = -1;
   array.forEach((ar, i) => {
     if (ar.id === id) {
@@ -468,6 +477,7 @@ function draw() {
   }
   // if he is playing
   showGame();
+
 }
 
 function playerSettingsUpdater() {}
@@ -491,7 +501,7 @@ function Updater() {
   socket.emit('updateplayer', data);
 
 }
-let list, ranking;
+let list, ranking, pp;
 
 function overlayshower() {
   list = new Listing((6 * width) / 7, height / 30, players);
@@ -499,6 +509,8 @@ function overlayshower() {
   chatbox = new Chatbox((width) / 300, 5 * height / 7, []);
   // making the ranktab
   ranking = new Leveltab((width) / 200, height / 10, 0);
+  // making the playerPickerList
+
   // Setting chatbox list chat
   chatbox.setChat(chatlist);
   // Showing them
@@ -507,6 +519,7 @@ function overlayshower() {
   chatbox.show();
   ranking.playerlvl = player.lvl;
   ranking.show();
+  pp.show();
 
 }
 

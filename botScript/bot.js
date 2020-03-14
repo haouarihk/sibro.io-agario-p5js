@@ -1,4 +1,4 @@
-const botcount = 1;
+const botcount = 5;
 const io = require('socket.io-client');
 let poszoom = 10;
 let nickname = "[bot]Bob";

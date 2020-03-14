@@ -303,7 +303,6 @@ class Player {
   }
 }
 class Room {
-
   constructor(index, playersQuantity, foodsQuantity, worldsize) {
     this.players = [];
     this.foods = [];
