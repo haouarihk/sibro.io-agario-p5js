@@ -247,9 +247,7 @@ function keyTyped() {
   }
   if (typedodo === 2) {
     // typing ....
-    inputfeild.value(inputfeild.value() + key);
-
-
+    inputfeild.value(inputfeild.value() + key); 
   }
 }
 
@@ -380,6 +378,7 @@ function keyPressed() {
     }
 
   }
+  pp.biglist=players;
   pp.update(key);
   console.log(key)
 }
@@ -447,7 +446,7 @@ let chatlist = []; ///////
 //////////////////////////
 
 function showMenu() {
-  changeFocus(view.viewMenu)
+  changeFocus(view.Menu)
   image(logo, width / 2 - 150, 7 * height / 700, 300, 300)
   // if nickname box is larger than 10 contrain it
   if (document.getElementById('nickname').value.length > 10) {
@@ -457,7 +456,7 @@ function showMenu() {
 
 // in the gameplay
 function showGame() {
-  changeFocus(view.viewGame)
+  changeFocus(view.Game)
   background(0);
   overlayshower();
 
@@ -480,7 +479,9 @@ function draw() {
 
 }
 
-function playerSettingsUpdater() {}
+function playerSettingsUpdater() {
+
+}
 
 function Updater() {
 
@@ -511,13 +512,14 @@ function overlayshower() {
   ranking = new Leveltab((width) / 200, height / 10, 0);
   // making the playerPickerList
 
-  // Setting chatbox list chat
+  // Setting
   chatbox.setChat(chatlist);
-  // Showing them
+  ranking.playerlvl = player.lvl;
+
+  // Showing
   image(bg, 0, 0, width, height);
   list.show();
   chatbox.show();
-  ranking.playerlvl = player.lvl;
   ranking.show();
   pp.show();
 
@@ -537,14 +539,12 @@ function changeFocus(foc) {
       // showing the game
       document.getElementById("game").style.visibility = "visible";
       break;
-
-
   }
 
 }
 const view = {
-  viewMenu: 0,
-  viewGame: 1
+  Menu: 0,
+  Game: 1
 }
 
 function zoomer() {

@@ -203,7 +203,6 @@ class playersPicker {
       rect(this.x, this.y, this.w * 2, this.playerslist.length * this.h * 0.5);
       fill(255);
       this.list.forEach((playerline, i) => {
-
         playerline.show(i + 1);
       });
     }
@@ -212,19 +211,33 @@ class playersPicker {
     this.list = [];
     showPlayerPicker = true;
     let ef = inputfeild.value().split(" ");
-    realvalueofinputfield = ef[0]
-    if (realvalueofinputfield == "/m") {
-      this.playerslist = searchwithnickname(ef[1], this.biglist)
+    let realvalueofinputfield = ef[0]
+
+    if (realvalueofinputfield !== "" && ef[1]) {
+      this.playerslist = searchwithnickname(ef[1], this.biglist);
+      this.playerslist.forEach(playerline => {
+        let nline = new Pickerline(this.x, this.y, this.biglist[getIndexById(playerline, this.biglist)].nickname);
+        nline.id = playerline;
+        nline.w = this.w;
+        nline.h = this.h;
+        nline.x = this.x;
+        nline.y = this.y;
+        this.list.push(nline);
+      });
+      //here the third command with else if then this else
+    } else {
+      this.playerslist = searchwithnickname(ef[0], commands);
+      this.playerslist.forEach(playerline => {
+        let nline = new Pickerline(this.x, this.y, commands[getIndexById(playerline, commands)].nickname);
+        nline.id = playerline;
+        nline.w = this.w;
+        nline.h = this.h;
+        nline.x = this.x;
+        nline.y = this.y;
+        this.list.push(nline);
+      });
     }
-    this.playerslist.forEach(playerline => {
-      let nline = new Pickerline(this.x, this.y, this.biglist[getIndexById(playerline, this.biglist)].nickname);
-      nline.id = playerline;
-      nline.w = this.w;
-      nline.h = this.h;
-      nline.x = this.x;
-      nline.y = this.y;
-      this.list.push(nline);
-    });
+    
   }
   changelocation(newX, newY) {
     this.x = newX;
@@ -234,3 +247,4 @@ class playersPicker {
     this.w = newW;
   }
 }
+const commands = [{nickname:"/m",id:"0"},{nickname:"/k",id:"1"},{nickname:"/g",id:"2"}]
