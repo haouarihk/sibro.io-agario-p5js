@@ -240,7 +240,6 @@ let typedodo = 0;
 let realvalueofinputfield = ''
 // this is a built in function in p5.js
 function keyTyped() {
-  pp.changelocation(mouseX, mouseY);
   // if he is not in the game, don't bother
   if (!connected) {
     return;
@@ -276,14 +275,16 @@ function searchwithnickname(input, list) {
 }
 
 function contains(ax, ay, aw, x, y, bw) {
-  return (x > ax && x < ax + aw && y > ay && y < ay + bw + 36);
+  return (x > ax && x < ax + aw && y > ay && y < ay + bw );
 }
-
+function mouseHovingOverBox(x,y,w,h){
+return (contains(mouseX,mouseY,w,x,y,h))
+}
 function mousePressed() {
   let x = (width) / 300 + 10
   let y = 5 * (height) / 7 + 150
   let w = 380;
-  if (contains(x, y, w, mouseX, mouseY)) {
+  if (contains(x, y, w, mouseX, mouseY,w)) {
     typedodo = 1;
   } else {
     typedodo = 0;
@@ -378,11 +379,17 @@ function keyPressed() {
     }
 
   }
+  changepplocation();
   pp.biglist=players;
   pp.update(key);
   console.log(key)
 }
-
+function changepplocation(){
+  let val = inputfeild.value()
+  let chunker = val.split(" ");
+  let tainer = chunker.length;
+  pp.changelocation(inputfeild.x +chunker.length*5+ chunker[chunker.length-1].length*5 , inputfeild.y+20);
+}
 // this is a built in function in p5.js (one time function)
 function setup() {
   // start to make sure that he is disconnected
