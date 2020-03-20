@@ -1,7 +1,9 @@
 # sibro.io agario p5js
  agar.io make with p5.js and sockets
 
-
+# You can try it on:
+ https://sibiroio.herokuapp.com 
+ 
 # Requirements :
 
  
@@ -17,7 +19,7 @@
   2-in your command type : node server.js
 
 
-  3-open the browser and navigate to http://localhost:5001/
+  3-open the browser and navigate to http://localhost:5000/
 
 
 
