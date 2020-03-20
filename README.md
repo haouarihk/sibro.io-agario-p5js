@@ -21,7 +21,3 @@
   -npm start
 
   3-open the browser and navigate to http://localhost:5000/
-
-
-
-# the game is still on alpha version so don't expect alot.
