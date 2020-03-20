@@ -15,8 +15,10 @@
 
 
   2-in your command type : 
-  npm install
-  npm start
+  
+  -npm install
+  
+  -npm start
 
   3-open the browser and navigate to http://localhost:5000/
 
