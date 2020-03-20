@@ -2,7 +2,7 @@
  agar.io make with p5.js and sockets
  ## For simple users
 # You can try it on:
- https://sibiroio.herokuapp.com 
+ https://sibiro.herokuapp.com 
  
  ## For developers
 # Requirements :
