@@ -23,7 +23,6 @@
   "homepage": "https://github.com/wolfpat01/sibro.io-agario-p5js#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "node": "^13.8.0",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
     "uniqid": "^5.2.0"

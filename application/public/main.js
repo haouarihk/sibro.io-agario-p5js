@@ -33,15 +33,17 @@ function preload() {
   inputfeild = createInput();
   inputfeild.hide();
   br = loadFont('fonts/br2.ttf');
-  bg = loadImage('a3.jpg');
+  //bg = loadImage('a3.jpg');
   logo = loadImage('logo.png');
 }
+
 // this function updates the players list
 function updatepeeps(pips) {
   players = [];
 
   pips.forEach((pip, i) => {
     let blobs = [];
+
     // this for taking all the blobs from pip and store it in this variable
     if (pip.isitok) {
       pip.blobs.forEach(blob => {
@@ -85,6 +87,7 @@ function updatepeeps(pips) {
   });
 
 }
+
 // this function updates the foods list
 function updateyamies(yams) {
   yams.forEach(yam => {
@@ -92,6 +95,7 @@ function updateyamies(yams) {
     foods.push(new Food(yam.type, yam.x, yam.y, yam.r, yam.id));
   });
 }
+
 // this function updates the Snacks list
 function updateSnacks(yam2) {
   yam2.forEach(snack => {
@@ -103,10 +107,12 @@ function updateSnacks(yam2) {
     }
   });
 }
+
 // this function would activate when the player is not playing but in
 function imspectating() {
 
 }
+
 // not using that function , this function to let the player know when he get eaten
 function warfeilddata(data) {
   if (data.aterid === player.id) {
@@ -116,11 +122,13 @@ function warfeilddata(data) {
     imspectating();
   }
 }
+
 // this function for reciving texts
 function reciveTextChat(data) {
   const datanickname = data.nickname;
   chatlist.push(new Chatline(data.message, datanickname, [255, 255, 0]));
 }
+
 // this function slice food when it get eaten
 function killthisfoodwiththatid(fooddata) {
   let index = getIndexById(fooddata, foods);
@@ -129,6 +137,7 @@ function killthisfoodwiththatid(fooddata) {
     foods.splice(index, 1);
   }
 }
+
 // this function called when the player about to join
 function login() {
 
@@ -189,6 +198,7 @@ function login() {
   });
 
 }
+
 // this function for login with an account , not used yet
 function login2() {
   // taking username and password from html input feild
@@ -202,7 +212,7 @@ function login2() {
   };
   socket.emit('login', data);
   // revciving the log from the server
-  socket.on('loging', (a) => {})
+  socket.on('loging', (a) => { })
 }
 
 
@@ -212,6 +222,7 @@ function mouseWheel(event) {
   posWheel += event.delta;
   posWheel = constrain(posWheel, 1, 9000);
 }
+
 // the chat
 // this for wether he is playing or typing
 let showinput = false;
@@ -246,6 +257,7 @@ function mousePressed() {
     typedodo = 0;
   }
 }
+
 // this is a built in function in p5.js
 function keyPressed() {
   // if he is not in the game, don't bother
@@ -283,56 +295,56 @@ function keyPressed() {
       inputfeild.value(inputfeild.value().substring(0, inputfeild.value().length - 1));
     }
   } else
-  if (typedodo === 0) {
-    // exit game
-    if (keyIsDown(ESCAPE)) {
-      // escape from the game (ESCAPE)
-      socket.disconnect();
-      connected = false;
-    }
-    // playing
-    // if he is not typing, then he is playing
-    if (key === ' ') {
-      // the split key (Spacebar)
-      socket.emit('lvlup');
-    }
-    if (key === 's') {
-      // the split key (Spacebar)
-      socket.emit('feed');
-    }
-    if (key === 't' || keyIsDown(ENTER)) {
-      // to start typing (t)
-      inputfeild.value('');
-      typedodo = 2;
-    }
-  } else
-  if (typedodo === 1) {
-    // exit chat
-    if (keyCode === ESCAPE) {
-      inputfeild.hide();
-      // escape from the chatbox
-      typedodo = 0;
-    }
-    if (keyCode === ENTER) {
-      // trigering if he want to type
-      typedodo = 0;
-      // if he typed something
-      if (inputfeild.value().length > 0) {
-        // send what he has typed
-        data = {
-          // to: is to who he want to send the message
-          // all mean to everyone
-          to: 'all',
-          nickname: player.nickname,
-          message: inputfeild.value()
-        };
-        socket.emit('chatup', data);
+    if (typedodo === 0) {
+      // exit game
+      if (keyIsDown(ESCAPE)) {
+        // escape from the game (ESCAPE)
+        socket.disconnect();
+        connected = false;
       }
-      // clean afterwords
-      inputfeild.value('');
-    }
+      // playing
+      // if he is not typing, then he is playing
+      if (key === ' ') {
+        // the split key (Spacebar)
+        socket.emit('lvlup');
+      }
+      if (key === 's') {
+        // the split key (Spacebar)
+        socket.emit('feed');
+      }
+      if (key === 't' || keyIsDown(ENTER)) {
+        // to start typing (t)
+        inputfeild.value('');
+        typedodo = 2;
+      }
+    } else
+      if (typedodo === 1) {
+        // exit chat
+        if (keyCode === ESCAPE) {
+          inputfeild.hide();
+          // escape from the chatbox
+          typedodo = 0;
+        }
+        if (keyCode === ENTER) {
+          // trigering if he want to type
+          typedodo = 0;
+          // if he typed something
+          if (inputfeild.value().length > 0) {
+            // send what he has typed
+            data = {
+              // to: is to who he want to send the message
+              // all mean to everyone
+              to: 'all',
+              nickname: player.nickname,
+              message: inputfeild.value()
+            };
+            socket.emit('chatup', data);
+          }
+          // clean afterwords
+          inputfeild.value('');
+        }
 
-  }
+      }
 }
 
 // this is a built in function in p5.js (one time function)
@@ -363,6 +375,7 @@ function getIndexById(id, array) {
   });
   return indexofar;
 }
+
 // ge the center dot
 function getCenterDot(blobs) {
   // the form of this equation is:
@@ -428,7 +441,7 @@ function draw() {
   showGame();
 }
 
-function playerSettingsUpdater() {}
+function playerSettingsUpdater() { }
 
 function Updater() {
 
@@ -456,7 +469,7 @@ function overlayshower() {
   // Making chatbox 
   chatbox = new Chatbox((width) / 300, 5 * height / 7, []);
   // making the ranktab
-  ranking = new Leveltab((width) / 200, height / 10 , 0);
+  ranking = new Leveltab((width) / 200, height / 10, 0);
   // Setting chatbox list chat
   chatbox.setChat(chatlist);
   // Showing them
@@ -499,13 +512,13 @@ function zoomer() {
   newbe = lerp(newbe, player.blobs.length * 120 / (sumr + zoom - 100), 0.2)
   scale(newbe);
 }
-let middotx2=0,middoty2=0;
+let middotx2 = 0, middoty2 = 0;
 function shower() {
   translate(width / 2, height / 2);
   zoomer();
   const middot = getCenterDot(player.blobs);
-  middotx2 = lerp(middotx2,-middot.x,0.9)
-  middoty2 = lerp(middoty2,-middot.y,0.9)
+  middotx2 = lerp(middotx2, -middot.x, 0.9)
+  middoty2 = lerp(middoty2, -middot.y, 0.9)
   translate(middotx2, middoty2);
   // show all the foods in the array
   foods.forEach(food => {

@@ -11,22 +11,29 @@ const requirement = [
   2000, 2000, 2000
 ];
 const objppl = [{
-    un: 'gx',
-    pw: '123456789',
-  },
-  {
-    un: 'wolfpat',
-    pw: '123456789',
-  },
-  {
-    un: 'nbstID',
-    pw: '123456789',
-  }
+  un: 'gx',
+  pw: '123456789',
+},
+{
+  un: 'wolfpat',
+  pw: '123456789',
+},
+{
+  un: 'nbstID',
+  pw: '123456789',
+}
 ];
+
+
 ///// Calculators
 function getDistance(x1, y1, x2, y2) {
-  const xx = (x1 - x2) * (x1 - x2);
-  const yy = (y1 - y2) * (y1 - y2);
+  const xx = (x1 - x2) ** 2;
+  const yy = (y1 - y2) ** 2;
+  return Math.sqrt(xx + yy);
+}
+function getDistance2(a, b) {
+  const xx = (a.x - b.x) * (a.x - b.x);
+  const yy = (a.y - b.y) * (a.y - b.y);
   const distance = Math.sqrt(xx + yy);
   return distance;
 }
@@ -38,13 +45,6 @@ function map(value, minvalue, maxvalue, newminvalue, newmaxvalue) {
   let newvalue = (value * newmaxvalue) + newminvalue;
   newvalue /= (maxvalue + minvalue);
   return newvalue;
-}
-
-function getDistance2(a, b) {
-  const xx = (a.x - b.x) * (a.x - b.x);
-  const yy = (a.y - b.y) * (a.y - b.y);
-  const distance = Math.sqrt(xx + yy);
-  return distance;
 }
 
 function getCollisionState(obj1, obj2, minDiff) {
@@ -132,14 +132,19 @@ function checkNickname(nickname) {
   }
   return nickname;
 }
+
+
 ///// Classes
 class Point {
   constructor(velx, vely) {
     this.x = velx;
     this.y = vely;
   }
+  getMag() {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+  }
   setMag(c) {
-    const Mag = Math.sqrt(this.x * this.x + this.y * this.y);
+    const Mag = this.getMag()
     if (this.x === 0 && this.y === 0) {
       this.x = Math.random();
       this.y = Math.random();
@@ -150,17 +155,16 @@ class Point {
       this.y *= c;
     }
   };
+
   substract(v) {
     this.x -= v.x;
     this.y -= v.y;
   }
+
   vector(x1, y1, x2, y2) {
     this.x = x2 - x1;
     this.y = y2 - y1;
   };
-  getMag() {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
-  }
 }
 class Food {
   constructor() {
@@ -179,13 +183,8 @@ class Food {
     this.x = pos.x;
     this.y = pos.y;
   }
-  /**
-   * Get Random number based on the provided varaibles
-   * @param {*} kindProbs 
-   * @returns {int} index of selected value
-   */
-
 }
+
 class Snack {
   constructor() {
     this.x = 0;
@@ -252,6 +251,7 @@ class Blob {
     }
   }
 }
+
 class Player {
   constructor(id, blobs, c, nickname) {
     this.id = id;
@@ -262,12 +262,15 @@ class Player {
     this.nickname = nickname;
     this.middot = new Point(0, 0);
     this.lvl = 0;
+    this.place = 0;
+    this.index = 0;
     this.timestoseedup = 10
   }
   setLvl(newlvl) {
     this.lvl = newlvl;
   }
 }
+
 class Room {
 
   constructor(index, playersQuantity, foodsQuantity, worldsize) {
@@ -279,7 +282,7 @@ class Room {
     this.comparisonTimer = 500; // how much to refresh the Top 10 players list
     this.powerups = ["Change color", "Speedup", "Jump", "gain 3000 mass"]
     this.powerupscost = [20, 100, 2000, 6000]
-    this.buttons = ['a', 's','d', 'f']
+    this.buttons = ['a', 's', 'd', 'f']
     //
     // Food settings
     this.foodsMaxCount = foodsQuantity || 500; // how manny foods (default 500)
@@ -319,9 +322,20 @@ class Room {
       }
     })
   }
+
   comparisionwithweight() {
     if (this.players.length > 1) {
+      _players = []
+      bsort = []
       this.players.sort((player1, player2) => player2.r - player1.r);
+      /*this.players.forEach((a, i) => {
+        bsort[i] = { id: a.id };
+      })
+      this.players.map((p, i) => {
+        const _index = getIndexById(p.id, _players);
+        p.place = _index;
+        return p
+      })*/
     }
   }
   //// Generators
@@ -413,7 +427,7 @@ class Room {
   rediuceRadiusBy(step = 0.005) {
     this.players = this.players.map(player => {
       player.blobs = player.blobs.map(blob => {
-        let blobSize = blob.r - (blob.r*step);
+        let blobSize = blob.r - (blob.r * step);
         if (blobSize < this.minPlayerSize) {
           blobSize = this.minPlayerSize;
         }
@@ -445,7 +459,7 @@ class Room {
             food.blobs.forEach((yam, k) => {
               const state = getCollisionState(blob, yam, 0);
               if (state === collisionState.firstPlayerBigger) {
-                player.lvl += parseInt(food.lvl*0.8);
+                player.lvl += parseInt(food.lvl * 0.8);
                 objectIndexesToRemove.push({
                   index: k,
                   id: food.id
@@ -595,6 +609,7 @@ class Room {
           blobs,
           playerInfo.color,
           checkNickname(playerInfo.nickname)));
+        this.players[this.players.length - 1].index = this.players.length - 1;
         // sending back the info
         const settingsofplayer = {
           blobs,
@@ -604,7 +619,7 @@ class Room {
           powerups: this.powerups,
           powerupscost: this.powerupscost,
           buttons: this.buttons,
-          timesforspeedingup:this.timestoseedup
+          timesforspeedingup: this.timestoseedup
         };
         socket.emit('set!', settingsofplayer);
 
@@ -636,6 +651,7 @@ class Room {
             })
 
           }
+
           // update his middle dot 
           player.middot = getCenterDot(player.blobs);
         })
@@ -651,6 +667,7 @@ class Room {
           console.log("LEVELUP!")
         }
       });
+
       // When a player buy something
       socket.on('buyItem', (item) => {
         const playerIndex = getIndexById(socket.id, this.players)
@@ -662,6 +679,7 @@ class Room {
           }
         }
       });
+
       // When a player split
       socket.on('feed', () => {
         const playerIndex = getIndexById(socket.id, this.players)
@@ -691,6 +709,7 @@ class Room {
 
         }
       }
+
       socket.on('chatup', onrecivechat);
     });
     ///// Timers
@@ -699,6 +718,7 @@ class Room {
     }, 500);
 
   }
+
   // blob functions 
   updateBlob(blob, mousex, mousey, width, height) {
     let indexofplayer = getIndexById(blob.id, this.players)
@@ -742,12 +762,12 @@ class Room {
       const middot = getCenterDot(this.players[blob.indexofplayer].blobs);
       let mousepoint = new Point(mousex, mousey);
       blob.direction = getDirection(new Point(width / 2, height / 2), mousepoint, new Point(Math.random, Math.random));
-      blob.direction.setMag(blob.avregePlayerSpeed+blob.addspeed);
+      blob.direction.setMag(blob.avregePlayerSpeed + blob.addspeed);
       // setting the magnitude
       // moving the blob
       blob.setVel(new Point(blob.direction.x, blob.direction.y))
       blob.addspeed = 0;
- 
+
     }
   }
   constrainblob(blob) {
@@ -755,6 +775,7 @@ class Room {
     blob.x = limitNumberWithinRange(blob.x, this.worldSizeMin, this.worldSizeMax);
     blob.y = limitNumberWithinRange(blob.y, this.worldSizeMin, this.worldSizeMax);
   }
+
   split(blob) {
     let playerindex = getIndexById(blob.id, this.players);
     if (playerindex !== -1) {
@@ -769,6 +790,7 @@ class Room {
       }
     }
   };
+
   feed(blob) {
     let playerindex = getIndexById(blob.id, this.players);
     if (playerindex !== -1) {
@@ -784,6 +806,7 @@ class Room {
       }
     }
   };
+
   onSplited(blob) {
     let playerindex = getIndexById(blob.id, this.players);
     blob.eatmyself = (blob.timertoeatme <= 0);
@@ -791,42 +814,45 @@ class Room {
 
     }
   }
+
   Buy(item, index) {
     switch (item) {
       case 0: // case change color
         this.players[index].c = [Math.random() * 200 + 50, Math.random() * 200 + 50, Math.random() * 200 + 50];
         break;
-        case 1: // case speed ++
-        if(this.players[index].blobs[0]){
+      case 1: // case speed ++
+        if (this.players[index].blobs[0]) {
           this.players[index].blobs[0].addspeed += 1500
         }
-          break;
+        break;
       case 2: // case jump
-      if(this.players[index].blobs[0]){
-        this.players[index].blobs[0].direction.setMag(20000);
-        this.players[index].blobs[0].x += this.players[index].blobs[0].direction.x * 1
-        this.players[index].blobs[0].y += this.players[index].blobs[0].direction.y * 1
-      }
+        if (this.players[index].blobs[0]) {
+          this.players[index].blobs[0].direction.setMag(20000);
+          this.players[index].blobs[0].x += this.players[index].blobs[0].direction.x * 1
+          this.players[index].blobs[0].y += this.players[index].blobs[0].direction.y * 1
+        }
         break;
 
       case 3: // case gain 3000 mass
-      if(this.players[index].blobs[0]){
-        this.players[index].blobs[0].r += 3000;
-      }
+        if (this.players[index].blobs[0]) {
+          this.players[index].blobs[0].r += 3000;
+        }
         break;
 
     }
   }
 }
+
+/////
 const express = require('express');
 const uniqid = require('uniqid');
 const app = express();
 app.use(express.static('./application/public'));
 const sockets = require('socket.io');
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => console.log(`Server is listening on port ${PORT}...`));
+const server = app.listen(PORT, () => console.log(`Server is runing on port ${PORT}...`));
 const io = sockets(server);
-console.log('server is running');
+
 let rooms = 1;
 for (let i = 0; i < rooms; i++) {
   let room = new Room(i);
@@ -845,6 +871,7 @@ for (let i = 0; i < rooms; i++) {
     room.comparisionwithweight()
   }, room.comparisonTimer);
 }
+
 const collisionState = {
   sameSize: 0,
   firstPlayerBigger: 1,
