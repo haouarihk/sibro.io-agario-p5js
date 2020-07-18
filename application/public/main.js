@@ -473,7 +473,7 @@ function overlayshower() {
   // Setting chatbox list chat
   chatbox.setChat(chatlist);
   // Showing them
-  image(bg, 0, 0, width, height);
+  //image(bg, 0, 0, width, height);
   list.show();
   chatbox.show();
   ranking.playerlvl = player.lvl;
